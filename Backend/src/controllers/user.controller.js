@@ -7,6 +7,11 @@ import jwt from "jsonwebtoken";
 import { upload } from "../middlewares/multer.middleware.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
+const options = {
+  httpOnly: true,
+  secure: true,
+};
+
 const registerUser = asyncHandler(async (req, res) => {
   const { role, email, fullname, graduationYear, major, password } = req.body; // currently not using skills in the registration process
 
@@ -39,7 +44,38 @@ const registerUser = asyncHandler(async (req, res) => {
     avatar: avatar.url,
   });
 
-  return res.status(200).json(new ApiResponse(200, "heloo", "data is ok"));
+  if (!user) {
+    throw new ApiError(500, "User registration failed");
+  }
+
+  return res.status(200).json(new ApiResponse(200, user, "data is ok"));
 });
 
-export { registerUser };
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    throw new ApiError(400, "Email and password are required");
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  const isPassValid = await user.isPasswordCorrect(password);
+  if (!isPassValid) {
+    throw new ApiError(401, "Invalid password");
+  }
+
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+  user.refreshToken = refreshToken;
+  await user.save();
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(new ApiResponse(200, {}, "Logged in successfully"));
+});
+
+export { registerUser, loginUser };
