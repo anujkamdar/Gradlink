@@ -79,15 +79,19 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logOutUser = asyncHandler(async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.user._id, {
-    $set: {
-      refreshToken: null,
-    }
-    // or by
-    // $unset: {
-    //   refreshToken: 1,
-    // },
-  },{ new: true }).select("-password");
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        refreshToken: null,
+      },
+      // or by
+      // $unset: {
+      //   refreshToken: 1,
+      // },
+    },
+    { new: true }
+  ).select("-password");
 
   return res
     .status(200)
@@ -96,5 +100,35 @@ const logOutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Logged out successfully"));
 });
 
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken = req.cookies.refreshToken;
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Refresh token is required");
+  }
 
-export { registerUser, loginUser, logOutUser };
+  const decoded = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+  const user = await User.findById(decoded?._id);
+
+  if (!user) {
+    throw new ApiError(404, "Invalid refresh token or user not found");
+  }
+
+  // like isse ye check hogya ki logged out to nhi h na koi like khud cookie me daal de token to isiliye logout karte time removed the refresh token from user
+  if (incomingRefreshToken !== user.refreshToken) {
+    throw new ApiError(403, "Refresh token is expired or used");
+  }
+
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+  user.refreshToken = refreshToken;
+  user.save();
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(new ApiResponse(200, {}, "Access token refreshed successfully"));
+});
+
+export { registerUser, loginUser, logOutUser, refreshAccessToken };
