@@ -5,7 +5,9 @@ import { User } from "../models/User.model.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { upload } from "../middlewares/multer.middleware.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, uploadPdfOnCloudinary } from "../utils/cloudinary.js";
+import { Job } from "../models/Job.model.js";
+import { JobApplication } from "../models/JobApplication.model.js";
 
 const options = {
   httpOnly: true,
@@ -131,4 +133,68 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Access token refreshed successfully"));
 });
 
-export { registerUser, loginUser, logOutUser, refreshAccessToken };
+const createJobPosting = asyncHandler(async (req, res) => {
+  const { title, company, description, requiredSkills } = req.body;
+  const postedBy = req.user._id; // assuming user is authenticated and _id is available in req.user
+  if (!title) {
+    throw new ApiError(400, "Job title is required");
+  }
+  if (!company) {
+    throw new ApiError(400, "Company name is required");
+  }
+  if (!description) {
+    throw new ApiError(400, "Job description is required");
+  }
+  if (!requiredSkills || requiredSkills.length === 0) {
+    throw new ApiError(400, "At least one required skill is needed");
+  }
+
+  const job = await Job.create({
+    postedBy: postedBy,
+    title: title.trim(),
+    company: company.trim(),
+    description: description.trim(),
+    requiredSkills: requiredSkills.map((skill) => skill.trim()),
+  });
+
+  if (!job) {
+    throw new ApiError(500, "Job posting failed");
+  }
+
+  return res.status(201).json(new ApiResponse(201, job, "Job posted successfully"));
+});
+
+const createJobApplication = asyncHandler(async (req, res) => {
+  const { jobId, coverLetter } = req.body;
+  const userApplying = req.user._id; // assuming user is authenticated and _id is available in req.user
+  const resumeLocalPath = req.file?.path;
+
+  if (!resumeLocalPath) {
+    throw new ApiError(400, "Resume file is required");
+  }
+
+  if (!jobId) {
+    throw new ApiError(400, "Job ID is required");
+  }
+
+  const job = await Job.findById(jobId);
+  if (!job) {
+    throw new ApiError(404, "Job not found");
+  }
+
+  const resume = await uploadPdfOnCloudinary(resumeLocalPath);
+  if (!resume) {
+    throw new ApiError(400, "Resume upload failed");
+  }
+
+  const application = await JobApplication.create({
+    jobId: jobId,
+    appliedBy: userApplying,
+    coverLetter: coverLetter,
+    resumeUrl: resume.url,
+  });
+
+  return res.status(201).json(new ApiResponse(201, application, "Job application created successfully"));
+});
+
+export { registerUser, loginUser, logOutUser, refreshAccessToken, createJobPosting, createJobApplication };

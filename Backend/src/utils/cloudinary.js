@@ -24,4 +24,21 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-export { uploadOnCloudinary };
+const uploadPdfOnCloudinary = async (localFilePath) => {
+  try {
+    if (!localFilePath) {
+      return null;
+    }
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      folder: "gradlink",
+      resource_type: "raw",
+    });
+    fs.unlinkSync(localFilePath); 
+    return response;
+
+  } catch (error) {
+    fs.unlinkSync(localFilePath);
+  }
+};
+
+export { uploadOnCloudinary, uploadPdfOnCloudinary };

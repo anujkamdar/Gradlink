@@ -18,7 +18,7 @@ const jobApplicationSchema = new Schema(
     coverLetter: {
       type: String,
     },
-    resumeurl: {
+    resumeUrl: {
       type: String,
     },
     matchedSkills: [
