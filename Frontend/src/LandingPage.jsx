@@ -1,4 +1,6 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
+import axios from "axios"
+import { useNavigate, useNavigation } from "react-router-dom"
 import { Button } from "./components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
 import {
@@ -43,11 +45,107 @@ import {
 
 // to make it expandable just add the which college in register and then change the controllers in backend to make it for many colleges
 
-function App() {
+function LandingPage() {
+
+  const navigate = useNavigate();
+  const navigation = useNavigation();
+
+
   const [isSignInOpen, setIsSignInOpen] = useState(false)
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState("")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("")
+  const passwordRef = useRef(null);
+  const registerPasswordRef = useRef(null);
+  const [graduationYear, setGraduationYear] = useState("");
+  const [major, setMajor] = useState("");
+  const [avatar, setAvatar] = useState(null);
+  const avatarRef = useRef(null);
+
+
+
+  const signInUser = async () => {
+    setPassword(passwordRef.current.value)
+    if (!email) {
+      alert("Enter Email");
+      return;
+    }
+    if (!passwordRef.current.value) {
+      alert("Enter Password");
+      return;
+    }
+
+    console.log(email, passwordRef.current.value);
+    try {
+      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: passwordRef.current.value });
+      console.log(response.data);
+      navigate("/profile-page")
+    } catch (error) {
+      alert(error.response.data.message);
+    }
+  }
+
+  const registerUser = async () => {
+    if (!email) {
+      alert("Enter Email");
+      return;
+    }
+    if (!registerPasswordRef.current.value) {
+      alert("Enter Password");
+      return;
+    }
+    if (selectedRole === "") {
+      alert("Select a role");
+      return;
+    }
+    const firstName = document.getElementById("first-name").value;
+    const lastName = document.getElementById("last-name").value;
+
+    if (!firstName || !lastName) {
+      alert("Enter First and Last Name");
+      return;
+    }
+
+    if (selectedRole === "alumni" || selectedRole === "student") {
+      if (!graduationYear) {
+        alert("Select Graduation Year");
+        return;
+      }
+      if (!major) {
+        alert("Enter Major");
+        return;
+      }
+    }
+
+
+    if (!avatar) {
+      alert("Please upload a profile picture");
+      return;
+    }
+
+    // Prepare data to send
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", registerPasswordRef.current.value);
+    formData.append("fullname", `${firstName.trim()} ${lastName.trim()}`);
+    formData.append("role", selectedRole);
+    formData.append("major", major.trim());
+    formData.append("graduationYear", graduationYear ? graduationYear.toString() : "");
+    formData.append("avatar", avatar);
+
+    try {
+      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/register", formData);
+      console.log(response.data);
+    } catch (error) {
+      alert(error.response?.data?.message || "Network Error");
+    } 
+  }
+
+
+
+
 
   const features = [
     {
@@ -157,6 +255,9 @@ function App() {
     },
   ]
 
+
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50">
       {/* Header */}
@@ -200,81 +301,52 @@ function App() {
                   <DialogTitle>Welcome Back</DialogTitle>
                   <DialogDescription>Sign in to your AlumniConnect account</DialogDescription>
                 </DialogHeader>
-                <Tabs defaultValue="role-select" className="w-full">
-                  <TabsContent value="role-select" className="space-y-4">
-                    <div className="space-y-4">
-                      <Label className="font-medium">Select your role</Label>
-                      <div className="grid grid-cols-3 gap-2">
-                        <Button
-                          variant={selectedRole === "alumni" ? "default" : "outline"}
-                          className={`flex flex-col items-center p-4 h-auto ${selectedRole === "alumni"
-                            ? "bg-black hover:opacity-95"
-                            : "border-purple-200 hover:bg-purple-50"
-                            }`}
-                          onClick={() => setSelectedRole("alumni")}
-                        >
-                          <UserCheck className="h-6 w-6 mb-2" />
-                          <span className="text-sm">Alumni</span>
-                        </Button>
-                        <Button
-                          variant={selectedRole === "student" ? "default" : "outline"}
-                          className={`flex flex-col items-center p-4 h-auto ${selectedRole === "student"
-                            ? "bg-black hover:opacity-95"
-                            : "border-purple-200 hover:bg-purple-50"
-                            }`}
-                          onClick={() => setSelectedRole("student")}
-                        >
-                          <GraduationCap className="h-6 w-6 mb-2" />
-                          <span className="text-sm">Student</span>
-                        </Button>
-                        <Button
-                          variant={selectedRole === "admin" ? "default" : "outline"}
-                          className={`flex flex-col items-center p-4 h-auto ${selectedRole === "admin"
-                            ? "bg-black hover:opacity-95"
-                            : "border-purple-200 hover:bg-purple-50"
-                            }`}
-                          onClick={() => setSelectedRole("admin")}
-                        >
-                          <Shield className="h-6 w-6 mb-2" />
-                          <span className="text-sm">Admin</span>
-                        </Button>
-                      </div>
+                {(
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email">
+                        Email
+                      </Label>
+                      <Input
+                        id="signin-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        className="border-purple-200 focus:border-purple-500"
+                        onChange={(e) => { setEmail(e.target.value) }}
+                      />
                     </div>
-                    {selectedRole && (
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="signin-email">
-                            Email
-                          </Label>
-                          <Input
-                            id="signin-email"
-                            type="email"
-                            placeholder="Enter your email"
-                            className="border-purple-200 focus:border-purple-500"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="signin-password">
-                            Password
-                          </Label>
-                          <Input
-                            id="signin-password"
-                            type="password"
-                            placeholder="Enter your password"
-                            className="border-purple-200 focus:border-purple-500"
-                          />
-                        </div>
-                        <Button className="w-full bg-black opacity-90">
-                          Sign In as {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}
-                        </Button>
-                      </div>
-                    )}
-                  </TabsContent>
-                </Tabs>
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-password">
+                        Password
+                      </Label>
+                      <Input
+                        id="signin-password"
+                        type="password"
+                        placeholder="Enter your password"
+                        className="border-purple-200 focus:border-purple-500"
+                        ref={passwordRef}
+                      />
+                    </div>
+                    <Button
+                      className="w-full bg-black opacity-90"
+                      onClick={(e) => { signInUser() }}
+                    >
+                      Sign In
+                    </Button>
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
 
-            <Dialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
+            <Dialog
+              open={isRegisterOpen}
+              onOpenChange={(state) => {
+                setIsRegisterOpen(state)
+                if (!state) {
+                  setAvatar(null);
+                }
+              }}>
               <DialogTrigger asChild>
                 <Button>
                   Get Started
@@ -358,28 +430,44 @@ function App() {
                             type="email"
                             placeholder="john@example.com"
                             className="border-purple-200 focus:border-purple-500"
+                            value={email}
+                            onChange={(e) => { setEmail(e.target.value) }}
                           />
                         </div>
                         {selectedRole === "alumni" && (
                           <>
-                            <div className="space-y-2">
-                              <Label htmlFor="graduation-year">
-                                Graduation Year
-                              </Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Array.from({ length: 100 }, (_, i) => 2024 - i).map((year) => ( // if i wanna scale yha 100 ki jgah how many years that institiution has been open
-                                    <SelectItem key={year} value={year.toString()}>
-                                      {year}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="graduation-year">
+                                  Graduation Year
+                                </Label>
+                                <Select onValueChange={(value) => { setGraduationYear(value) }}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select year" />
+                                  </SelectTrigger>
+                                  <SelectContent id="grad-year">
+                                    {Array.from({ length: 100 }, (_, i) => 2024 - i).map((year) => ( // if i wanna scale yha 100 ki jgah how many years that institiution has been open
+                                      <SelectItem key={year} value={year.toString()}>
+                                        {year}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="major">
+                                  Major
+                                </Label>
+                                <Input
+                                  id="major"
+                                  placeholder="Computer Science"
+                                  className="border-purple-200 focus:border-purple-500"
+                                  value={major}
+                                  onChange={(e) => setMajor(e.target.value)}
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-2">
+                            {/* <div className="space-y-2">
                               <Label htmlFor="degree">
                                 Degree
                               </Label>
@@ -395,30 +483,62 @@ function App() {
                                   <SelectItem value="other">Other</SelectItem>
                                 </SelectContent>
                               </Select>
-                            </div>
+                            </div> */}
                           </>
                         )}
                         {selectedRole === "student" && (
                           <>
-                            <div className="space-y-2">
-                              <Label htmlFor="graduation-year">
-                                Graduation Year
-                              </Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Array.from({ length: 8 }, (_, i) => 2024 + i).map((year) => (
-                                    <SelectItem key={year} value={year.toString()}>
-                                      {year}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="graduation-year">
+                                  Graduation Year
+                                </Label>
+                                <Select onValueChange={(value) => { setGraduationYear(value) }}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select year" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: 8 }, (_, i) => 2024 + i).map((year) => (
+                                      <SelectItem key={year} value={year.toString()}>
+                                        {year}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="major">
+                                  Major
+                                </Label>
+                                <Input
+                                  id="major"
+                                  placeholder="Computer Science"
+                                  className="border-purple-200 focus:border-purple-500"
+                                  value={major}
+                                  onChange={(e) => setMajor(e.target.value)}
+                                />
+                              </div>
                             </div>
                           </>
                         )}
+                        <div className="space-y-2">
+                          <Label htmlFor="avatar">
+                            Profile Picture
+                          </Label>
+                          <Input
+                            id="avatar"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setAvatar(e.target.files[0]);
+                              }
+                            }}
+                          />
+                          {avatar && (
+                            <img src={URL.createObjectURL(avatar)} alt="Avatar Preview" className="mt-2 w-24 h-24 object-cover rounded-full" />
+                          )}
+                        </div>
                         <div className="space-y-2">
                           <Label htmlFor="register-password">
                             Password
@@ -427,9 +547,10 @@ function App() {
                             id="register-password"
                             type="password"
                             placeholder="Create a password"
+                            ref={registerPasswordRef}
                           />
                         </div>
-                        <Button className="w-full">Create Account</Button>
+                        <Button onClick={(e) => { e.preventdefaut; registerUser() }} className="w-full">Create Account</Button>
                       </div>
                     )}
                   </TabsContent>
@@ -486,7 +607,7 @@ function App() {
             🎓 Connecting Alumni Worldwide
           </Badge>
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-            Strengthen Your   
+            Strengthen Your
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600">
               {" "}
               Alumni Network
@@ -837,4 +958,4 @@ function App() {
   )
 }
 
-export default App
+export default LandingPage
