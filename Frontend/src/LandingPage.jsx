@@ -49,8 +49,6 @@ function LandingPage() {
 
   const navigate = useNavigate();
   const navigation = useNavigation();
-
-
   const [isSignInOpen, setIsSignInOpen] = useState(false)
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState("")
@@ -63,7 +61,6 @@ function LandingPage() {
   const [major, setMajor] = useState("");
   const [avatar, setAvatar] = useState(null);
   const avatarRef = useRef(null);
-
 
 
   const signInUser = async () => {
@@ -81,7 +78,7 @@ function LandingPage() {
     try {
       const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: passwordRef.current.value });
       console.log(response.data);
-      navigate("/profile-page")
+      navigate("/dashboard")
     } catch (error) {
       alert(error.response.data.message);
     }
@@ -136,17 +133,17 @@ function LandingPage() {
     formData.append("avatar", avatar);
 
     try {
-      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/register", formData);
+      let response = await axios.post("http://localhost:8000/gradlink/api/v1/users/register", formData);
       console.log(response.data);
+      response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: registerPasswordRef.current.value });
+      console.log(response.data);
+      navigate("/dashboard");
     } catch (error) {
       alert(error.response?.data?.message || "Network Error");
-    } 
+    }
   }
 
-
-
-
-
+  
   const features = [
     {
       icon: Users,

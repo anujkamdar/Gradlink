@@ -3,22 +3,48 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import LandingPage from './LandingPage'
 import ProfilePage from './components/ProfilePage'
-import Playground from './Playground'
-import { createBrowserRouter,RouterProvider } from 'react-router-dom'
+import JobsPage from './components/JobsPage'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
+import Network from './components/Network'
+import EventsTab from './components/EventsTab'
+import TabsLayout from './TabsLayout'
+import Homepage from './components/Homepage'
 
 const router = createBrowserRouter([{
   path: "/",
-  element: <Layout/>,
+  element: <Layout />,
   children: [
     {
       path: "",
-      element: <LandingPage/>
+      element: <LandingPage />
     },
     {
       path: "profile-page",
-      element: <ProfilePage/>
-    }
+      element: <ProfilePage />
+    },
+    {
+      path: "tabs",
+      element: <TabsLayout />,
+      children: [
+        {
+          path: "home",
+          element: <Homepage />
+        },
+        {
+          path: "jobs",
+          element: <JobsPage />
+        },
+        {
+          path: "network",
+          element: <Network />
+        },
+        {
+          path: "events",
+          element: <EventsTab />
+        }
+      ]
+    },
   ]
 }])
 
