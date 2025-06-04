@@ -7,7 +7,14 @@ const app = express();
 
 // Middleware to parse JSON and URL-encoded data
 // Middleware to handle cookies
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(CookieParser());
@@ -18,7 +25,6 @@ app.use("/gradlink/api/v1/users", userRouter);
 
 export { app };
 
-
 app.use((err, req, res, next) => {
   let customError = err;
 
@@ -28,7 +34,7 @@ app.use((err, req, res, next) => {
       err.statusCode || 500,
       err.message || "Internal Server Error",
       [], // Optional: collect validation or system errors
-      process.env.NODE_ENV === 'development' ? err.stack : ""
+      process.env.NODE_ENV === "development" ? err.stack : ""
     );
   }
 
@@ -36,6 +42,6 @@ app.use((err, req, res, next) => {
     success: customError.success,
     message: customError.message,
     errors: customError.errors,
-    stack: process.env.NODE_ENV === 'development' ? customError.stack : undefined,
+    stack: process.env.NODE_ENV === "development" ? customError.stack : undefined,
   });
 });

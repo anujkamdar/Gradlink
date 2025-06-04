@@ -197,4 +197,53 @@ const createJobApplication = asyncHandler(async (req, res) => {
   return res.status(201).json(new ApiResponse(201, application, "Job application created successfully"));
 });
 
-export { registerUser, loginUser, logOutUser, refreshAccessToken, createJobPosting, createJobApplication };
+
+const getCurrentUserProfileData = asyncHandler(async(req,res) => {
+  const userId = req.user._id;
+  if (!mongoose.isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid user ID");
+  } // this error wont happen as already checked in verifyJwt
+
+  const user = await User.findById(userId).select("-password -refreshToken");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  return res.status(200).json(new ApiResponse(200, user, "User profile data retrieved successfully"));
+})
+
+
+const getUserProfileData = asyncHandler(async(req,res) => {
+  const { userId } = req.params;
+
+  if (!mongoose.isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid user ID");
+  }
+
+  const user = await User.findById(userId).select("-password -refreshToken");
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res.status(200).json(new ApiResponse(200, user, "User profile data retrieved successfully"));
+  
+})
+
+const updateAccountDetails = asyncHandler(async(req,res) => {
+  const userDetails = req.body;
+
+  if(req.body._id != req.user._id){
+    throw new ApiError(403, "You are not authorized to update this account");
+  }
+
+
+  const updatedDetails = await User.findByIdAndUpdate(req.body._id,userDetails);
+  res
+  .status(200)
+  .json(new ApiResponse(200,updatedDetails,"Updated success"))
+
+})
+
+
+
+export { registerUser, loginUser, logOutUser, refreshAccessToken, createJobPosting, createJobApplication , getCurrentUserProfileData ,getUserProfileData,updateAccountDetails};

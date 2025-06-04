@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
+import { type } from "os";
 const userSchema = new Schema(
   {
     role: {
@@ -36,6 +37,9 @@ const userSchema = new Schema(
       type: String,
       default:
         "https://images.pexels.com/photos/31989354/pexels-photo-31989354/free-photo-of-church-on-the-lady-of-our-rocks-island-montenegro.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", // Placeholder URL for avatar
+    },
+    bio: {
+      type: String,
     },
     password: {
       type: String,
