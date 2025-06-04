@@ -5,12 +5,33 @@ import { Input } from './ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { Users, Building, MessageSquare, User, Star } from 'lucide-react';
 import Header from './Header';
+import "../App.css";
 
 export default function Network() {
+
+    const [loading, setLoading] = React.useState(true);
+
+    setTimeout(() => {
+        setLoading(false)
+    },2000)
+
+
+
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="loader bg-indigo-600"></div>
+            </div>
+        );
+    }
+
+
+
     return (
         <>
             <div className="bg-gray-50 min-h-screen">
-                
+
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="space-y-6">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between">

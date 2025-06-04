@@ -76,11 +76,11 @@ function LandingPage() {
 
     console.log(email, passwordRef.current.value);
     try {
-      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: passwordRef.current.value });
+      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: passwordRef.current.value },{withCredentials: true});
       console.log(response.data);
-      navigate("/dashboard")
+      navigate("/tabs/home")
     } catch (error) {
-      alert(error.response.data.message);
+      alert(error?.response?.data?.message || "Network error");
     }
   }
 

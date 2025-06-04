@@ -1,6 +1,8 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Bell, User, LogOut, Menu, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 
 
@@ -9,6 +11,20 @@ export default function Header() {
     const activeTab = 1;
     const user = null;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/logout",{ withCredentials: true })
+            console.log("Logout successful:", response.data.data);
+        } catch (error) {
+            console.log(error.response?.data?.message);
+        }
+    }
+
+
+
+
     return (
         <header className="bg-white shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,7 +80,7 @@ export default function Header() {
                             </span>
                         </div>
                         <button
-                            // onClick={handleLogout}
+                            onClick={handleLogout}
                             className="hidden md:inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
                         >
                             <LogOut className="mr-1 h-4 w-4" />
@@ -130,7 +146,7 @@ export default function Header() {
                             Profile
                         </button>
                         <button
-                            // onClick={handleLogout}
+                            onClick={handleLogout}
                             className="text-gray-500 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
                         >
                             Logout

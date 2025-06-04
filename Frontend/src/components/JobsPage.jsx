@@ -58,6 +58,24 @@ const recentJobs = [
 
 
 export default function JobsPage() {
+
+  const [loading, setLoading] = React.useState(true);
+  React.useEffect(() => {
+    // Simulate loading data
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000); // Simulate a 1 second loading time
+    return () => clearTimeout(timer); // Cleanup the timer on unmount
+  }, []);
+
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
   return (
     <>
       <div className="bg-gray-50 min-h-screen">
