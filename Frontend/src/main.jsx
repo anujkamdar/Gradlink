@@ -4,6 +4,7 @@ import './index.css'
 import LandingPage from './LandingPage'
 import ProfilePage from './components/ProfilePage'
 import JobsPage from './components/JobsPage'
+import PostJobPage from './components/PostJobPage'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
 import Network from './components/Network'
@@ -34,6 +35,10 @@ const router = createBrowserRouter([{
         {
           path: "jobs",
           element: <JobsPage />
+        },
+        {
+          path: "post-job",
+          element: <PostJobPage />
         },
         {
           path: "network",

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search } from "lucide-react";
 import Header from './Header';
+import { useNavigate } from "react-router-dom";
 
 
 const recentJobs = [
@@ -49,33 +50,9 @@ const recentJobs = [
 
 
 
-
-
-
-
-
-
-
-
 export default function JobsPage() {
-
-  const [loading, setLoading] = React.useState(true);
-  React.useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000); // Simulate a 1 second loading time
-    return () => clearTimeout(timer); // Cleanup the timer on unmount
-  }, []);
-
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+  const navigate = useNavigate();
+  
   return (
     <>
       <div className="bg-gray-50 min-h-screen">
@@ -84,9 +61,11 @@ export default function JobsPage() {
 
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>
-              <div className="mt-4 md:mt-0 flex space-x-3">
-                <Button variant="outline" className="flex items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>              <div className="mt-4 md:mt-0 flex space-x-3">                <Button 
+                  variant="outline" 
+                  className="flex items-center"
+                  onClick={() => navigate('/tabs/post-job')}
+                >
                   <Plus className="mr-1 h-4 w-4" />
                   Post a Job
                 </Button>
