@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Bell, User, LogOut, Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -9,14 +9,45 @@ import axios from "axios";
 
 export default function Header() {
     const activeTab = 1;
-    const user = null;
+    const [user,setUser] = useState(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
+
+    const getUser = async () => {
+        try {
+            const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/current-user-profile", { withCredentials: true });
+            console.log("User data:", response.data.data);
+            return response.data.data;
+        } catch (error) {
+            console.error("Error fetching user data:", error.response?.data?.message);
+            return null;
+        }
+    }
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const userData = await getUser();
+            if (userData) {
+                setUser(userData);
+            } else {
+                console.log("Failed to fetch user data");
+                navigate("/");
+            }
+        };
+        fetchUser();
+    }, [navigate]);
+
+
+
+    
+
+
 
     const handleLogout = async () => {
         try {
             const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/logout",{ withCredentials: true })
             console.log("Logout successful:", response.data.data);
+            navigate("/");
         } catch (error) {
             console.log(error.response?.data?.message);
         }
