@@ -1,7 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { type } from "os";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
 const userSchema = new Schema(
   {
     role: {
@@ -87,5 +88,7 @@ userSchema.methods.generateRefreshToken = function () {
     { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
   );
 };
+
+userSchema.plugin(mongooseAggregatePaginate);
 
 export const User = mongoose.model("User", userSchema);

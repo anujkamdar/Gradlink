@@ -134,7 +134,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 const createJobPosting = asyncHandler(async (req, res) => {
-  const { title, company, description, requiredSkills } = req.body;
+  const { title, company, description, requiredSkills, type, location } = req.body;
   const postedBy = req.user._id; // assuming user is authenticated and _id is available in req.user
   if (!title) {
     throw new ApiError(400, "Job title is required");
@@ -148,6 +148,12 @@ const createJobPosting = asyncHandler(async (req, res) => {
   if (!requiredSkills || requiredSkills.length === 0) {
     throw new ApiError(400, "At least one required skill is needed");
   }
+  if (!type) {
+    throw new ApiError(400, "Job type is required");
+  }
+  if (!location) {
+    throw new ApiError(400, "Job location is required");
+  }
 
   const job = await Job.create({
     postedBy: postedBy,
@@ -155,6 +161,8 @@ const createJobPosting = asyncHandler(async (req, res) => {
     company: company.trim(),
     description: description.trim(),
     requiredSkills: requiredSkills.map((skill) => skill.trim()),
+    type: type.trim(),
+    location: location.trim(),
   });
 
   if (!job) {
@@ -197,8 +205,7 @@ const createJobApplication = asyncHandler(async (req, res) => {
   return res.status(201).json(new ApiResponse(201, application, "Job application created successfully"));
 });
 
-
-const getCurrentUserProfileData = asyncHandler(async(req,res) => {
+const getCurrentUserProfileData = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   if (!mongoose.isValidObjectId(userId)) {
     throw new ApiError(400, "Invalid user ID");
@@ -209,10 +216,9 @@ const getCurrentUserProfileData = asyncHandler(async(req,res) => {
     throw new ApiError(404, "User not found");
   }
   return res.status(200).json(new ApiResponse(200, user, "User profile data retrieved successfully"));
-})
+});
 
-
-const getUserProfileData = asyncHandler(async(req,res) => {
+const getUserProfileData = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
   if (!mongoose.isValidObjectId(userId)) {
@@ -226,24 +232,114 @@ const getUserProfileData = asyncHandler(async(req,res) => {
   }
 
   return res.status(200).json(new ApiResponse(200, user, "User profile data retrieved successfully"));
-  
-})
+});
 
-const updateAccountDetails = asyncHandler(async(req,res) => {
+const updateAccountDetails = asyncHandler(async (req, res) => {
   const userDetails = req.body;
 
-  if(req.body._id != req.user._id){
+  if (req.body._id != req.user._id) {
     throw new ApiError(403, "You are not authorized to update this account");
   }
 
+  const updatedDetails = await User.findByIdAndUpdate(req.body._id, userDetails);
+  res.status(200).json(new ApiResponse(200, updatedDetails, "Updated success"));
+});
 
-  const updatedDetails = await User.findByIdAndUpdate(req.body._id,userDetails);
-  res
-  .status(200)
-  .json(new ApiResponse(200,updatedDetails,"Updated success"))
+const getJobPostings = asyncHandler(async (req, res) => {
+  const { search, type, location, currentPage = 2, limit = 5} = req.body;
+  const matchstage = {};
+  const skip = (parseInt(currentPage) - 1) * parseInt(limit);
 
-})
+  if (search) {
+    const searchRegex = new RegExp(search, "i"); // case-insensitive search
+    matchstage.$or = [{ title: searchRegex }, { description: searchRegex }];
+  }
+  if (type) {
+    matchstage.type = type;
+  }
+  if (location) {
+    matchstage.location = location;
+  }
+
+  if (currentPage < 1 || limit < 1) {
+    throw new ApiError(400, "Invalid pagination parameters");
+  }
+  if (isNaN(currentPage) || isNaN(limit)) {
+    throw new ApiError(400, "Pagination parameters must be numbers");
+  }
+
+
+  const totalCount = await Job.countDocuments(matchstage);
+
+
+  const aggregate = await Job.aggregate([
+    {
+      $match: matchstage,
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "postedBy",
+        foreignField: "_id",
+        as: "postedByDetails",
+      },
+    },
+    // {
+    //   $unwind: "$postedByDetails"
+    // },
+    {
+      $project: {
+        title: 1,
+        company: 1,
+        description: 1,
+        requiredSkills: 1,
+        type: 1,
+        location: 1,
+        postedByDetails: {
+          _id: "$postedByDetails._id",
+          fullname: "$postedByDetails.fullname",
+          avatar: "$postedByDetails.avatar",
+        },
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    },
+    {
+      $sort: { createdAt: -1 }, // sort by creation date, most recent first
+    },
+    {
+      $skip: skip, // skip documents for pagination
+    },
+    {
+      $limit: parseInt(limit), // limit the number of documents returned
+    },
+  ]);
 
 
 
-export { registerUser, loginUser, logOutUser, refreshAccessToken, createJobPosting, createJobApplication , getCurrentUserProfileData ,getUserProfileData,updateAccountDetails};
+  if (aggregate.length === 0) {
+    return res.status(404).json(new ApiResponse(404, [], "No job postings found for the given criteria"));
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { jobs: aggregate, currentPage: parseInt(currentPage), limit: parseInt(limit),pages:Math.ceil(totalCount/limit)},
+        "Job postings retrieved successfully"
+      )
+    );
+});
+
+export {
+  registerUser,
+  loginUser,
+  logOutUser,
+  refreshAccessToken,
+  createJobPosting,
+  createJobApplication,
+  getCurrentUserProfileData,
+  getUserProfileData,
+  updateAccountDetails,
+  getJobPostings,
+};
