@@ -1,75 +1,71 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, BookmarkIcon, Briefcase, MapPin, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
 import Header from './Header';
 import { useNavigate } from "react-router-dom";
-
-
-const recentJobs = [
-  {
-    id: 1,
-    title: "Software Engineer",
-    company: "Tech Solutions Inc.",
-    location: "Remote",
-    type: "Full-time",
-    postedDate: "2 days ago",
-    postedBy: "John Doe"
-  },
-  {
-    id: 2,
-    title: "Data Analyst",
-    company: "Data Insights Ltd.",
-    location: "Bangalore",
-    type: "Part-time",
-    postedDate: "1 week ago",
-    postedBy: "Jane Smith"
-  },
-  {
-    id: 3,
-    title: "Product Manager",
-    company: "Innovatech Corp.",
-    location: "Delhi",
-    type: "Contract",
-    postedDate: "3 days ago",
-    postedBy: "Alice Johnson"
-  },
-  {
-    id: 4,
-    title: "UX Designer",
-    company: "Creative Minds Studio",
-    location: "Mumbai",
-    type: "Internship",
-    postedDate: "5 days ago",
-    postedBy: "Bob Brown"
-  }
-];
+import axios from 'axios';
 
 
 
 
 export default function JobsPage() {
   const navigate = useNavigate();
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [type, setType] = useState("");
+  const [location, setLocation] = useState("");
+  const [search, setSearch] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+  const [jobs, setJobs] = useState([]);
+
+
+  // Handle pagination
+  const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const goToPrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  const goToPage = (pageNumber) => setCurrentPage(pageNumber);
+
+
+  const getJobPostings = async () => {
+    try {
+      console.log(search, location, type , currentPage);
+      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-job-postings",{search,location,type,currentPage},{withCredentials:true})
+      console.log(response.data.data);
+      setTotalPages(response.data.data.pages);
+      setJobs(response.data.data.jobs);
+    } catch (error) {
+      console.log(error.response?.data?.message || "Network Error");
+    }
+  }
+
+  useEffect(() => {
+    getJobPostings();
+  }
+  , [currentPage, search, location, type]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, location, type]);
+
+
+
   return (
     <>
       <div className="bg-gray-50 min-h-screen">
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>              <div className="mt-4 md:mt-0 flex space-x-3">                <Button 
-                  variant="outline" 
+              <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>
+              <div className="mt-4 md:mt-0 flex space-x-3">
+                <Button
+                  variant="outline"
                   className="flex items-center"
                   onClick={() => navigate('/tabs/post-job')}
                 >
                   <Plus className="mr-1 h-4 w-4" />
                   Post a Job
                 </Button>
-                <Button className="flex items-center">
+                <Button onClick={() => { getJobPostings() }} className="flex items-center">
                   <Search className="mr-1 h-4 w-4" />
                   Find Jobs
                 </Button>
@@ -81,23 +77,23 @@ export default function JobsPage() {
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="md:col-span-2">
-                    <Input placeholder="Search jobs by title, company or keyword" />
+                    <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search jobs by title, company or keyword" />
                   </div>
                   <div>
-                    <select className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select value={location} onChange={(e) => setLocation(e.target?.value)} className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                       <option value="">All Locations</option>
                       <option value="remote">Remote</option>
                       <option value="delhi">Delhi</option>
                       <option value="mumbai">Mumbai</option>
                       <option value="bangalore">Bangalore</option>
+                      <option value="other">Other</option>
                     </select>
                   </div>
                   <div>
-                    <select className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select value={type} onChange={(e) => setType(e.target.value)} className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                       <option value="">All Job Types</option>
-                      <option value="fulltime">Full-time</option>
-                      <option value="parttime">Part-time</option>
-                      <option value="contract">Contract</option>
+                      <option value="full-time">Full-time</option>
+                      <option value="part-time">Part-time</option>
                       <option value="internship">Internship</option>
                     </select>
                   </div>
@@ -111,24 +107,38 @@ export default function JobsPage() {
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Featured Opportunities</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {recentJobs.slice(0, 2).map((job) => (
-                    <Card key={job.id} className="border-l-4 border-l-indigo-600">
+                  {jobs.slice(0, 2).map((job) => (
+                    <Card
+                      key={job.id}
+                      className="border-l-4 border-l-indigo-600 hover:shadow-lg transition-shadow duration-300"
+                    >
                       <CardContent className="p-5">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="font-medium text-gray-900">{job.title}</h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {job.company} • {job.location}
+                            <h4 className="font-medium text-gray-900 text-lg">{job.title}</h4>
+                            <p className="text-sm text-gray-500 mt-1 flex items-center">
+                              <Briefcase className="w-4 h-4 mr-1" />
+                              {job.company}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1 flex items-center">
+                              <MapPin className="w-4 h-4 mr-1" />
+                              {job.location}
                             </p>
                             <div className="mt-2 flex items-center">
                               <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
                                 {job.type}
                               </Badge>
-                              <span className="text-xs text-gray-500">Posted {job.postedDate}</span>
+                              <span className="text-xs text-gray-500 flex items-center">
+                                <Clock className="w-3 h-3 mr-1" />
+                                Posted {job.postedDate}
+                              </span>
                             </div>
-                            <p className="text-xs text-gray-500 mt-2">Posted by: {job.postedBy}</p>
+                            <p className="text-xs text-gray-500 mt-2 flex items-center">
+                              <User className="w-3 h-3 mr-1" />
+                              Posted by: {job.postedBy}
+                            </p>
                           </div>
-                          <Button size="sm">Apply</Button>
+                          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Apply</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -138,37 +148,96 @@ export default function JobsPage() {
 
               {/* All Jobs */}
               <h3 className="text-lg font-medium text-gray-900 mb-4">All Opportunities</h3>
-              {[...recentJobs, ...recentJobs].slice(0, 6).map((job, index) => (
-                <Card key={`all-${job.id}-${index}`}>
-                  <CardContent className="p-5">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                      <div>
-                        <h4 className="font-medium text-gray-900">{job.title}</h4>
-                        <p className="text-sm text-gray-500">
-                          {job.company} • {job.location}
-                        </p>
-                        <div className="mt-1 flex items-center">
-                          <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
-                            {job.type}
-                          </Badge>
-                          <span className="text-xs text-gray-500">Posted {job.postedDate}</span>
+              <div className="grid grid-cols-1 gap-4">
+                {jobs.map((job, index) => (
+                  <Card
+                    key={`all-${job.id}-${index}`}
+                    className="hover:shadow-md transition-shadow duration-300 overflow-hidden"
+                  >
+                    <CardContent className="p-0">
+                      <div className="p-5 border-l-4 border-l-transparent hover:border-l-indigo-600 transition-colors duration-300">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                          <div className="flex items-start space-x-4">
+                            <div className="flex-shrink-0 bg-gray-100 rounded-md p-3 hidden md:block">
+                              <Briefcase className="w-8 h-8 text-indigo-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900 text-lg">{job.title}</h4>
+                              <div className="flex flex-wrap items-center gap-2 mt-1">
+                                <span className="text-sm text-gray-600 flex items-center">
+                                  <Briefcase className="w-4 h-4 mr-1 text-gray-400" />
+                                  {job.company}
+                                </span>
+                                <span className="text-sm text-gray-600 flex items-center">
+                                  <MapPin className="w-4 h-4 mr-1 text-gray-400" />
+                                  {job.location}
+                                </span>
+                                <span className="text-sm text-gray-600 flex items-center">
+                                  <Clock className="w-4 h-4 mr-1 text-gray-400" />
+                                  {job.postedDate}
+                                </span>
+                              </div>
+                              <div className="mt-2 flex items-center">
+                                <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
+                                  {job.type}
+                                </Badge>
+                                <span className="text-xs text-gray-500 flex items-center">
+                                  <User className="w-3 h-3 mr-1" />
+                                  {job.postedBy}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-3 md:mt-0 flex space-x-2">
+                            <Button variant="outline" size="sm" className="flex items-center">
+                              <BookmarkIcon className="mr-1 h-4 w-4" />
+                              Save
+                            </Button>
+                            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Apply Now</Button>
+                          </div>
                         </div>
                       </div>
-                      <div className="mt-3 md:mt-0 flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          Save
-                        </Button>
-                        <Button size="sm">Apply Now</Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
 
-              {/* Load More Button */}
-              <div className="flex justify-center mt-6">
-                <Button variant="outline" className="w-full md:w-auto">
-                  Load More Jobs
+              {/* Pagination */}
+              <div className="flex justify-center items-center mt-8 space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className="flex items-center"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="ml-1">Previous</span>
+                </Button>
+
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length:totalPages }, (_, i) => i + 1).map(number => (
+                    <Button
+                      key={number}
+                      variant={currentPage === number ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => goToPage(number)}
+                      className={`w-8 h-8 p-0 ${currentPage === number ? 'bg-indigo-600' : ''}`}
+                    >
+                      {number}
+                    </Button>
+                  ))}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center"
+                >
+                  <span className="mr-1">Next</span>
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>

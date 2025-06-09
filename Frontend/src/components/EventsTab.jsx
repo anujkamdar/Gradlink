@@ -44,10 +44,6 @@ export default function EventsTab() {
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                             <h2 className="text-2xl font-bold text-gray-900">Events</h2>
                             <div className="mt-4 md:mt-0 flex space-x-3">
-                                <Button variant="outline" className="flex items-center">
-                                    <Calendar className="mr-1 h-4 w-4" />
-                                    My Calendar
-                                </Button>
                                 <Button className="flex items-center">
                                     <Plus className="mr-1 h-4 w-4" />
                                     Create Event
@@ -55,17 +51,6 @@ export default function EventsTab() {
                             </div>
                         </div>
 
-                        {/* Event Categories */}
-                        <div className="flex overflow-x-auto space-x-4 pb-2">
-                            <Button variant="outline" className="rounded-full px-4">All Events</Button>
-                            <Button variant="outline" className="rounded-full px-4 bg-indigo-50 text-indigo-600">Upcoming</Button>
-                            <Button variant="outline" className="rounded-full px-4">Virtual</Button>
-                            <Button variant="outline" className="rounded-full px-4">In-Person</Button>
-                            <Button variant="outline" className="rounded-full px-4">Webinars</Button>
-                            <Button variant="outline" className="rounded-full px-4">Reunions</Button>
-                            <Button variant="outline" className="rounded-full px-4">Workshops</Button>
-                            <Button variant="outline" className="rounded-full px-4">Career Fairs</Button>
-                        </div>
 
                         {/* Featured Event */}
                         <Card className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-none">

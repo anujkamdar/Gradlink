@@ -135,9 +135,10 @@ function LandingPage() {
     try {
       let response = await axios.post("http://localhost:8000/gradlink/api/v1/users/register", formData);
       console.log(response.data);
-      response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: registerPasswordRef.current.value });
+      response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: registerPasswordRef.current.value },{withCredentials:true});
       console.log(response.data);
-      navigate("/dashboard");
+
+      navigate("/tabs/home");
     } catch (error) {
       alert(error.response?.data?.message || "Network Error");
     }
