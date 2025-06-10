@@ -4,6 +4,7 @@ import {
   createJobApplication,
   createJobPosting,
   getCurrentUserProfileData,
+  getJobById,
   getJobPostings,
   getUserProfileData,
   loginUser,
@@ -32,5 +33,6 @@ userRouter.route("/get-profile-data/:userId").get(verifyJwt, getUserProfileData)
 userRouter.route("/current-user-profile").get(verifyJwt, getCurrentUserProfileData);
 userRouter.route("/update-profile").post(verifyJwt, updateAccountDetails);
 userRouter.route("/get-job-postings").post(verifyJwt, getJobPostings);
+userRouter.route("/job/:jobId").get(verifyJwt, getJobById);
 
 export default userRouter;

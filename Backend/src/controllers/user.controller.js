@@ -190,19 +190,42 @@ const createJobApplication = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Job not found");
   }
 
+  // Check if user has already applied
+  const existingApplication = await JobApplication.findOne({
+    job: jobId,
+    appliedBy: userApplying
+  });
+
+  if (existingApplication) {
+    throw new ApiError(400, "You have already applied for this job");
+  }
+
   const resume = await uploadPdfOnCloudinary(resumeLocalPath);
   if (!resume) {
     throw new ApiError(400, "Resume upload failed");
   }
 
+  // Find matching skills if any
+  const userSkills = req.user.skills || [];
+  const jobSkills = job.requiredSkills || [];
+  const matchedSkills = userSkills.filter(skill => 
+    jobSkills.some(jobSkill => jobSkill.toLowerCase() === skill.toLowerCase())
+  );
+
   const application = await JobApplication.create({
-    jobId: jobId,
+    job: jobId,
     appliedBy: userApplying,
     coverLetter: coverLetter,
     resumeUrl: resume.url,
+    matchedSkills: matchedSkills
   });
 
-  return res.status(201).json(new ApiResponse(201, application, "Job application created successfully"));
+  // Add user to job applicants list
+  await Job.findByIdAndUpdate(jobId, {
+    $addToSet: { applicants: userApplying }
+  });
+
+  return res.status(201).json(new ApiResponse(201, application, "Job application submitted successfully"));
 });
 
 const getCurrentUserProfileData = asyncHandler(async (req, res) => {
@@ -331,6 +354,55 @@ const getJobPostings = asyncHandler(async (req, res) => {
     );
 });
 
+
+const getJobById = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  
+  if (!mongoose.isValidObjectId(jobId)) {
+    throw new ApiError(400, "Invalid job ID format");
+  }
+  
+  const job = await Job.aggregate([
+    {
+      $match: { _id: new mongoose.Types.ObjectId(jobId) }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "postedBy",
+        foreignField: "_id",
+        as: "postedByDetails",
+      },
+    },
+    {
+      $project: {
+        title: 1,
+        company: 1,
+        description: 1,
+        requiredSkills: 1,
+        type: 1,
+        location: 1,
+        postedByDetails: {
+          _id: 1,
+          fullname: 1,
+          avatar: 1,
+        },
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
+  ]); 
+  
+  if (!job || job.length === 0) {
+    throw new ApiError(404, "Job not found");
+  }
+  
+  return res.status(200).json(
+    new ApiResponse(200, job[0], "Job details retrieved successfully")
+  );
+});
+
+
 export {
   registerUser,
   loginUser,
@@ -342,4 +414,5 @@ export {
   getUserProfileData,
   updateAccountDetails,
   getJobPostings,
+  getJobById
 };
