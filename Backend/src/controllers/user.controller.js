@@ -270,6 +270,8 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 const getJobPostings = asyncHandler(async (req, res) => {
   const { search, type, location, currentPage = 2, limit = 5} = req.body;
+  const response = await User.findById(req.user._id).select("-password -refreshToken -role");
+  const userSkills = response.skills || [];
   const matchstage = {};
   const skip = (parseInt(currentPage) - 1) * parseInt(limit);
 
@@ -293,8 +295,6 @@ const getJobPostings = asyncHandler(async (req, res) => {
 
 
   const totalCount = await Job.countDocuments(matchstage);
-
-
   const aggregate = await Job.aggregate([
     {
       $match: matchstage,
@@ -307,9 +307,21 @@ const getJobPostings = asyncHandler(async (req, res) => {
         as: "postedByDetails",
       },
     },
-    // {
-    //   $unwind: "$postedByDetails"
-    // },
+    {
+      $addFields: {
+        matchCount: {
+          $size: {
+            $filter: {
+              input: "$requiredSkills",
+              as: "skill",
+              cond: {
+                $in: ["$$skill", userSkills.map(skill => skill.toLowerCase())],
+              },
+            }
+          }
+        }
+      }
+    },
     {
       $project: {
         title: 1,
@@ -325,10 +337,11 @@ const getJobPostings = asyncHandler(async (req, res) => {
         },
         createdAt: 1,
         updatedAt: 1,
+        matchCount: 1, 
       },
     },
     {
-      $sort: { createdAt: -1 }, // sort by creation date, most recent first
+      $sort: { matchCount: -1,createdAt: -1 }, // sort by creation date, most recent first
     },
     {
       $skip: skip, // skip documents for pagination
@@ -337,7 +350,6 @@ const getJobPostings = asyncHandler(async (req, res) => {
       $limit: parseInt(limit), // limit the number of documents returned
     },
   ]);
-
 
 
   if (aggregate.length === 0) {
