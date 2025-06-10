@@ -41,6 +41,7 @@ export default function JobDetailsPage() {
     }, [jobId]);
 
     const handleApplySubmit = async (e) => {
+        // learned new syntax here try-catch-finally
         e.preventDefault();
         if (!resumeFile) {
             alert("Please upload your resume");
@@ -81,6 +82,11 @@ export default function JobDetailsPage() {
             const file = e.target.files[0];
             if (file.type !== 'application/pdf') {
                 alert("Please upload a PDF file for your resume");
+                return;
+            }
+            console.log((file.size / (1024 * 1024)))
+            if (file.size > 10 * 1024 * 1024) {
+                alert("Please upload within 10MB");
                 return;
             }
             setResumeFile(file);
@@ -191,7 +197,7 @@ export default function JobDetailsPage() {
                                     </div>
                                 </div>
                                 <div className="mt-4 lg:mt-0">
-                                    <Dialog open={isApplyDialogOpen} onOpenChange={setIsApplyDialogOpen}>
+                                    <Dialog open={isApplyDialogOpen} onOpenChange={(state) => { setIsApplyDialogOpen(state); setResumeFile(null) }}>
                                         <DialogTrigger asChild>
                                             <Button
                                                 size="lg"
@@ -251,12 +257,15 @@ export default function JobDetailsPage() {
                                                                         onChange={handleFileChange}
                                                                         required
                                                                         className="sr-only"
+                                                                        disabled={isSubmitting}
                                                                     />
                                                                 </div>
                                                             </div>
                                                             <label
                                                                 htmlFor="resume"
-                                                                className="mt-2 cursor-pointer inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 w-full"
+                                                                className={`mt-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 w-full ${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"
+                                                                    }`}
+
                                                             >
                                                                 {resumeFile ? "Change file" : "Select a file"}
                                                             </label>
@@ -268,6 +277,7 @@ export default function JobDetailsPage() {
                                                             variant="outline"
                                                             onClick={() => setIsApplyDialogOpen(false)}
                                                             className="border-indigo-200 text-indigo-700"
+                                                            disabled={isSubmitting}
                                                         >
                                                             Cancel
                                                         </Button>
