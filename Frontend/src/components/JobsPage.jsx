@@ -11,6 +11,7 @@ import axios from 'axios';
 
 
 
+
 export default function JobsPage() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,8 +30,8 @@ export default function JobsPage() {
 
   const getJobPostings = async () => {
     try {
-      console.log(search, location, type , currentPage);
-      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-job-postings",{search,location,type,currentPage},{withCredentials:true})
+      console.log(search, location, type, currentPage);
+      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-job-postings", { search, location, type, currentPage }, { withCredentials: true })
       console.log(response.data.data);
       setTotalPages(response.data.data.pages);
       setJobs(response.data.data.jobs);
@@ -42,7 +43,7 @@ export default function JobsPage() {
   useEffect(() => {
     getJobPostings();
   }
-  , [currentPage, search, location, type]);
+    , [currentPage, search, location, type]);
   useEffect(() => {
     setCurrentPage(1);
   }, [search, location, type]);
@@ -107,10 +108,9 @@ export default function JobsPage() {
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Featured Opportunities</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {jobs.slice(0, 2).map((job) => (
-                    <Card
-                      key={job.id}
-                      className="border-l-4 border-l-indigo-600 hover:shadow-lg transition-shadow duration-300"
+                  {jobs.slice(0, 2).map((job) => (                    <Card key={job._id}
+                      className="border-l-4 border-l-indigo-600 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                      onClick={() => navigate(`/tabs/jobs/${job._id}`)}
                     >
                       <CardContent className="p-5">
                         <div className="flex justify-between items-start">
@@ -130,15 +130,24 @@ export default function JobsPage() {
                               </Badge>
                               <span className="text-xs text-gray-500 flex items-center">
                                 <Clock className="w-3 h-3 mr-1" />
-                                Posted {job.postedDate}
+                                Posted {Date.UTC()}
                               </span>
                             </div>
                             <p className="text-xs text-gray-500 mt-2 flex items-center">
                               <User className="w-3 h-3 mr-1" />
-                              Posted by: {job.postedBy}
+                              Posted by: {job.postedByDetails[0].fullname}
                             </p>
                           </div>
-                          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Apply</Button>
+                          <Button 
+                            size="sm" 
+                            className="bg-indigo-600 hover:bg-indigo-700"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/tabs/jobs/${job._id}`);
+                            }}
+                          >
+                            Apply
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -149,10 +158,12 @@ export default function JobsPage() {
               {/* All Jobs */}
               <h3 className="text-lg font-medium text-gray-900 mb-4">All Opportunities</h3>
               <div className="grid grid-cols-1 gap-4">
-                {jobs.map((job, index) => (
-                  <Card
-                    key={`all-${job.id}-${index}`}
+                {jobs.map((job, index) => {
+                  const date = Date(job.createdAt);
+                  return(
+                  <Card key={job._id}
                     className="hover:shadow-md transition-shadow duration-300 overflow-hidden"
+                    onClick={() => {navigate(`/tabs/jobs/${job._id}`)}}
                   >
                     <CardContent className="p-0">
                       <div className="p-5 border-l-4 border-l-transparent hover:border-l-indigo-600 transition-colors duration-300">
@@ -172,10 +183,10 @@ export default function JobsPage() {
                                   <MapPin className="w-4 h-4 mr-1 text-gray-400" />
                                   {job.location}
                                 </span>
-                                <span className="text-sm text-gray-600 flex items-center">
+                                {/* <span className="text-sm text-gray-600 flex items-center">
                                   <Clock className="w-4 h-4 mr-1 text-gray-400" />
-                                  {job.postedDate}
-                                </span>
+                                  {job.createdAt}
+                                </span> */}
                               </div>
                               <div className="mt-2 flex items-center">
                                 <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
@@ -183,23 +194,23 @@ export default function JobsPage() {
                                 </Badge>
                                 <span className="text-xs text-gray-500 flex items-center">
                                   <User className="w-3 h-3 mr-1" />
-                                  {job.postedBy}
+                                  {job.postedByDetails[0].fullname}
                                 </span>
                               </div>
                             </div>
                           </div>
                           <div className="mt-3 md:mt-0 flex space-x-2">
-                            <Button variant="outline" size="sm" className="flex items-center">
+                            {/* <Button variant="outline" size="sm" className="flex items-center">
                               <BookmarkIcon className="mr-1 h-4 w-4" />
                               Save
-                            </Button>
+                            </Button> */}
                             <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Apply Now</Button>
                           </div>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )})}
               </div>
 
               {/* Pagination */}
@@ -216,7 +227,7 @@ export default function JobsPage() {
                 </Button>
 
                 <div className="flex items-center space-x-1">
-                  {Array.from({ length:totalPages }, (_, i) => i + 1).map(number => (
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
                     <Button
                       key={number}
                       variant={currentPage === number ? "default" : "outline"}

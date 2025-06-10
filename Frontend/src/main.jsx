@@ -4,6 +4,7 @@ import './index.css'
 import LandingPage from './LandingPage'
 import ProfilePage from './components/ProfilePage'
 import JobsPage from './components/JobsPage'
+import JobDetailsPage from './components/JobDetailsPage'
 import PostJobPage from './components/PostJobPage'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
@@ -37,6 +38,10 @@ const router = createBrowserRouter([{
           element: <JobsPage />
         },
         {
+          path: "jobs/:jobId",
+          element: <JobDetailsPage />
+        },
+        {
           path: "post-job",
           element: <PostJobPage />
         },
@@ -47,7 +52,7 @@ const router = createBrowserRouter([{
         {
           path: "events",
           element: <EventsTab />
-        }
+        },
       ]
     },
   ]
