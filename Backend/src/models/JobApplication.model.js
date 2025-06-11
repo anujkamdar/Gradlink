@@ -21,11 +21,6 @@ const jobApplicationSchema = new Schema(
     resumeUrl: {
       type: String,
     },
-    matchedSkills: [
-      {
-        type: String,
-      },
-    ],
   },
   { timestamps: true }
 );
