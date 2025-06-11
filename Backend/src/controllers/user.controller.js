@@ -8,6 +8,7 @@ import { upload } from "../middlewares/multer.middleware.js";
 import { uploadOnCloudinary, uploadPdfOnCloudinary } from "../utils/cloudinary.js";
 import { Job } from "../models/Job.model.js";
 import { JobApplication } from "../models/JobApplication.model.js";
+import { match } from "assert";
 
 const options = {
   httpOnly: true,
@@ -193,7 +194,7 @@ const createJobApplication = asyncHandler(async (req, res) => {
   // Check if user has already applied
   const existingApplication = await JobApplication.findOne({
     job: jobId,
-    appliedBy: userApplying
+    appliedBy: userApplying,
   });
 
   if (existingApplication) {
@@ -208,21 +209,17 @@ const createJobApplication = asyncHandler(async (req, res) => {
   // Find matching skills if any
   const userSkills = req.user.skills || [];
   const jobSkills = job.requiredSkills || [];
-  const matchedSkills = userSkills.filter(skill => 
-    jobSkills.some(jobSkill => jobSkill.toLowerCase() === skill.toLowerCase())
-  );
 
   const application = await JobApplication.create({
     job: jobId,
     appliedBy: userApplying,
     coverLetter: coverLetter,
     resumeUrl: resume.url,
-    matchedSkills: matchedSkills
   });
 
   // Add user to job applicants list
   await Job.findByIdAndUpdate(jobId, {
-    $addToSet: { applicants: userApplying }
+    $addToSet: { applicants: userApplying },
   });
 
   return res.status(201).json(new ApiResponse(201, application, "Job application submitted successfully"));
@@ -269,7 +266,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const getJobPostings = asyncHandler(async (req, res) => {
-  const { search, type, location, currentPage = 2, limit = 5} = req.body;
+  const { search, type, location, currentPage = 2, limit = 5 } = req.body;
   const response = await User.findById(req.user._id).select("-password -refreshToken -role");
   const userSkills = response.skills || [];
   const matchstage = {};
@@ -293,7 +290,6 @@ const getJobPostings = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Pagination parameters must be numbers");
   }
 
-
   const totalCount = await Job.countDocuments(matchstage);
   const aggregate = await Job.aggregate([
     {
@@ -315,12 +311,12 @@ const getJobPostings = asyncHandler(async (req, res) => {
               input: "$requiredSkills",
               as: "skill",
               cond: {
-                $in: ["$$skill", userSkills.map(skill => skill.toLowerCase())],
+                $in: ["$$skill", userSkills.map((skill) => skill.toLowerCase())],
               },
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     },
     {
       $project: {
@@ -337,11 +333,11 @@ const getJobPostings = asyncHandler(async (req, res) => {
         },
         createdAt: 1,
         updatedAt: 1,
-        matchCount: 1, 
+        matchCount: 1,
       },
     },
     {
-      $sort: { matchCount: -1,createdAt: -1 }, // sort by creation date, most recent first
+      $sort: { matchCount: -1, createdAt: -1 }, // sort by creation date, most recent first
     },
     {
       $skip: skip, // skip documents for pagination
@@ -351,32 +347,33 @@ const getJobPostings = asyncHandler(async (req, res) => {
     },
   ]);
 
-
   if (aggregate.length === 0) {
-    return res.status(404).json(new ApiResponse(404, [], "No job postings found for the given criteria"));
+    return res.status(200).json(new ApiResponse(404, [], "No job postings found for the given criteria"));
   }
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { jobs: aggregate, currentPage: parseInt(currentPage), limit: parseInt(limit),pages:Math.ceil(totalCount/limit)},
-        "Job postings retrieved successfully"
-      )
-    );
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        jobs: aggregate,
+        currentPage: parseInt(currentPage),
+        limit: parseInt(limit),
+        pages: Math.ceil(totalCount / limit),
+      },
+      "Job postings retrieved successfully"
+    )
+  );
 });
-
 
 const getJobById = asyncHandler(async (req, res) => {
   const { jobId } = req.params;
-  
+
   if (!mongoose.isValidObjectId(jobId)) {
     throw new ApiError(400, "Invalid job ID format");
   }
-  
+
   const job = await Job.aggregate([
     {
-      $match: { _id: new mongoose.Types.ObjectId(jobId) }
+      $match: { _id: new mongoose.Types.ObjectId(jobId) },
     },
     {
       $lookup: {
@@ -402,18 +399,176 @@ const getJobById = asyncHandler(async (req, res) => {
         createdAt: 1,
         updatedAt: 1,
       },
-    }
-  ]); 
-  
+    },
+  ]);
+
   if (!job || job.length === 0) {
     throw new ApiError(404, "Job not found");
   }
-  
+  return res.status(200).json(new ApiResponse(200, job[0], "Job details retrieved successfully"));
+});
+
+const getMyJobPostings = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { page = 1, search = "" } = req.query;
+  const limit = 10;
+  const skip = (parseInt(page) - 1) * limit;
+
+  const query = {
+    postedBy: userId,
+  };
+
+  if (search) {
+    const searchRegex = new RegExp(search, "i");
+    query.$or = [{ title: searchRegex }, { company: searchRegex }, { description: searchRegex }];
+  }
+
+  const totalCount = await Job.countDocuments(query);
+
+  const jobs = await Job.aggregate([
+    {
+      $match: query,
+    },
+    {
+      $lookup: {
+        from: "jobapplications",
+        localField: "_id",
+        foreignField: "job",
+        as: "applications",
+      },
+    },
+    {
+      $addFields: {
+        applicantsCount: { $size: "$applicants" },
+      },
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+    {
+      $skip: skip,
+    },
+    {
+      $limit: limit,
+    },
+  ]);
   return res.status(200).json(
-    new ApiResponse(200, job[0], "Job details retrieved successfully")
+    new ApiResponse(
+      200,
+      {
+        jobs,
+        currentPage: parseInt(page),
+        limit,
+        pages: Math.ceil(totalCount / limit),
+      },
+      "My job postings retrieved successfully"
+    )
   );
 });
 
+const deleteJob = asyncHandler(async (req, res) => {
+  const { jobId } = req.body;
+  const userId = req.user._id;
+
+  if (!mongoose.isValidObjectId(jobId)) {
+    throw new ApiError(400, "Invalid job ID format");
+  }
+
+  const job = await Job.findById(jobId);
+
+  if (!job) {
+    throw new ApiError(404, "Job not found");
+  }
+
+  if (job.postedBy.toString() !== userId.toString()) {
+    throw new ApiError(403, "You do not have permission to delete this job");
+  }
+
+  await JobApplication.deleteMany({ job: jobId });
+
+  await Job.findByIdAndDelete(jobId);
+
+  return res.status(200).json(new ApiResponse(200, null, "Job and related applications deleted successfully"));
+});
+
+const getJobApplications = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  if (!mongoose.isValidObjectId(jobId)) {
+    throw new ApiError(404, "Not a valid object id");
+  }
+  const job = await Job.findById(jobId);
+
+  if (!job) {
+    throw new ApiError(404, "This Job does not exist");
+  }
+
+  if (job.postedBy.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not allowed to access this information");
+  }
+
+  const aggregate = await JobApplication.aggregate([
+    {
+      $match: {
+        job: new mongoose.Types.ObjectId(jobId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "appliedBy",
+        foreignField: "_id",
+        as: "appliedByDetails",
+      },
+    },
+    {
+      $addFields: {
+        appliedByDetails: {
+          $arrayElemAt: ["$appliedByDetails", 0],
+        },
+      },
+    },
+    {
+      $project: {
+        job: 1,
+        appliedBy: 1,
+        status: 1,
+        coverLetter: 1,
+        resumeUrl: 1,
+        appliedByDetails: {
+          _id: "$appliedByDetails._id",
+          fullname: "$appliedByDetails.fullname",
+          avatar: "$appliedByDetails.avatar",
+          graduationYear: "$appliedByDetails.graduationYear",
+          major: "$appliedByDetails.major",
+          skills: "$appliedByDetails.skills",
+          email: "$appliedByDetails.email",
+        },
+        matchedSkills: 1,
+        requiredSkills: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    },
+  ]);
+
+  const jobRequiredSkills = job.requiredSkills || [];
+
+  const applications = aggregate.map((app) => {
+    const userSkills = app.appliedByDetails?.skills || [];
+    const matchedSkills = userSkills.filter((skill) => jobRequiredSkills.includes(skill));
+
+    return {
+      ...app,
+      matchedSkills,
+      requiredSkills: jobRequiredSkills,
+    };
+  });
+
+  if (aggregate.length === 0) {
+    return res.status(404).json(new ApiResponse(404, [], "No applications found for this job"));
+  }
+  return res.status(200).json(new ApiResponse(200, applications, "Job applications retrieved successfully"));
+});
 
 export {
   registerUser,
@@ -426,5 +581,8 @@ export {
   getUserProfileData,
   updateAccountDetails,
   getJobPostings,
-  getJobById
+  getJobById,
+  getMyJobPostings,
+  deleteJob,
+  getJobApplications,
 };

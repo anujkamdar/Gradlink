@@ -3,9 +3,12 @@ import { upload } from "../middlewares/multer.middleware.js";
 import {
   createJobApplication,
   createJobPosting,
+  deleteJob,
   getCurrentUserProfileData,
+  getJobApplications,
   getJobById,
   getJobPostings,
+  getMyJobPostings,
   getUserProfileData,
   loginUser,
   logOutUser,
@@ -21,18 +24,16 @@ userRouter.route("/register").post(upload.single("avatar"), registerUser);
 userRouter.route("/login").post(loginUser);
 userRouter.route("/refresh-token").post(refreshAccessToken);
 
-// secure routes
 userRouter.route("/logout").get(verifyJwt, logOutUser);
-
-//only alum routes
 userRouter.route("/create-job").post(verifyJwt, createJobPosting);
-
-// student also routes
 userRouter.route("/apply-job").post(verifyJwt, upload.single("resume"), createJobApplication);
 userRouter.route("/get-profile-data/:userId").get(verifyJwt, getUserProfileData);
 userRouter.route("/current-user-profile").get(verifyJwt, getCurrentUserProfileData);
 userRouter.route("/update-profile").post(verifyJwt, updateAccountDetails);
 userRouter.route("/get-job-postings").post(verifyJwt, getJobPostings);
 userRouter.route("/job/:jobId").get(verifyJwt, getJobById);
+userRouter.route("/delete-job").post(verifyJwt, deleteJob);
+userRouter.route("/my-job-postings").get(verifyJwt, getMyJobPostings);
+userRouter.route("/get-job-applications/:jobId").get(verifyJwt,getJobApplications);
 
 export default userRouter;
