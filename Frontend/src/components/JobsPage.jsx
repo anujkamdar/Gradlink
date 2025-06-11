@@ -20,13 +20,13 @@ export default function JobsPage() {
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [jobs, setJobs] = useState([]);
+  const [user, setUser] = useState(null);
 
 
   // Handle pagination
   const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
   const goToPrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
   const goToPage = (pageNumber) => setCurrentPage(pageNumber);
-
 
   const getJobPostings = async () => {
     try {
@@ -40,13 +40,26 @@ export default function JobsPage() {
     }
   }
 
+  const getCurrentUser = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/current-user-profile", { withCredentials: true });
+      setUser(response.data.data);
+    } catch (error) {
+      console.log(error.response?.data?.message || "Error fetching user data");
+    }
+  };
+
   useEffect(() => {
     getJobPostings();
-  }
-    , [currentPage, search, location, type]);
+    getCurrentUser();
+  }, [currentPage, search, location, type]);
   useEffect(() => {
     setCurrentPage(1);
   }, [search, location, type]);
+
+
+
+
 
 
 
@@ -54,24 +67,33 @@ export default function JobsPage() {
     <>
       <div className="bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>
-              <div className="mt-4 md:mt-0 flex space-x-3">
+          <div className="space-y-6">            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>
+            <div className="mt-4 md:mt-0 flex space-x-3">
+              {user?.role === 'alumni' && (
                 <Button
                   variant="outline"
                   className="flex items-center"
-                  onClick={() => navigate('/tabs/post-job')}
+                  onClick={() => navigate('/tabs/my-jobs')}
                 >
-                  <Plus className="mr-1 h-4 w-4" />
-                  Post a Job
+                  <Briefcase className="mr-1 h-4 w-4" />
+                  My Posted Jobs
                 </Button>
-                <Button onClick={() => { getJobPostings() }} className="flex items-center">
-                  <Search className="mr-1 h-4 w-4" />
-                  Find Jobs
-                </Button>
-              </div>
+              )}
+              <Button
+                variant="outline"
+                className="flex items-center"
+                onClick={() => navigate('/tabs/post-job')}
+              >
+                <Plus className="mr-1 h-4 w-4" />
+                Post a Job
+              </Button>
+              <Button onClick={() => { getJobPostings() }} className="flex items-center">
+                <Search className="mr-1 h-4 w-4" />
+                Find Jobs
+              </Button>
             </div>
+          </div>
 
             {/* Search and Filter */}
             <Card>
@@ -102,55 +124,60 @@ export default function JobsPage() {
               </CardContent>
             </Card>
 
+
+            {!jobs && <h1>No jobs for this criteria</h1>}
+
+
+
             {/* Job Listings */}
             <div className="space-y-4">
               {/* Featured Jobs Section */}
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Featured Opportunities</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {jobs.slice(0, 2).map((job) => (                    <Card key={job._id}
-                      className="border-l-4 border-l-indigo-600 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                      onClick={() => navigate(`/tabs/jobs/${job._id}`)}
-                    >
-                      <CardContent className="p-5">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium text-gray-900 text-lg">{job.title}</h4>
-                            <p className="text-sm text-gray-500 mt-1 flex items-center">
-                              <Briefcase className="w-4 h-4 mr-1" />
-                              {job.company}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1 flex items-center">
-                              <MapPin className="w-4 h-4 mr-1" />
-                              {job.location}
-                            </p>
-                            <div className="mt-2 flex items-center">
-                              <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
-                                {job.type}
-                              </Badge>
-                              <span className="text-xs text-gray-500 flex items-center">
-                                <Clock className="w-3 h-3 mr-1" />
-                                Posted {Date.UTC()}
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-2 flex items-center">
-                              <User className="w-3 h-3 mr-1" />
-                              Posted by: {job.postedByDetails[0].fullname}
-                            </p>
+                  {jobs && jobs.slice(0, 2).map((job) => (<Card key={job._id}
+                    className="border-l-4 border-l-indigo-600 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                    onClick={() => navigate(`/tabs/jobs/${job._id}`)}
+                  >
+                    <CardContent className="p-5">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-medium text-gray-900 text-lg">{job.title}</h4>
+                          <p className="text-sm text-gray-500 mt-1 flex items-center">
+                            <Briefcase className="w-4 h-4 mr-1" />
+                            {job.company}
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1 flex items-center">
+                            <MapPin className="w-4 h-4 mr-1" />
+                            {job.location}
+                          </p>
+                          <div className="mt-2 flex items-center">
+                            <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
+                              {job.type}
+                            </Badge>
+                            <span className="text-xs text-gray-500 flex items-center">
+                              <Clock className="w-3 h-3 mr-1" />
+                              Posted {Date.UTC()}
+                            </span>
                           </div>
-                          <Button 
-                            size="sm" 
-                            className="bg-indigo-600 hover:bg-indigo-700"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/tabs/jobs/${job._id}`);
-                            }}
-                          >
-                            Apply
-                          </Button>
+                          <p className="text-xs text-gray-500 mt-2 flex items-center">
+                            <User className="w-3 h-3 mr-1" />
+                            Posted by: {job.postedByDetails[0].fullname}
+                          </p>
                         </div>
-                      </CardContent>
-                    </Card>
+                        <Button
+                          size="sm"
+                          className="bg-indigo-600 hover:bg-indigo-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/tabs/jobs/${job._id}`);
+                          }}
+                        >
+                          Apply
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                   ))}
                 </div>
               </div>
@@ -158,59 +185,60 @@ export default function JobsPage() {
               {/* All Jobs */}
               <h3 className="text-lg font-medium text-gray-900 mb-4">All Opportunities</h3>
               <div className="grid grid-cols-1 gap-4">
-                {jobs.map((job, index) => {
+                {jobs && jobs.map((job, index) => {
                   const date = Date(job.createdAt);
-                  return(
-                  <Card key={job._id}
-                    className="hover:shadow-md transition-shadow duration-300 overflow-hidden"
-                    onClick={() => {navigate(`/tabs/jobs/${job._id}`)}}
-                  >
-                    <CardContent className="p-0">
-                      <div className="p-5 border-l-4 border-l-transparent hover:border-l-indigo-600 transition-colors duration-300">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                          <div className="flex items-start space-x-4">
-                            <div className="flex-shrink-0 bg-gray-100 rounded-md p-3 hidden md:block">
-                              <Briefcase className="w-8 h-8 text-indigo-600" />
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-gray-900 text-lg">{job.title}</h4>
-                              <div className="flex flex-wrap items-center gap-2 mt-1">
-                                <span className="text-sm text-gray-600 flex items-center">
-                                  <Briefcase className="w-4 h-4 mr-1 text-gray-400" />
-                                  {job.company}
-                                </span>
-                                <span className="text-sm text-gray-600 flex items-center">
-                                  <MapPin className="w-4 h-4 mr-1 text-gray-400" />
-                                  {job.location}
-                                </span>
-                                {/* <span className="text-sm text-gray-600 flex items-center">
+                  return (
+                    <Card key={job._id}
+                      className="hover:shadow-md transition-shadow duration-300 overflow-hidden"
+                      onClick={() => { navigate(`/tabs/jobs/${job._id}`) }}
+                    >
+                      <CardContent className="p-0">
+                        <div className="p-5 border-l-4 border-l-transparent hover:border-l-indigo-600 transition-colors duration-300">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                            <div className="flex items-start space-x-4">
+                              <div className="flex-shrink-0 bg-gray-100 rounded-md p-3 hidden md:block">
+                                <Briefcase className="w-8 h-8 text-indigo-600" />
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-gray-900 text-lg">{job.title}</h4>
+                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                  <span className="text-sm text-gray-600 flex items-center">
+                                    <Briefcase className="w-4 h-4 mr-1 text-gray-400" />
+                                    {job.company}
+                                  </span>
+                                  <span className="text-sm text-gray-600 flex items-center">
+                                    <MapPin className="w-4 h-4 mr-1 text-gray-400" />
+                                    {job.location}
+                                  </span>
+                                  {/* <span className="text-sm text-gray-600 flex items-center">
                                   <Clock className="w-4 h-4 mr-1 text-gray-400" />
                                   {job.createdAt}
                                 </span> */}
-                              </div>
-                              <div className="mt-2 flex items-center">
-                                <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
-                                  {job.type}
-                                </Badge>
-                                <span className="text-xs text-gray-500 flex items-center">
-                                  <User className="w-3 h-3 mr-1" />
-                                  {job.postedByDetails[0].fullname}
-                                </span>
+                                </div>
+                                <div className="mt-2 flex items-center">
+                                  <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
+                                    {job.type}
+                                  </Badge>
+                                  <span className="text-xs text-gray-500 flex items-center">
+                                    <User className="w-3 h-3 mr-1" />
+                                    {job.postedByDetails[0].fullname}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="mt-3 md:mt-0 flex space-x-2">
-                            {/* <Button variant="outline" size="sm" className="flex items-center">
+                            <div className="mt-3 md:mt-0 flex space-x-2">
+                              {/* <Button variant="outline" size="sm" className="flex items-center">
                               <BookmarkIcon className="mr-1 h-4 w-4" />
                               Save
                             </Button> */}
-                            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Apply Now</Button>
+                              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Apply Now</Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )})}
+                      </CardContent>
+                    </Card>
+                  )
+                })}
               </div>
 
               {/* Pagination */}

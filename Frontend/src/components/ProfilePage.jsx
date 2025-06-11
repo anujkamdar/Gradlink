@@ -210,11 +210,8 @@ function ProfilePage() {
           <div className="h-48 bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600"></div>
           <div className="container mx-auto px-4">
             <div className="relative -mt-24 mb-8 flex flex-col md:flex-row items-start md:items-end space-y-4 md:space-y-0 md:space-x-6">
-              <div className="w-32 h-32 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden">
-                {/* This would be the user's profile picture */}
-                <div className="w-full h-full bg-purple-200 flex items-center justify-center">
-                  <User className="h-16 w-16 text-purple-600" />
-                </div>
+              <div className="w-32 h-32 rounded-full overflow-hidden">
+                <img src={userData.avatar} alt="" />
               </div>
 
               <div className="flex-1">
