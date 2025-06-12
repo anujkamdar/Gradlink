@@ -43,6 +43,10 @@ const userSchema = new Schema(
     bio: {
       type: String,
     },
+    company: {
+      type:String,
+      trim:true
+    },
     password: {
       type: String,
       required: true,
