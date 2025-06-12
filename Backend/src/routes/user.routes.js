@@ -15,6 +15,7 @@ import {
   refreshAccessToken,
   registerUser,
   updateAccountDetails,
+  updateJobApplicationStatus,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 
@@ -34,6 +35,7 @@ userRouter.route("/get-job-postings").post(verifyJwt, getJobPostings);
 userRouter.route("/job/:jobId").get(verifyJwt, getJobById);
 userRouter.route("/delete-job").post(verifyJwt, deleteJob);
 userRouter.route("/my-job-postings").get(verifyJwt, getMyJobPostings);
-userRouter.route("/get-job-applications/:jobId").get(verifyJwt,getJobApplications);
+userRouter.route("/get-job-applications/:jobId").get(verifyJwt, getJobApplications);
+userRouter.route("/update-application-status").post(verifyJwt, updateJobApplicationStatus);
 
 export default userRouter;

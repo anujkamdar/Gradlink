@@ -206,10 +206,6 @@ const createJobApplication = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Resume upload failed");
   }
 
-  // Find matching skills if any
-  const userSkills = req.user.skills || [];
-  const jobSkills = job.requiredSkills || [];
-
   const application = await JobApplication.create({
     job: jobId,
     appliedBy: userApplying,
@@ -316,6 +312,13 @@ const getJobPostings = asyncHandler(async (req, res) => {
             },
           },
         },
+        isAlreadyApplied: {
+          $cond: {
+            if: { $in: [req.user._id, "$applicants"] },
+            then: true,
+            else: false,
+          },
+        },
       },
     },
     {
@@ -334,6 +337,7 @@ const getJobPostings = asyncHandler(async (req, res) => {
         createdAt: 1,
         updatedAt: 1,
         matchCount: 1,
+        isAlreadyApplied: 1,
       },
     },
     {
@@ -570,6 +574,33 @@ const getJobApplications = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, applications, "Job applications retrieved successfully"));
 });
 
+const updateJobApplicationStatus = asyncHandler(async (req, res) => {
+  const { applicationId, status } = req.body;
+  if (!mongoose.isValidObjectId(applicationId)) {
+    throw new ApiError(400, "Invalid application ID format");
+  }
+  const application = await JobApplication.findById(applicationId);
+  if (!application) {
+    throw new ApiError(404, "Application not found");
+  }
+
+  const job = await Job.findById(application.job);
+
+  if (!job) {
+    throw new ApiError(404, "Job not found for this application");
+  }
+
+  if (job.postedBy.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You do not have permission to update this application");
+  }
+  if (!["accepted", "rejected", "pending"].includes(status)) {
+    throw new ApiError(400, "Invalid status value");
+  }
+  application.status = status;
+  await application.save();
+  return res.status(200).json(new ApiResponse(200, status, "Application status updated successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -585,4 +616,5 @@ export {
   getMyJobPostings,
   deleteJob,
   getJobApplications,
+  updateJobApplicationStatus,
 };
