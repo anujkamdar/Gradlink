@@ -9,6 +9,7 @@ import { uploadOnCloudinary, uploadPdfOnCloudinary } from "../utils/cloudinary.j
 import { Job } from "../models/Job.model.js";
 import { JobApplication } from "../models/JobApplication.model.js";
 import { match } from "assert";
+import { groupEnd } from "console";
 
 const options = {
   httpOnly: true,
@@ -630,6 +631,51 @@ const getUserJobApplications = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, applications, "User job applications fetched successfully"));
 });
 
+const getUsers = asyncHandler(async (req, res) => {
+  const { search, graduationYear, major, company } = req.body;
+  const matchstage = {};
+  if (graduationYear) {
+    matchstage.graduationYear = graduationYear;
+  }
+  if (major) {
+    matchstage.major = major;
+  }
+  if (company) {
+    matchstage.company = company;
+  }
+
+  if (search) {
+    matchstage.fullname = new RegExp(search, "i");
+  }
+
+  const aggregate = await User.aggregate([
+    {
+      $match: matchstage,
+    },
+    {
+      $project: {
+        _id: 1,
+        role:1,
+        email:1,
+        fullname:1,
+        graduationYear:1,
+        major:1,
+        skills:1,
+        company:1,
+        avatar: 1,
+        location: 1,
+      },
+    },
+  ]);
+
+
+  if (aggregate.length === 0) {
+    return res.status(404).json(new ApiResponse(404, [], "No users found for the given criteria"));
+  }
+
+  return res.status(200).json(new ApiResponse(200, aggregate, "Users fetched successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -647,4 +693,5 @@ export {
   getJobApplications,
   updateJobApplicationStatus,
   getUserJobApplications,
+  getUsers,
 };
