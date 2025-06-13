@@ -57,6 +57,12 @@ export default function JobsPage() {
     setCurrentPage(1);
   }, [search, location, type]);
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+  }
+
 
 
 
@@ -69,8 +75,7 @@ export default function JobsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>
-            <div className="mt-4 md:mt-0 flex space-x-3">
-              {user?.role === 'alumni' && (
+            <div className="mt-4 md:mt-0 flex space-x-3">              {user?.role === 'alumni' && (
                 <Button
                   variant="outline"
                   className="flex items-center"
@@ -80,6 +85,16 @@ export default function JobsPage() {
                   My Posted Jobs
                 </Button>
               )}
+              
+                <Button
+                  variant="outline"
+                  className="flex items-center"
+                  onClick={() => navigate('/tabs/my-applications')}
+                >
+                  <BookmarkIcon className="mr-1 h-4 w-4" />
+                  My Applications
+                </Button>
+              
               <Button
                 variant="outline"
                 className="flex items-center"
@@ -157,7 +172,7 @@ export default function JobsPage() {
                             </Badge>
                             <span className="text-xs text-gray-500 flex items-center">
                               <Clock className="w-3 h-3 mr-1" />
-                              Posted {Date.UTC()}
+                              Posted {formatDate(job.createdAt)}
                             </span>
                           </div>
                           <p className="text-xs text-gray-500 mt-2 flex items-center">
@@ -167,13 +182,14 @@ export default function JobsPage() {
                         </div>
                         <Button
                           size="sm"
-                          className="bg-indigo-600 hover:bg-indigo-700"
+                          className={`${job.isAlreadyApplied ? "bg-gradient-to-r from-green-500 to-green-900 text-white hover:bg-gradient-to-l" : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                            }`}
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/tabs/jobs/${job._id}`);
                           }}
                         >
-                          Apply
+                          {job.isAlreadyApplied ? "Already Applied" : "Apply Now"}
                         </Button>
                       </div>
                     </CardContent>
@@ -186,7 +202,6 @@ export default function JobsPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-4">All Opportunities</h3>
               <div className="grid grid-cols-1 gap-4">
                 {jobs && jobs.map((job, index) => {
-                  const date = Date(job.createdAt);
                   return (
                     <Card key={job._id}
                       className="hover:shadow-md transition-shadow duration-300 overflow-hidden"
@@ -210,10 +225,10 @@ export default function JobsPage() {
                                     <MapPin className="w-4 h-4 mr-1 text-gray-400" />
                                     {job.location}
                                   </span>
-                                  {/* <span className="text-sm text-gray-600 flex items-center">
-                                  <Clock className="w-4 h-4 mr-1 text-gray-400" />
-                                  {job.createdAt}
-                                </span> */}
+                                  <span className="text-sm text-gray-600 flex items-center">
+                                    <Clock className="w-4 h-4 mr-1 text-gray-400" />
+                                    {formatDate(job.createdAt)}
+                                  </span>
                                 </div>
                                 <div className="mt-2 flex items-center">
                                   <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
@@ -231,7 +246,24 @@ export default function JobsPage() {
                               <BookmarkIcon className="mr-1 h-4 w-4" />
                               Save
                             </Button> */}
-                              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Apply Now</Button>
+                              {!job.isAlreadyApplied && (
+                                <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer">Apply Now</Button>
+                              )}
+                              {
+                                job.isAlreadyApplied && (
+                                  // give a good looking button with text "Already Applied"
+                                  // use gradient background
+                                  // greenish pinkish color
+                                  <Button size="sm" className="bg-gradient-to-r from-green-500 to-green-900 text-white hover:bg-gradient-to-l">
+                                    Already Applied
+                                  </Button>
+
+
+
+
+
+                                )
+                              }
                             </div>
                           </div>
                         </div>

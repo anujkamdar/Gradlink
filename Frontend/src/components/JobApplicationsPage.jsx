@@ -42,14 +42,14 @@ export default function JobApplicationsPage() {
           `http://localhost:8000/gradlink/api/v1/users/job/${jobId}`,
           { withCredentials: true }
         );
-        
+
         setJob(jobResponse.data.data);
-        
+
         const applicationsResponse = await axios.get(
           `http://localhost:8000/gradlink/api/v1/users/get-job-applications/${jobId}`,
           { withCredentials: true }
         );
-        
+
         setApplications(applicationsResponse.data.data);
         setLoading(false);
       } catch (err) {
@@ -62,7 +62,7 @@ export default function JobApplicationsPage() {
     if (jobId) {
       fetchJobAndApplications();
     }
-  }, [jobId]);
+  }, [jobId,]);
 
   const handleViewCoverLetter = (coverLetter, applicant) => {
     setSelectedCoverLetter(coverLetter);
@@ -76,8 +76,27 @@ export default function JobApplicationsPage() {
   };
 
   const updateApplicationStatus = async (applicationId, newStatus) => {
-    //baad me
+    try {
+      console.log("hello");
+      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/update-application-status", {
+        applicationId: applicationId,
+        status: newStatus
+      }, { withCredentials: true })
+
+      const updatedApplications = applications.map((application) => {
+        if (application._id == applicationId) {
+          return { ...application, status: newStatus };
+        } else {
+          return application;
+        }
+      })
+      setApplications(updatedApplications);
+      console.log(response.data.message);
+    } catch (error) {
+      console.log(error.response?.data?.message || "Something went wrong")
+    }
   };
+
 
   if (loading) {
     return (
@@ -122,14 +141,14 @@ export default function JobApplicationsPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="mb-4"
             onClick={() => navigate('/tabs/my-jobs')}
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to My Jobs
           </Button>
-          
+
           <div className="bg-white rounded-xl shadow-md p-6 mb-6">
             <div className="flex flex-col md:flex-row justify-between">
               <div>
@@ -143,7 +162,7 @@ export default function JobApplicationsPage() {
                   <span>Posted on {formatDate(job.createdAt)}</span>
                 </div>
               </div>
-              
+
               <div className="mt-4 md:mt-0">
                 <div className="flex items-center mb-2">
                   <span className="text-lg font-semibold text-indigo-600 mr-2">
@@ -153,10 +172,10 @@ export default function JobApplicationsPage() {
                 </div>
                 <Badge className={`
                   px-3 py-1 
-                  ${job.type === 'full-time' 
-                    ? 'bg-blue-100 text-blue-800' 
-                    : job.type === 'part-time' 
-                      ? 'bg-purple-100 text-purple-800' 
+                  ${job.type === 'full-time'
+                    ? 'bg-blue-100 text-blue-800'
+                    : job.type === 'part-time'
+                      ? 'bg-purple-100 text-purple-800'
                       : 'bg-green-100 text-green-800'
                   }`}
                 >
@@ -172,7 +191,7 @@ export default function JobApplicationsPage() {
         {/* Applications Section */}
         <div className="space-y-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Applications</h2>
-          
+
           {applications.length === 0 ? (
             <Card className="bg-white rounded-xl shadow-md">
               <CardContent className="p-10 text-center">
@@ -186,18 +205,18 @@ export default function JobApplicationsPage() {
           ) : (
             applications.map((application) => {
               const matchedSkills = application.matchedSkills;
-              const skillMatchPercentage = job.requiredSkills.length > 0 
+              const skillMatchPercentage = job.requiredSkills.length > 0
                 ? Math.round((matchedSkills.length / job.requiredSkills.length) * 100)
                 : 0;
-                return (
-                <Card 
-                  key={application._id} 
+              return (
+                <Card
+                  key={application._id}
                   className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg border-l-4"
                   style={{
-                    borderLeftColor: application.status === 'accepted' 
-                      ? '#10b981' 
+                    borderLeftColor: application.status === 'accepted'
+                      ? '#10b981'
                       : application.status === 'rejected'
-                        ? '#ef4444' 
+                        ? '#ef4444'
                         : '#6366f1'
                   }}
                 >
@@ -207,9 +226,9 @@ export default function JobApplicationsPage() {
                       <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-6">
                         <div className="flex items-start space-x-4">
                           <div className="h-16 w-16 rounded-full overflow-hidden flex-shrink-0">
-                            <img 
-                              src={application.appliedByDetails?.avatar || 'https://via.placeholder.com/150'} 
-                              alt={application.appliedByDetails?.fullname} 
+                            <img
+                              src={application.appliedByDetails?.avatar || 'https://via.placeholder.com/150'}
+                              alt={application.appliedByDetails?.fullname}
                               className="h-full w-full object-cover"
                             />
                           </div>
@@ -224,15 +243,14 @@ export default function JobApplicationsPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="mt-4 md:mt-0 flex flex-col items-end">
-                          <Badge className={`mb-2 px-3 py-1 ${
-                            application.status === 'accepted' 
-                              ? 'bg-green-100 text-green-800' 
-                              : application.status === 'rejected'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-blue-100 text-blue-800'
-                          }`}>
+                          <Badge className={`mb-2 px-3 py-1 ${application.status === 'accepted'
+                            ? 'bg-green-100 text-green-800'
+                            : application.status === 'rejected'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-blue-100 text-blue-800'
+                            }`}>
                             {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
                           </Badge>
                           <span className="text-sm text-gray-500">
@@ -250,37 +268,35 @@ export default function JobApplicationsPage() {
                           </h4>
                           <div className="flex items-center">
                             <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2 max-w-[100px]">
-                              <div 
-                                className={`h-2.5 rounded-full ${
-                                  skillMatchPercentage >= 70 
-                                    ? 'bg-green-600' 
-                                    : skillMatchPercentage >= 40 
-                                      ? 'bg-yellow-400' 
-                                      : 'bg-red-500'
-                                }`}
+                              <div
+                                className={`h-2.5 rounded-full ${skillMatchPercentage >= 70
+                                  ? 'bg-green-600'
+                                  : skillMatchPercentage >= 40
+                                    ? 'bg-yellow-400'
+                                    : 'bg-red-500'
+                                  }`}
                                 style={{ width: `${skillMatchPercentage}%` }}
                               ></div>
                             </div>
-                            <span className={`text-sm font-medium ${
-                              skillMatchPercentage >= 70 
-                                ? 'text-green-600' 
-                                : skillMatchPercentage >= 40 
-                                  ? 'text-yellow-600' 
-                                  : 'text-red-600'
-                            }`}>
+                            <span className={`text-sm font-medium ${skillMatchPercentage >= 70
+                              ? 'text-green-600'
+                              : skillMatchPercentage >= 40
+                                ? 'text-yellow-600'
+                                : 'text-red-600'
+                              }`}>
                               {skillMatchPercentage}%
                             </span>
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-2">
                           {job.requiredSkills.map((skill) => {
                             const isMatched = matchedSkills.includes(skill);
                             return (
-                              <Badge 
-                                key={skill} 
-                                className={isMatched 
-                                  ? "bg-green-50 text-green-700 border-green-200" 
+                              <Badge
+                                key={skill}
+                                className={isMatched
+                                  ? "bg-green-50 text-green-700 border-green-200"
                                   : "bg-gray-100 text-gray-500 border-gray-200"
                                 }
                               >
@@ -294,45 +310,54 @@ export default function JobApplicationsPage() {
 
                       {/* Actions Section */}
                       <div className="flex flex-wrap gap-3">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           className="border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700"
                           onClick={() => handleViewCoverLetter(application.coverLetter, application.appliedByDetails)}
                         >
                           <FileText className="h-4 w-4 mr-1.5" />
                           View Cover Letter
                         </Button>
-                        
-                        <Button 
-                          variant="outline" 
+
+                        <Button
+                          variant="outline"
                           className="border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700"
                           onClick={() => window.open(application.resumeUrl, '_blank')}
                         >
                           <Download className="h-4 w-4 mr-1.5" />
                           Download Resume
                         </Button>
-                        
-                        {application.status === 'pending' && (
-                          <>
-                            <Button 
-                              variant="outline" 
-                              className="border-green-200 bg-green-50 hover:bg-green-100 text-green-700"
-                              onClick={() => updateApplicationStatus(application._id, 'accepted')}
-                            >
-                              <Check className="h-4 w-4 mr-1.5" />
-                              Accept Application
-                            </Button>
-                            
-                            <Button 
-                              variant="outline" 
-                              className="border-red-200 bg-red-50 hover:bg-red-100 text-red-700"
-                              onClick={() => updateApplicationStatus(application._id, 'rejected')}
-                            >
-                              <X className="h-4 w-4 mr-1.5" />
-                              Reject Application
-                            </Button>
-                          </>
-                        )}
+
+
+                        <>
+                          <Button
+                            variant="outline"
+                            className="border-green-200 bg-green-50 hover:bg-green-100 text-green-700"
+                            onClick={() => updateApplicationStatus(application._id, 'accepted')}
+                          >
+                            <Check className="h-4 w-4 mr-1.5" />
+                            Accept Application
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            className="border-red-200 bg-red-50 hover:bg-red-100 text-red-700"
+                            onClick={() => updateApplicationStatus(application._id, 'rejected')}
+                          >
+                            <X className="h-4 w-4 mr-1.5" />
+                            Reject Application
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            className="border-purple-200 bg-purple-50 hover:bg-purple-200 text-purple-700"
+                            onClick={() => updateApplicationStatus(application._id, 'pending')}
+                          >
+                            <Clock className='h-4 w-4 mr-1.5 mt-0.5' />
+                            Set to pending
+                          </Button>
+                        </>
+
                       </div>
                     </div>
                   </CardContent>

@@ -8,6 +8,7 @@ import JobDetailsPage from './components/JobDetailsPage'
 import PostJobPage from './components/PostJobPage'
 import MyJobsPage from './components/MyJobsPage'
 import JobApplicationsPage from './components/JobApplicationsPage'
+import MyJobApplicationsPage from './components/MyJobApplicationsPage'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
 import Network from './components/Network'
@@ -54,6 +55,10 @@ const router = createBrowserRouter([{
         {
           path: "my-jobs",
           element: <MyJobsPage />
+        },
+        {
+          path: "my-applications",
+          element: <MyJobApplicationsPage />
         },
         {
           path: "network",
