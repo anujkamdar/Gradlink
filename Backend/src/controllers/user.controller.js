@@ -2,7 +2,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asynchandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/User.model.js";
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import jwt from "jsonwebtoken";
 import { upload } from "../middlewares/multer.middleware.js";
 import { uploadOnCloudinary, uploadPdfOnCloudinary } from "../utils/cloudinary.js";
@@ -601,6 +601,35 @@ const updateJobApplicationStatus = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, status, "Application status updated successfully"));
 });
 
+const getUserJobApplications = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const applications = await JobApplication.aggregate([
+    {
+      $match: {
+        appliedBy: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "jobs",
+        localField: "job",
+        foreignField: "_id",
+        as: "jobDetails",
+      },
+    },
+    {
+      $addFields: {
+        jobDetails: {
+          $arrayElemAt: ["$jobDetails", 0],
+        },
+      },
+    },
+  ]);
+
+  return res.status(200).json(new ApiResponse(200, applications, "User job applications fetched successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -617,4 +646,5 @@ export {
   deleteJob,
   getJobApplications,
   updateJobApplicationStatus,
+  getUserJobApplications,
 };
