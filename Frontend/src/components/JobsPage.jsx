@@ -14,6 +14,7 @@ import axios from 'axios';
 
 export default function JobsPage() {
   const navigate = useNavigate();
+  const [loading,setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [type, setType] = useState("");
   const [location, setLocation] = useState("");
@@ -30,7 +31,7 @@ export default function JobsPage() {
 
   const getJobPostings = async () => {
     try {
-      console.log(search, location, type, currentPage);
+      // console.log(search, location, type, currentPage);
       const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-job-postings", { search, location, type, currentPage }, { withCredentials: true })
       console.log(response.data.data);
       setTotalPages(response.data.data.pages);
@@ -44,14 +45,18 @@ export default function JobsPage() {
     try {
       const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/current-user-profile", { withCredentials: true });
       setUser(response.data.data);
+      setLoading(false);
     } catch (error) {
       console.log(error.response?.data?.message || "Error fetching user data");
     }
   };
 
+
+  useEffect(() => {
+    getCurrentUser();
+  },[])
   useEffect(() => {
     getJobPostings();
-    getCurrentUser();
   }, [currentPage, search, location, type]);
   useEffect(() => {
     setCurrentPage(1);
@@ -63,6 +68,14 @@ export default function JobsPage() {
     return date.toLocaleDateString(undefined, options);
   }
 
+  
+  if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            </div>
+        );
+    }
 
 
 
@@ -95,14 +108,14 @@ export default function JobsPage() {
                   My Applications
                 </Button>
               
-              <Button
+              {user.role == "alumini" &&<Button
                 variant="outline"
                 className="flex items-center"
                 onClick={() => navigate('/tabs/post-job')}
               >
                 <Plus className="mr-1 h-4 w-4" />
                 Post a Job
-              </Button>
+              </Button>}
               <Button onClick={() => { getJobPostings() }} className="flex items-center">
                 <Search className="mr-1 h-4 w-4" />
                 Find Jobs

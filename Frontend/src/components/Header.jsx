@@ -81,12 +81,12 @@ export default function Header() {
                             >
                                 Network
                             </NavLink>
-                            <NavLink
+                            {/* <NavLink
                                 to="/tabs/events"
                                 className={({ isActive }) => `${isActive ? "text-indigo-600 border-indigo-600" : "text-gray-500 border-transparent hover:text-gray-700"} border-b-2 px-1 py-2 text-sm font-medium`}
                             >
                                 Events
-                            </NavLink>
+                            </NavLink> */}
                         </nav>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -97,7 +97,7 @@ export default function Header() {
                         <div className="hidden md:flex items-center space-x-2">
                             <div
                                 className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer"
-                                onClick={() => navigate("/profile-page")}
+                                onClick={() => navigate("/my-profile-page")}
                             >
                                 {user?.avatar ? (
                                     <img src={user.avatar} alt="Profile" className="h-8 w-8 rounded-full object-cover" />
@@ -133,42 +133,42 @@ export default function Header() {
                         <button
                             onClick={() => {
                                 setIsMobileMenuOpen(false);
+                                navigate("/tabs/home")
                             }}
-                            className={`${activeTab === "home" ? "bg-indigo-50 text-indigo-600" : "text-gray-500"
-                                } block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
+                            className={`text-gray-500 block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
                         >
                             Home
                         </button>
                         <button
                             onClick={() => {
                                 setIsMobileMenuOpen(false);
+                                navigate("/tabs/jobs")
                             }}
-                            className={`${activeTab === "jobs" ? "bg-indigo-50 text-indigo-600" : "text-gray-500"
-                                } block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
+                            className={`text-gray-500 block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
                         >
                             Jobs
                         </button>
                         <button
                             onClick={() => {
                                 setIsMobileMenuOpen(false);
+                                navigate("/tabs/network")
+
                             }}
-                            className={`${activeTab === "network" ? "bg-indigo-50 text-indigo-600" : "text-gray-500"
-                                } block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
+                            className={`text-gray-500 block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
                         >
                             Network
                         </button>
-                        <button
+                        {/* <button
                             onClick={() => {
                                 setIsMobileMenuOpen(false);
                             }}
-                            className={`${activeTab === "events" ? "bg-indigo-50 text-indigo-600" : "text-gray-500"
-                                } block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
+                            className={` block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
                         >
                             Events
-                        </button>
+                        </button> */}
                         <button
                             onClick={() => {
-                                navigate("/profile-page");
+                                navigate("/my-profile-page");
                                 setIsMobileMenuOpen(false);
                             }}
                             className="text-gray-500 block px-3 py-2 rounded-md text-base font-medium w-full text-left"

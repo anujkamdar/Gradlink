@@ -15,6 +15,7 @@ import Network from './components/Network'
 import EventsTab from './components/EventsTab'
 import TabsLayout from './TabsLayout'
 import Homepage from './components/Homepage'
+import OtherUserProfilePage from './components/OtherUserProfilePage'
 
 const router = createBrowserRouter([{
   path: "/",
@@ -25,8 +26,12 @@ const router = createBrowserRouter([{
       element: <LandingPage />
     },
     {
-      path: "profile-page",
+      path: "my-profile-page",
       element: <ProfilePage />
+    },
+    {
+      path:"user-profile/:otherUserId",
+      element:<OtherUserProfilePage/>
     },
     {
       path: "tabs",

@@ -175,7 +175,7 @@ export default function Network() {
                                     <Card key={member._id} className="overflow-hidden bg-white">
                                         <div className="p-5">
                                             <div className="flex items-start">
-                                                <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-100 mr-4">
+                                                <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-100 mr-4 cursor-pointer" onClick={() => navigate(`/user-profile/${member._id}`)}>
                                                     {member.avatar ? (
                                                         <img src={member.avatar} className="h-full w-full object-cover" />
                                                     ) : (
@@ -221,7 +221,7 @@ export default function Network() {
                                                 </div>
                                             </div>
                                             <Button className="w-full mt-4" variant={"outline"}>
-                                                {"Request Sent"}
+                                                {"Coming Soon"}
                                             </Button>
                                         </div>
                                     </Card>
