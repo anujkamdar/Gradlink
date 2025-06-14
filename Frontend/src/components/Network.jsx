@@ -1,22 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import { Input } from './ui/input';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
-import { Users, Building, MessageSquare, User, Star } from 'lucide-react';
+import { Select } from './ui/select';
+import { Users, Building, User, Briefcase, MapPin, Filter } from 'lucide-react';
+import { Badge } from './ui/badge';
 import Header from './Header';
 import "../App.css";
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function Network() {
 
-    const [loading, setLoading] = React.useState(true);
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [search, setSearch] = useState("");
+    const [graduationYear, setGraduationYear] = useState("");
+    const [major, setMajor] = useState("");
+    const [company, setCompany] = useState("");
+    const [networkMembers, setNetworkMembers] = useState([]);
 
-    setTimeout(() => {
-        setLoading(false)
-    },2000)
 
 
 
+    const fetchUsers = async () => {
+        try {
+            console.log(search, company, major, graduationYear)
+            const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-users", { search, major, company, graduationYear }, { withCredentials: true });
+            setNetworkMembers(response.data.data)
+            console.log(response.data.data);
+        } catch (error) {
+            console.log(error.response?.data?.message || "Something went wrong")
+        }
+    }
+
+
+    useEffect(() => {
+        fetchUsers();
+    }, [search, major, company, graduationYear])
+
+
+
+
+
+
+
+
+    // will later work on this section
+    const networkStats = {
+        totalMembers: 9,
+        students: 2,
+        alumni: 7,
+        companies: 9
+    };
 
     if (loading) {
         return (
@@ -26,199 +62,175 @@ export default function Network() {
         );
     }
 
-
-
     return (
         <>
             <div className="bg-gray-50 min-h-screen">
-
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="space-y-6">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                            <h2 className="text-2xl font-bold text-gray-900">My Network</h2>
-                            <div className="mt-4 md:mt-0 flex space-x-3">
-                                <Button variant="outline" className="flex items-center">
-                                    <Users className="mr-1 h-4 w-4" />
-                                    Find Alumni
-                                </Button>
-                                <Button className="flex items-center">
-                                    <MessageSquare className="mr-1 h-4 w-4" />
-                                    Messages
-                                </Button>
+                    <div className="space-y-8">
+                        {/* Network Header */}
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">Student & Alumni Network</h1>
+                            <p className="text-gray-600 mt-2">
+                                Connect with fellow students and alumni. Build your professional network and discover new opportunities.
+                            </p>
+                        </div>
+
+                        {/* Network Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <Card className="bg-white">
+                                <CardContent className="p-5 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Total Members</p>
+                                        <p className="text-3xl font-bold">{networkStats.totalMembers}</p>
+                                    </div>
+                                    <div className="bg-blue-100 p-3 rounded-full">
+                                        <Users className="h-6 w-6 text-blue-600" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-white">
+                                <CardContent className="p-5 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Students</p>
+                                        <p className="text-3xl font-bold">{networkStats.students}</p>
+                                    </div>
+                                    <div className="bg-green-100 p-3 rounded-full">
+                                        <User className="h-6 w-6 text-green-600" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-white">
+                                <CardContent className="p-5 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Alumni</p>
+                                        <p className="text-3xl font-bold">{networkStats.alumni}</p>
+                                    </div>
+                                    <div className="bg-purple-100 p-3 rounded-full">
+                                        <User className="h-6 w-6 text-purple-600" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-white">
+                                <CardContent className="p-5 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Companies</p>
+                                        <p className="text-3xl font-bold">{networkStats.companies}</p>
+                                    </div>
+                                    <div className="bg-orange-100 p-3 rounded-full">
+                                        <Building className="h-6 w-6 text-orange-600" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Filters and Search */}
+                        <div>
+                            <div className="flex items-center mb-4">
+                                <Filter className="h-5 w-5 mr-2 text-gray-700" />
+                                <h2 className="text-xl font-semibold text-gray-900">Discover Students & Alumni</h2>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div className="col-span-1 md:col-span-1">
+                                    <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name" className="w-full" />
+                                </div>
+                                <div className="col-span-1 md:col-span-1">
+                                    <select value={graduationYear} onChange={(e) => setGraduationYear(Number(e.target.value))} className="w-full h-10 px-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">All Years</option>
+                                        <option value="2024">2024</option>
+                                        <option value="2023">2023</option>
+                                        <option value="2022">2022</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2020">2020</option>
+                                    </select>
+                                </div>
+                                <div className="col-span-1 md:col-span-1">
+                                    <select value={major} onChange={(e) => setMajor(e.target.value)} className="w-full h-10 px-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">All Majors</option>
+                                        <option value="Computer Science">Computer Science</option>
+                                        <option value="Business Administration">Business Administration</option>
+                                        <option value="Design">Design</option>
+                                        <option value="Engineering">Engineering</option>
+                                        <option value="Marketing">Marketing</option>
+                                    </select>
+                                </div>
+                                <div value={company} onChange={(e) => setCompany(e.target.value)} className="col-span-1 md:col-span-1">
+                                    <select className="w-full h-10 px-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">All Companies</option>
+                                        <option value="Google">Google</option>
+                                        <option value="Microsoft">Microsoft</option>
+                                        <option value="Apple">Apple</option>
+                                        <option value="Amazon">Amazon</option>
+                                        <option value="Meta">Meta</option>
+                                        <option value="Tesla">Tesla</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Connection Stats */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <Card>
-                                <CardContent className="p-5 text-center">
-                                    <Users className="h-6 w-6 mx-auto text-indigo-600 mb-2" />
-                                    <h3 className="text-2xl font-bold">250</h3>
-                                    <p className="text-sm text-gray-500">Connections</p>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardContent className="p-5 text-center">
-                                    <Building className="h-6 w-6 mx-auto text-indigo-600 mb-2" />
-                                    <h3 className="text-2xl font-bold">36</h3>
-                                    <p className="text-sm text-gray-500">Companies</p>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardContent className="p-5 text-center">
-                                    <MessageSquare className="h-6 w-6 mx-auto text-indigo-600 mb-2" />
-                                    <h3 className="text-2xl font-bold">12</h3>
-                                    <p className="text-sm text-gray-500">New Messages</p>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardContent className="p-5 text-center">
-                                    <User className="h-6 w-6 mx-auto text-indigo-600 mb-2" />
-                                    <h3 className="text-2xl font-bold">5</h3>
-                                    <p className="text-sm text-gray-500">Pending Requests</p>
-                                </CardContent>
-                            </Card>
-                        </div>
+                        {/* Network Members */}
+                        <div>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Network Members <span className="text-gray-500 text-sm font-normal">({networkMembers.length} members found)</span></h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {networkMembers.map(member => (
+                                    <Card key={member._id} className="overflow-hidden bg-white">
+                                        <div className="p-5">
+                                            <div className="flex items-start">
+                                                <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-100 mr-4">
+                                                    {member.avatar ? (
+                                                        <img src={member.avatar} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <User className="h-full w-full p-3 text-gray-400" />
+                                                    )}
+                                                </div>
+                                                <div>
 
-                        {/* Alumni Directory */}
-                        <Card>
-                            <CardHeader className="px-6 pt-6 pb-0">
-                                <CardTitle>Alumni Directory</CardTitle>
-                                <CardDescription>Connect with alumni from your department or batch</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                <div className="mb-4">
-                                    <Input placeholder="Search alumni by name, company, or location" />
-                                </div>
-
-                                <Tabs defaultValue="all">
-                                    <TabsList className="mb-4">
-                                        <TabsTrigger value="all">All Alumni</TabsTrigger>
-                                        <TabsTrigger value="myBatch">My Batch</TabsTrigger>
-                                        <TabsTrigger value="myDepartment">My Department</TabsTrigger>
-                                        <TabsTrigger value="recommended">Recommended</TabsTrigger>
-                                    </TabsList>
-
-                                    <TabsContent value="all" className="space-y-4">
-                                        {/* Mock alumni profiles */}
-                                        {[
-                                            {
-                                                id: 1,
-                                                name: "Priya Sharma",
-                                                role: "Product Manager",
-                                                company: "Google",
-                                                batch: "2018",
-                                                department: "Computer Science",
-                                                location: "Bangalore",
-                                                mutualConnections: 15
-                                            },
-                                            {
-                                                id: 2,
-                                                name: "Vikram Singh",
-                                                role: "Software Engineer",
-                                                company: "Microsoft",
-                                                batch: "2019",
-                                                department: "Computer Science",
-                                                location: "Hyderabad",
-                                                mutualConnections: 8
-                                            },
-                                            {
-                                                id: 3,
-                                                name: "Neha Patel",
-                                                role: "Data Scientist",
-                                                company: "Amazon",
-                                                batch: "2017",
-                                                department: "Computer Science",
-                                                location: "Bangalore",
-                                                mutualConnections: 5
-                                            },
-                                            {
-                                                id: 4,
-                                                name: "Rahul Verma",
-                                                role: "UX Designer",
-                                                company: "Flipkart",
-                                                batch: "2018",
-                                                department: "Design",
-                                                location: "Mumbai",
-                                                mutualConnections: 3
-                                            }
-                                        ].map((alumni) => (
-                                            <Card key={alumni.id} className="hover:shadow-md transition-shadow">
-                                                <CardContent className="p-5">
-                                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                                                        <div className="flex items-center">
-                                                            <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-                                                                <User className="h-6 w-6 text-gray-500" />
-                                                            </div>
-                                                            <div className="ml-4">
-                                                                <h4 className="font-medium text-gray-900">{alumni.name}</h4>
-                                                                <p className="text-sm text-gray-500">
-                                                                    {alumni.role} at {alumni.company}
-                                                                </p>
-                                                                <div className="mt-1 flex flex-wrap items-center text-xs text-gray-500">
-                                                                    <span className="mr-2">Batch of {alumni.batch}</span>
-                                                                    <span className="mr-2">•</span>
-                                                                    <span className="mr-2">{alumni.department}</span>
-                                                                    <span className="mr-2">•</span>
-                                                                    <span>{alumni.location}</span>
-                                                                </div>
-                                                            </div>
+                                                    <h3 className="font-semibold text-lg">{member.fullname}</h3>
+                                                    {member.position && (
+                                                        <p className="text-gray-600 text-sm">{member.position}</p>
+                                                    )}
+                                                    {member.company && (
+                                                        <div className="flex items-center text-gray-500 text-sm mt-1">
+                                                            <Briefcase className="h-4 w-4 mr-1" />
+                                                            <span>{member.company}</span>
                                                         </div>
-                                                        <div className="mt-4 md:mt-0 flex flex-col items-end">
-                                                            <Button size="sm">Connect</Button>
-                                                            <span className="text-xs text-gray-500 mt-1">
-                                                                {alumni.mutualConnections} mutual connections
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
+                                                    )}
 
-                                        {/* Load More Button */}
-                                        <div className="flex justify-center mt-6">
-                                            <Button variant="outline" className="w-full md:w-auto">
-                                                Load More
+                                                    {/* <div className="flex items-center text-gray-500 text-sm mt-1">
+                                                        <MapPin className="h-4 w-4 mr-1" />
+                                                        <span>{member.location}</span>
+                                                    </div> */}
+                                                </div>
+                                            </div>
+                                            <div className="mt-3">
+                                                <div className="flex items-center text-sm text-gray-600 mb-2">
+                                                    <span className="mr-2">{member.major}</span>
+                                                    <span className="mr-2">•</span>
+                                                    <span>Class of {member.graduationYear}</span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mt-3">
+                                                    {member.skills.slice(0, 3).map((skill, index) => (
+                                                        <Badge key={index} variant="secondary" className="text-xs">
+                                                            {skill}
+                                                        </Badge>
+                                                    ))}
+                                                    {member.skills.length > 3 && (
+                                                        <Badge variant="outline" className="text-xs">
+                                                            +{member.skills.length - 3} more
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <Button className="w-full mt-4" variant={"outline"}>
+                                                {"Request Sent"}
                                             </Button>
                                         </div>
-                                    </TabsContent>
-
-                                    <TabsContent value="myBatch" className="py-4">
-                                        <div className="text-center py-8">
-                                            <Users className="h-10 w-10 mx-auto text-gray-400 mb-2" />
-                                            <h3 className="text-lg font-medium">Filter by your batch</h3>
-                                            <p className="text-sm text-gray-500 mt-1">
-                                                Connect with classmates from your graduation year
-                                            </p>
-                                        </div>
-                                    </TabsContent>
-
-                                    <TabsContent value="myDepartment" className="py-4">
-                                        <div className="text-center py-8">
-                                            <Building className="h-10 w-10 mx-auto text-gray-400 mb-2" />
-                                            <h3 className="text-lg font-medium">Filter by your department</h3>
-                                            <p className="text-sm text-gray-500 mt-1">
-                                                Connect with alumni from your department
-                                            </p>
-                                        </div>
-                                    </TabsContent>
-
-                                    <TabsContent value="recommended" className="py-4">
-                                        <div className="text-center py-8">
-                                            <Star className="h-10 w-10 mx-auto text-gray-400 mb-2" />
-                                            <h3 className="text-lg font-medium">Recommended connections</h3>
-                                            <p className="text-sm text-gray-500 mt-1">
-                                                People you might want to connect with based on your profile
-                                            </p>
-                                        </div>
-                                    </TabsContent>
-                                </Tabs>
-                            </CardContent>
-                        </Card>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </>
-    )
+    );
 }
-

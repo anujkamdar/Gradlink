@@ -16,7 +16,6 @@ export default function Header() {
     const getUser = async () => {
         try {
             const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/current-user-profile", { withCredentials: true });
-            console.log("User data:", response.data.data);
             return response.data.data;
         } catch (error) {
             console.error("Error fetching user data:", error.response?.data?.message);
