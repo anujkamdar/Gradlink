@@ -4,12 +4,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/User.model.js";
 import mongoose, { Mongoose } from "mongoose";
 import jwt from "jsonwebtoken";
-import { upload } from "../middlewares/multer.middleware.js";
 import { uploadOnCloudinary, uploadPdfOnCloudinary } from "../utils/cloudinary.js";
 import { Job } from "../models/Job.model.js";
 import { JobApplication } from "../models/JobApplication.model.js";
-import { match } from "assert";
-import { groupEnd } from "console";
 
 const options = {
   httpOnly: true,
@@ -235,14 +232,19 @@ const getCurrentUserProfileData = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, user, "User profile data retrieved successfully"));
 });
 
-const getUserProfileData = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
+const getOtherUserProfileData = asyncHandler(async (req, res) => {
+  const { otherUserId } = req.params;
 
-  if (!mongoose.isValidObjectId(userId)) {
+  if (!otherUserId) {
+    throw new ApiError(400, "User ID is required");
+  }
+  
+
+  if (!mongoose.isValidObjectId(otherUserId)) {
     throw new ApiError(400, "Invalid user ID");
   }
 
-  const user = await User.findById(userId).select("-password -refreshToken");
+  const user = await User.findById(otherUserId).select("-password -refreshToken");
 
   if (!user) {
     throw new ApiError(404, "User not found");
@@ -664,13 +666,14 @@ const getUsers = asyncHandler(async (req, res) => {
         company:1,
         avatar: 1,
         location: 1,
+        position:1
       },
     },
   ]);
 
 
   if (aggregate.length === 0) {
-    return res.status(404).json(new ApiResponse(404, [], "No users found for the given criteria"));
+    return res.status(200).json(new ApiResponse(404, [], "No users found for the given criteria"));
   }
 
   return res.status(200).json(new ApiResponse(200, aggregate, "Users fetched successfully"));
@@ -684,7 +687,7 @@ export {
   createJobPosting,
   createJobApplication,
   getCurrentUserProfileData,
-  getUserProfileData,
+  getOtherUserProfileData,
   updateAccountDetails,
   getJobPostings,
   getJobById,

@@ -9,7 +9,7 @@ import {
   getJobById,
   getJobPostings,
   getMyJobPostings,
-  getUserProfileData,
+  getOtherUserProfileData,
   loginUser,
   logOutUser,
   refreshAccessToken,
@@ -20,26 +20,41 @@ import {
   getUsers
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
+import { verifyAlum } from "../middlewares/verifyalum.middleware.js";
 
 const userRouter = Router();
 
 userRouter.route("/register").post(upload.single("avatar"), registerUser);
 userRouter.route("/login").post(loginUser);
 userRouter.route("/refresh-token").post(refreshAccessToken);
-
 userRouter.route("/logout").get(verifyJwt, logOutUser);
-userRouter.route("/create-job").post(verifyJwt, createJobPosting);
+
+
+
+
+//alum only
+userRouter.route("/create-job").post(verifyJwt,verifyAlum,createJobPosting);
+
+// vaise i dont think so i need verifyAlum here as i have already checked in the comtroller if that job is made by that user
+userRouter.route("/update-application-status").post(verifyJwt,verifyAlum,updateJobApplicationStatus);
+userRouter.route("/delete-job").post(verifyJwt,verifyAlum ,deleteJob);
+userRouter.route("/my-job-postings").get(verifyJwt,verifyAlum ,getMyJobPostings);
+userRouter.route("/get-job-applications/:jobId").get(verifyJwt, verifyAlum,getJobApplications);
+
+
+
+
 userRouter.route("/apply-job").post(verifyJwt, upload.single("resume"), createJobApplication);
-userRouter.route("/get-profile-data/:userId").get(verifyJwt, getUserProfileData);
+userRouter.route("/get-profile-data/:otherUserId").get(verifyJwt, getOtherUserProfileData);
 userRouter.route("/current-user-profile").get(verifyJwt, getCurrentUserProfileData);
 userRouter.route("/update-profile").post(verifyJwt, updateAccountDetails);
 userRouter.route("/get-job-postings").post(verifyJwt, getJobPostings);
 userRouter.route("/job/:jobId").get(verifyJwt, getJobById);
-userRouter.route("/delete-job").post(verifyJwt, deleteJob);
-userRouter.route("/my-job-postings").get(verifyJwt, getMyJobPostings);
-userRouter.route("/get-job-applications/:jobId").get(verifyJwt, getJobApplications);
-userRouter.route("/update-application-status").post(verifyJwt, updateJobApplicationStatus);
 userRouter.route("/my-applications").get(verifyJwt, getUserJobApplications);
 userRouter.route("/get-users").post(verifyJwt,getUsers);
+
+
+
+// Alum Only Routes
 
 export default userRouter;
