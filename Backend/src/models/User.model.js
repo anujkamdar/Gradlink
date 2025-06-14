@@ -47,6 +47,10 @@ const userSchema = new Schema(
       type:String,
       trim:true
     },
+    position:{
+      type: String,
+      trim: true,
+    },
     location: {
       type: String,
       trim: true,
