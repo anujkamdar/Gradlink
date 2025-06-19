@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import { uploadOnCloudinary, uploadPdfOnCloudinary } from "../utils/cloudinary.js";
 import { Job } from "../models/Job.model.js";
 import { JobApplication } from "../models/JobApplication.model.js";
+import { College } from "../models/College.modal.js";
 
 const options = {
   httpOnly: true,
@@ -238,7 +239,6 @@ const getOtherUserProfileData = asyncHandler(async (req, res) => {
   if (!otherUserId) {
     throw new ApiError(400, "User ID is required");
   }
-  
 
   if (!mongoose.isValidObjectId(otherUserId)) {
     throw new ApiError(400, "Invalid user ID");
@@ -657,20 +657,19 @@ const getUsers = asyncHandler(async (req, res) => {
     {
       $project: {
         _id: 1,
-        role:1,
-        email:1,
-        fullname:1,
-        graduationYear:1,
-        major:1,
-        skills:1,
-        company:1,
+        role: 1,
+        email: 1,
+        fullname: 1,
+        graduationYear: 1,
+        major: 1,
+        skills: 1,
+        company: 1,
         avatar: 1,
         location: 1,
-        position:1
+        position: 1,
       },
     },
   ]);
-
 
   if (aggregate.length === 0) {
     return res.status(200).json(new ApiResponse(404, [], "No users found for the given criteria"));
@@ -678,6 +677,104 @@ const getUsers = asyncHandler(async (req, res) => {
 
   return res.status(200).json(new ApiResponse(200, aggregate, "Users fetched successfully"));
 });
+
+const registerCollegeandAdmin = asyncHandler(async (req, res) => {
+  let { collegeEmail, phoneNumber, collegeName, location, majors, fullname, adminEmail, password } = req.body;
+  majors = JSON.parse(majors);
+  if (!collegeEmail || !phoneNumber || !collegeName || !location || !majors || !fullname || !adminEmail || !password) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const collegeExists = await College.findOne({
+    $or: [{ collegeEmail: collegeEmail.trim().toLowerCase() }, { collegeName: collegeName.trim() }],
+  });
+  if (collegeExists) {
+    throw new ApiError(409, "College with this email or name already exists");
+  }
+  const adminExists = await User.findOne({ email: adminEmail.toLowerCase().trim() });
+  if (adminExists) {
+    throw new ApiError(409, "Admin with this email already exists");
+  }
+
+  const logoLocalPath = req.files?.logo[0]?.path;
+  if (!logoLocalPath) {
+    throw new ApiError(400, "College logo file is required");
+  }
+  const avatarLocalPath = req.files?.avatar[0]?.path;
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Admin avatar file is required");
+  }
+
+  const logo = await uploadOnCloudinary(logoLocalPath);
+  if(!logo) {
+    throw new ApiError(400, "College logo upload failed");
+  }
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  if (!avatar) {
+    throw new ApiError(400, "Admin avatar upload failed");
+  }
+
+
+
+  const college = await College.create({
+    collegeName: collegeName,
+    phoneNumber: phoneNumber,
+    location: location,
+    collegeEmail: collegeEmail,
+    majors: majors,
+    logo: logo.url,
+  })
+
+  if(!college){
+    throw new ApiError(500, "College registration failed");
+  }
+
+  const user = await User.create({
+    role: "admin",
+    email: adminEmail.toLowerCase().trim(),
+    fullname: fullname.trim(),
+    password: password,
+    avatar: avatar.url,
+    college: college._id,
+  });
+
+  if (!user) {
+    throw new ApiError(500, "Admin registration failed");
+  }
+
+  return res.status(200).json(new ApiResponse(200,{}, "College and admin registered successfully"));
+});
+
+const registerFundraiser = asyncHandler(async (req, res) => {
+  const { collegeId, title, description, coverImage, targetAmount } = req.body
+  if (!collegeId || !title || !targetAmount) {
+    throw new ApiError(400, "College ID, title, and target amount are required");
+  }
+  if (!mongoose.isValidObjectId(collegeId)) {
+    throw new ApiError(400, "Invalid college ID format");
+  }
+  const college = await College.findById(collegeId);
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+  const coverImageUrl = coverImage ? await uploadOnCloudinary(coverImage) : null;
+  if (coverImage && !coverImageUrl) {
+    throw new ApiError(400, "Cover image upload failed");
+  }
+  const fundraiser = await FundRaiser.create({
+    college: collegeId,
+    title: title.trim(),
+    description: description ? description.trim() : "",
+    coverImage: coverImageUrl ? coverImageUrl.url : null,
+    targetAmount: targetAmount,
+  });
+  if (!fundraiser) {
+    throw new ApiError(500, "Fundraiser creation failed");
+  }
+  return res.status(201).json(new ApiResponse(201, fundraiser, "Fundraiser created successfully"));
+});
+
+
 
 export {
   registerUser,
@@ -697,4 +794,5 @@ export {
   updateJobApplicationStatus,
   getUserJobApplications,
   getUsers,
+  registerCollegeandAdmin,
 };
