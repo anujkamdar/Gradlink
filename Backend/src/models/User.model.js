@@ -23,7 +23,6 @@ const userSchema = new Schema(
     },
     graduationYear: {
       type: Number,
-      required: true,
     },
     major: {
       type: String,
@@ -54,6 +53,10 @@ const userSchema = new Schema(
     location: {
       type: String,
       trim: true,
+    },
+    college:{
+      type: Schema.Types.ObjectId,
+      ref: "College",
     },
     password: {
       type: String,

@@ -8,6 +8,10 @@ const jobSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    college: {
+      type: Schema.Types.ObjectId,
+      ref: "College",
+    },
     title: {
       type: String,
       required: true,

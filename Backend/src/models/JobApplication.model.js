@@ -10,6 +10,10 @@ const jobApplicationSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    college: {
+      type: Schema.Types.ObjectId,
+      ref: "College",
+    },
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],
