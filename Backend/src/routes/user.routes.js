@@ -19,6 +19,8 @@ import {
   getUserJobApplications,
   getUsers,
   registerCollegeandAdmin,
+  createFundraiser,
+  getAllCollege,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 import { verifyAlum } from "../middlewares/verifyalum.middleware.js";
@@ -38,6 +40,9 @@ userRouter.route("/register-college-and-admin").post(
   registerCollegeandAdmin
 );
 
+
+userRouter.route("/get-all-colleges").get(getAllCollege);
+
 //alum only
 userRouter.route("/create-job").post(verifyJwt, verifyAlum, createJobPosting);
 
@@ -55,6 +60,9 @@ userRouter.route("/get-job-postings").post(verifyJwt, getJobPostings);
 userRouter.route("/job/:jobId").get(verifyJwt, getJobById);
 userRouter.route("/my-applications").get(verifyJwt, getUserJobApplications);
 userRouter.route("/get-users").post(verifyJwt, getUsers);
+
+
+userRouter.route("/create-fundraiser").post(verifyJwt,upload.single("coverImage"),createFundraiser)
 
 // Alum Only Routes
 

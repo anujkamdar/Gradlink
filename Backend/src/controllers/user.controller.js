@@ -7,17 +7,110 @@ import jwt from "jsonwebtoken";
 import { uploadOnCloudinary, uploadPdfOnCloudinary } from "../utils/cloudinary.js";
 import { Job } from "../models/Job.model.js";
 import { JobApplication } from "../models/JobApplication.model.js";
-import { College } from "../models/College.modal.js";
+import { College } from "../models/College.model.js";
+import { Fundraiser } from "../models/Fundraiser.model.js";
 
 const options = {
   httpOnly: true,
   secure: true,
 };
 
-const registerUser = asyncHandler(async (req, res) => {
-  const { role, email, fullname, graduationYear, major, password } = req.body; // currently not using skills in the registration process
+const getAllCollege = asyncHandler(async (req, res) => {
+  const colleges = await College.find({}, "_id collegeName majors");
+  res.status(200).json(new ApiResponse(200, colleges, "Colleges fetched successfully"));
+});
 
-  if (!role || !email || !fullname || !graduationYear || !password || !major) {
+const registerCollegeandAdmin = asyncHandler(async (req, res) => {
+  let { collegeEmail, phoneNumber, collegeName, location, majors, fullname, adminEmail, password } = req.body;
+  majors = JSON.parse(majors);
+
+  if (!collegeEmail) {
+    throw new ApiError(400, "College email is required");
+  }
+  if (!phoneNumber) {
+    throw new ApiError(400, "Phone number is required");
+  }
+  if (!collegeName) {
+    throw new ApiError(400, "College name is required");
+  }
+  if (!location) {
+    throw new ApiError(400, "Location is required");
+  }
+  if (!majors || majors.length === 0) {
+    throw new ApiError(400, "At least one major is required");
+  }
+  if (!fullname) {
+    throw new ApiError(400, "Admin fullname is required");
+  }
+  if (!adminEmail) {
+    throw new ApiError(400, "Admin email is required");
+  }
+  if (!password) {
+    throw new ApiError(400, "Admin password is required");
+  }
+
+  const collegeExists = await College.findOne({
+    $or: [{ collegeEmail: collegeEmail.trim().toLowerCase() }, { collegeName: collegeName.trim() }],
+  });
+  if (collegeExists) {
+    throw new ApiError(409, "College with this email or name already exists");
+  }
+  const adminExists = await User.findOne({ email: adminEmail.toLowerCase().trim() });
+  if (adminExists) {
+    throw new ApiError(409, "Admin with this email already exists");
+  }
+
+  const logoLocalPath = req.files?.logo[0]?.path;
+  if (!logoLocalPath) {
+    throw new ApiError(400, "College logo file is required");
+  }
+  const avatarLocalPath = req.files?.avatar[0]?.path;
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Admin avatar file is required");
+  }
+
+  const logo = await uploadOnCloudinary(logoLocalPath);
+  if (!logo) {
+    throw new ApiError(400, "College logo upload failed");
+  }
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  if (!avatar) {
+    throw new ApiError(400, "Admin avatar upload failed");
+  }
+
+  const college = await College.create({
+    collegeName: collegeName,
+    phoneNumber: phoneNumber,
+    location: location,
+    collegeEmail: collegeEmail,
+    majors: majors,
+    logo: logo.url,
+  });
+
+  if (!college) {
+    throw new ApiError(500, "College registration failed");
+  }
+
+  const user = await User.create({
+    role: "admin",
+    email: adminEmail.toLowerCase().trim(),
+    fullname: fullname.trim(),
+    password: password,
+    avatar: avatar.url,
+    college: college._id,
+  });
+
+  if (!user) {
+    throw new ApiError(500, "Admin registration failed");
+  }
+
+  return res.status(200).json(new ApiResponse(200, {}, "College and admin registered successfully"));
+});
+
+const registerUser = asyncHandler(async (req, res) => {
+  const { role, email, fullname, graduationYear, major, password, collegeId } = req.body; // currently not using skills in the registration process
+
+  if (!role || !email || !fullname || !graduationYear || !password || !major || !collegeId) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -44,6 +137,7 @@ const registerUser = asyncHandler(async (req, res) => {
     major: major.trim(),
     password: password,
     avatar: avatar.url,
+    college: collegeId,
   });
 
   if (!user) {
@@ -136,6 +230,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const createJobPosting = asyncHandler(async (req, res) => {
   const { title, company, description, requiredSkills, type, location } = req.body;
   const postedBy = req.user._id; // assuming user is authenticated and _id is available in req.user
+  const collegeId = req.user.college;
   if (!title) {
     throw new ApiError(400, "Job title is required");
   }
@@ -163,6 +258,7 @@ const createJobPosting = asyncHandler(async (req, res) => {
     requiredSkills: requiredSkills.map((skill) => skill.trim()),
     type: type.trim(),
     location: location.trim(),
+    college: collegeId,
   });
 
   if (!job) {
@@ -176,6 +272,7 @@ const createJobApplication = asyncHandler(async (req, res) => {
   const { jobId, coverLetter } = req.body;
   const userApplying = req.user._id; // assuming user is authenticated and _id is available in req.user
   const resumeLocalPath = req.file?.path;
+  const collegeId = req.user.college;
 
   if (!resumeLocalPath) {
     throw new ApiError(400, "Resume file is required");
@@ -210,6 +307,7 @@ const createJobApplication = asyncHandler(async (req, res) => {
     appliedBy: userApplying,
     coverLetter: coverLetter,
     resumeUrl: resume.url,
+    college: collegeId,
   });
 
   // Add user to job applicants list
@@ -235,7 +333,7 @@ const getCurrentUserProfileData = asyncHandler(async (req, res) => {
 
 const getOtherUserProfileData = asyncHandler(async (req, res) => {
   const { otherUserId } = req.params;
-
+  
   if (!otherUserId) {
     throw new ApiError(400, "User ID is required");
   }
@@ -250,12 +348,15 @@ const getOtherUserProfileData = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
 
+  if(user.college.toString() != req.user.college.toString()){
+    throw new ApiError(403, "You are not allowed to access this user's profile data");
+  }
+
   return res.status(200).json(new ApiResponse(200, user, "User profile data retrieved successfully"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const userDetails = req.body;
-
   if (req.body._id != req.user._id) {
     throw new ApiError(403, "You are not authorized to update this account");
   }
@@ -268,8 +369,12 @@ const getJobPostings = asyncHandler(async (req, res) => {
   const { search, type, location, currentPage = 2, limit = 5 } = req.body;
   const response = await User.findById(req.user._id).select("-password -refreshToken -role");
   const userSkills = response.skills || [];
-  const matchstage = {};
+  const matchstage = {
+    college: req.user.college,
+  };
   const skip = (parseInt(currentPage) - 1) * parseInt(limit);
+
+
 
   if (search) {
     const searchRegex = new RegExp(search, "i"); // case-insensitive search
@@ -380,7 +485,9 @@ const getJobById = asyncHandler(async (req, res) => {
 
   const job = await Job.aggregate([
     {
-      $match: { _id: new mongoose.Types.ObjectId(jobId) },
+      $match: { _id: new mongoose.Types.ObjectId(jobId),
+        college: req.user.college
+       },
     },
     {
       $lookup: {
@@ -635,7 +742,9 @@ const getUserJobApplications = asyncHandler(async (req, res) => {
 
 const getUsers = asyncHandler(async (req, res) => {
   const { search, graduationYear, major, company } = req.body;
-  const matchstage = {};
+  const matchstage = {
+    college: req.user.college
+  };
   if (graduationYear) {
     matchstage.graduationYear = graduationYear;
   }
@@ -678,103 +787,32 @@ const getUsers = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, aggregate, "Users fetched successfully"));
 });
 
-const registerCollegeandAdmin = asyncHandler(async (req, res) => {
-  let { collegeEmail, phoneNumber, collegeName, location, majors, fullname, adminEmail, password } = req.body;
-  majors = JSON.parse(majors);
-  if (!collegeEmail || !phoneNumber || !collegeName || !location || !majors || !fullname || !adminEmail || !password) {
+const createFundraiser = asyncHandler(async (req, res) => {
+  const { title, description, category, targetAmount } = req.body;
+  if (!title || !description || !category || !targetAmount) {
     throw new ApiError(400, "All fields are required");
   }
-
-  const collegeExists = await College.findOne({
-    $or: [{ collegeEmail: collegeEmail.trim().toLowerCase() }, { collegeName: collegeName.trim() }],
-  });
-  if (collegeExists) {
-    throw new ApiError(409, "College with this email or name already exists");
+  const coverImageLocalPath = req.file?.path;
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "Cover image file is required");
   }
-  const adminExists = await User.findOne({ email: adminEmail.toLowerCase().trim() });
-  if (adminExists) {
-    throw new ApiError(409, "Admin with this email already exists");
-  }
-
-  const logoLocalPath = req.files?.logo[0]?.path;
-  if (!logoLocalPath) {
-    throw new ApiError(400, "College logo file is required");
-  }
-  const avatarLocalPath = req.files?.avatar[0]?.path;
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Admin avatar file is required");
-  }
-
-  const logo = await uploadOnCloudinary(logoLocalPath);
-  if(!logo) {
-    throw new ApiError(400, "College logo upload failed");
-  }
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
-  if (!avatar) {
-    throw new ApiError(400, "Admin avatar upload failed");
-  }
-
-
-
-  const college = await College.create({
-    collegeName: collegeName,
-    phoneNumber: phoneNumber,
-    location: location,
-    collegeEmail: collegeEmail,
-    majors: majors,
-    logo: logo.url,
-  })
-
-  if(!college){
-    throw new ApiError(500, "College registration failed");
-  }
-
-  const user = await User.create({
-    role: "admin",
-    email: adminEmail.toLowerCase().trim(),
-    fullname: fullname.trim(),
-    password: password,
-    avatar: avatar.url,
-    college: college._id,
-  });
-
-  if (!user) {
-    throw new ApiError(500, "Admin registration failed");
-  }
-
-  return res.status(200).json(new ApiResponse(200,{}, "College and admin registered successfully"));
-});
-
-const registerFundraiser = asyncHandler(async (req, res) => {
-  const { collegeId, title, description, coverImage, targetAmount } = req.body
-  if (!collegeId || !title || !targetAmount) {
-    throw new ApiError(400, "College ID, title, and target amount are required");
-  }
-  if (!mongoose.isValidObjectId(collegeId)) {
-    throw new ApiError(400, "Invalid college ID format");
-  }
-  const college = await College.findById(collegeId);
-  if (!college) {
-    throw new ApiError(404, "College not found");
-  }
-  const coverImageUrl = coverImage ? await uploadOnCloudinary(coverImage) : null;
-  if (coverImage && !coverImageUrl) {
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  if (!coverImage?.url) {
     throw new ApiError(400, "Cover image upload failed");
   }
-  const fundraiser = await FundRaiser.create({
-    college: collegeId,
+  const fundraiser = await Fundraiser.create({
+    college: req.user.college,
     title: title.trim(),
-    description: description ? description.trim() : "",
-    coverImage: coverImageUrl ? coverImageUrl.url : null,
+    description: description.trim(),
+    category: category.trim(),
     targetAmount: targetAmount,
+    coverImage: coverImage.url,
   });
   if (!fundraiser) {
     throw new ApiError(500, "Fundraiser creation failed");
   }
   return res.status(201).json(new ApiResponse(201, fundraiser, "Fundraiser created successfully"));
 });
-
-
 
 export {
   registerUser,
@@ -795,4 +833,6 @@ export {
   getUserJobApplications,
   getUsers,
   registerCollegeandAdmin,
+  createFundraiser,
+  getAllCollege,
 };
