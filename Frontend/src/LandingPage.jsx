@@ -41,6 +41,7 @@ import {
   Award,
   Building,
 } from "lucide-react"
+import { set } from "date-fns"
 
 
 // to make it expandable just add the which college in register and then change the controllers in backend to make it for many colleges
@@ -60,7 +61,26 @@ function LandingPage() {
   const [graduationYear, setGraduationYear] = useState("");
   const [major, setMajor] = useState("");
   const [avatar, setAvatar] = useState(null);
+  const [college, setCollege] = useState("");
+  const [collegeIndex, setCollegeIndex] = useState(null);
+  const [collegeList, setCollegeList] = useState([]);
   const avatarRef = useRef(null);
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/get-all-colleges");
+        setCollegeList(response.data.data);
+        console.log("Colleges fetched:", response.data.data);
+      } catch (error) {
+        console.error("Error fetching colleges:", error);
+        alert("Failed to load colleges. Please try again later.");
+      }
+    };
+    fetchColleges();
+  }, []);
+
+
 
 
   const signInUser = async () => {
@@ -76,7 +96,7 @@ function LandingPage() {
 
     console.log(email, passwordRef.current.value);
     try {
-      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: passwordRef.current.value },{withCredentials: true});
+      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: passwordRef.current.value }, { withCredentials: true });
       console.log(response.data);
       navigate("/tabs/home")
     } catch (error) {
@@ -105,16 +125,23 @@ function LandingPage() {
       return;
     }
 
-    if (selectedRole === "alumni" || selectedRole === "student") {
-      if (!graduationYear) {
-        alert("Select Graduation Year");
-        return;
-      }
-      if (!major) {
-        alert("Enter Major");
-        return;
-      }
+    if (!graduationYear) {
+      alert("Select Graduation Year");
+      return;
     }
+
+
+    if (!college) {
+      alert("Select College");
+      return;
+    }
+
+    if (!major) {
+      alert("Select Major");
+      return;
+    }
+
+
 
 
     if (!avatar) {
@@ -128,14 +155,15 @@ function LandingPage() {
     formData.append("password", registerPasswordRef.current.value);
     formData.append("fullname", `${firstName.trim()} ${lastName.trim()}`);
     formData.append("role", selectedRole);
-    formData.append("major", major.trim());
     formData.append("graduationYear", graduationYear ? graduationYear.toString() : "");
     formData.append("avatar", avatar);
+    formData.append("collegeId", college);
+    formData.append("major", major);
 
     try {
       let response = await axios.post("http://localhost:8000/gradlink/api/v1/users/register", formData);
       console.log(response.data);
-      response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: registerPasswordRef.current.value },{withCredentials:true});
+      response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: registerPasswordRef.current.value }, { withCredentials: true });
       console.log(response.data);
 
       navigate("/tabs/home");
@@ -144,7 +172,7 @@ function LandingPage() {
     }
   }
 
-  
+
   const features = [
     {
       icon: Users,
@@ -359,7 +387,7 @@ function LandingPage() {
                   <TabsContent value="role-select" className="space-y-4">
                     <div className="space-y-4">
                       <Label >I am a...</Label>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <Button
                           variant={selectedRole === "alumni" ? "default" : "outline"}
                           className={`flex flex-col items-center p-4 h-auto ${selectedRole === "alumni"
@@ -381,17 +409,6 @@ function LandingPage() {
                         >
                           <GraduationCap className="h-6 w-6 mb-2" />
                           <span className="text-sm">Student</span>
-                        </Button>
-                        <Button
-                          variant={selectedRole === "admin" ? "default" : "outline"}
-                          className={`flex flex-col items-center p-4 h-auto ${selectedRole === "admin"
-                            ? "bg-black"
-                            : "border-purple-200 hover:bg-purple-50"
-                            }`}
-                          onClick={() => setSelectedRole("admin")}
-                        >
-                          <Shield className="h-6 w-6 mb-2" />
-                          <span className="text-sm">Admin</span>
                         </Button>
                       </div>
                     </div>
@@ -453,35 +470,26 @@ function LandingPage() {
                                 </Select>
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="major">
-                                  Major
+                                <Label htmlFor="college">
+                                  College
                                 </Label>
-                                <Input
-                                  id="major"
-                                  placeholder="Computer Science"
-                                  className="border-purple-200 focus:border-purple-500"
-                                  value={major}
-                                  onChange={(e) => setMajor(e.target.value)}
-                                />
+                                <Select onValueChange={(value) => {
+                                  setCollege(value);
+                                  const index = collegeList.findIndex(c => c._id === value);
+                                  setCollegeIndex(index);
+                                  setMajor(null)
+                                }}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select college" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {collegeList.map((college, index) => (
+                                      <SelectItem key={college._id} value={college._id}>{college.collegeName}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
                             </div>
-                            {/* <div className="space-y-2">
-                              <Label htmlFor="degree">
-                                Degree
-                              </Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select degree" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="btech">B.Tech</SelectItem>
-                                  <SelectItem value="mtech">M.Tech</SelectItem>
-                                  <SelectItem value="mba">MBA</SelectItem>
-                                  <SelectItem value="phd">PhD</SelectItem>
-                                  <SelectItem value="other">Other</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div> */}
                           </>
                         )}
                         {selectedRole === "student" && (
@@ -505,37 +513,72 @@ function LandingPage() {
                                 </Select>
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="major">
-                                  Major
+                                <Label htmlFor="college">
+                                  College
                                 </Label>
-                                <Input
-                                  id="major"
-                                  placeholder="Computer Science"
-                                  className="border-purple-200 focus:border-purple-500"
-                                  value={major}
-                                  onChange={(e) => setMajor(e.target.value)}
-                                />
+                                <Select onValueChange={(value) => {
+                                  setCollege(value)
+                                  const index = collegeList.findIndex(c => c._id === value);
+                                  setCollegeIndex(index);
+                                  setMajor(null)
+                                }}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select college" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {collegeList.map((college) => (
+                                      <SelectItem key={college._id} value={college._id}>
+                                        {college.collegeName}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
+
+
                             </div>
                           </>
                         )}
-                        <div className="space-y-2">
-                          <Label htmlFor="avatar">
-                            Profile Picture
-                          </Label>
-                          <Input
-                            id="avatar"
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                setAvatar(e.target.files[0]);
-                              }
-                            }}
-                          />
-                          {avatar && (
-                            <img src={URL.createObjectURL(avatar)} alt="Avatar Preview" className="mt-2 w-24 h-24 object-cover rounded-full" />
-                          )}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="avatar">
+                              Profile Picture
+                            </Label>
+                            <Input
+                              id="avatar"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  setAvatar(e.target.files[0]);
+                                }
+                              }}
+                            />
+                            {avatar && (
+                              <img src={URL.createObjectURL(avatar)} alt="Avatar Preview" className="mt-2 w-24 h-24 object-cover rounded-full" />
+                            )}
+                          </div>
+                          {(collegeIndex == 0 || collegeIndex) ? (
+                            <div className="space-y-2">
+                              <Label htmlFor="major">
+                                Major
+                              </Label>
+                              <Select onValueChange={(value) => { setMajor(value) }}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select major" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {collegeList[collegeIndex].majors.map((major) => (
+                                    <SelectItem key={major} value={major}>
+                                      {major}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          ) : <></>}
+
+
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="register-password">
@@ -837,6 +880,15 @@ function LandingPage() {
                 </Button>
               </DialogTrigger>
             </Dialog>
+            <Button
+              variant="outline"
+              size="lg"
+              className="text-lg px-10 py-4 bg-white/90 text-purple-600 hover:bg-white border-2 border-white/30 shadow-lg"
+              onClick={() => navigate("/college-register")}
+            >
+              Register as College
+              <Building className="ml-2 h-5 w-5" />
+            </Button>
           </div>
         </div>
       </section>

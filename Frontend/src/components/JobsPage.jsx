@@ -108,7 +108,7 @@ export default function JobsPage() {
                   My Applications
                 </Button>
               
-              {user.role == "alumini" &&<Button
+              {user.role == "alumni" &&<Button
                 variant="outline"
                 className="flex items-center"
                 onClick={() => navigate('/tabs/post-job')}
