@@ -16,6 +16,8 @@ import EventsTab from './components/EventsTab'
 import TabsLayout from './TabsLayout'
 import Homepage from './components/Homepage'
 import OtherUserProfilePage from './components/OtherUserProfilePage'
+import CollegeRegisterPage from './components/CollegeRegisterPage'
+import AdminDashboard from './components/AdminDashboard'
 
 const router = createBrowserRouter([{
   path: "/",
@@ -24,6 +26,14 @@ const router = createBrowserRouter([{
     {
       path: "",
       element: <LandingPage />
+    },
+    {
+      path: "college-register",
+      element: <CollegeRegisterPage />
+    },
+    {
+      path: "admin",
+      element: <AdminDashboard />
     },
     {
       path: "my-profile-page",
