@@ -814,6 +814,15 @@ const createFundraiser = asyncHandler(async (req, res) => {
   return res.status(201).json(new ApiResponse(201, fundraiser, "Fundraiser created successfully"));
 });
 
+const getFundraisers = asyncHandler(async (req,res) => {
+  const college = req.user.college;
+  const fundraisers = await Fundraiser.find({ college });
+  if (!fundraisers || fundraisers.length === 0) {
+    return res.status(404).json(new ApiResponse(404, [], "No fundraisers found for this college"));
+  }
+  return res.status(200).json(new ApiResponse(200, fundraisers, "Fundraisers fetched successfully"));
+})
+
 export {
   registerUser,
   loginUser,
@@ -835,4 +844,5 @@ export {
   registerCollegeandAdmin,
   createFundraiser,
   getAllCollege,
+  getFundraisers
 };
