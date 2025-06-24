@@ -41,10 +41,7 @@ import {
   Award,
   Building,
 } from "lucide-react"
-import { set } from "date-fns"
 
-
-// to make it expandable just add the which college in register and then change the controllers in backend to make it for many colleges
 
 function LandingPage() {
 
@@ -64,7 +61,6 @@ function LandingPage() {
   const [college, setCollege] = useState("");
   const [collegeIndex, setCollegeIndex] = useState(null);
   const [collegeList, setCollegeList] = useState([]);
-  const avatarRef = useRef(null);
 
   useEffect(() => {
     const fetchColleges = async () => {
@@ -140,10 +136,6 @@ function LandingPage() {
       alert("Select Major");
       return;
     }
-
-
-
-
     if (!avatar) {
       alert("Please upload a profile picture");
       return;

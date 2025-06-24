@@ -15,10 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { Select } from "./ui/select";
-import { Popover, PopoverTrigger, PopoverContent } from "./ui/Popover";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "./ui/calendar";
+
 
 function FundraiserManagement() {
     const [fundraisers, setFundraisers] = useState([]);
@@ -28,53 +25,20 @@ function FundraiserManagement() {
         title: "",
         description: "",
         targetAmount: "",
-        college: "",
-        coverImageFile: null,
-        coverImagePreview: null
+        coverImage: null,
     });
+    const [isAddingFundraiser, setIsAddingFundraiser] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchFundraisers = async () => {
             try {
-                setFundraisers([
-                    {
-                        id: "1",
-                        title: "New Computer Lab Equipment",
-                        description: "Raising funds to upgrade our computer science lab with latest hardware and software for better learning experience.",
-                        coverImage: "https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg",
-                        targetAmount: 50000,
-                        currentAmount: 1000,
-                        college: {
-                            _id: "101",
-                            collegeName: "Stanford University"
-                        },
-                        donors: 145,
-                        createdAt: "2024-01-15",
-                        updatedAt: "2024-01-20",
-                        category: "Infrastructure",
-                        status: "active"
-                    },
-                    {
-                        id: "2",
-                        title: "Student Scholarship Fund",
-                        description: "Supporting underprivileged students with scholarships to pursue their dreams in higher education.",
-                        coverImage: "https://images.pexels.com/photos/1205651/pexels-photo-1205651.jpeg",
-                        targetAmount: 100000,
-                        currentAmount: 100000,
-                        college: {
-                            _id: "102",
-                            collegeName: "MIT"
-                        },
-                        donors: 287,
-                        createdAt: "2023-10-05",
-                        updatedAt: "2024-01-05",
-                        category: "Education",
-                        status: "completed"
-                    }
-                ]);
+                const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/get-fundraisers", { withCredentials: true })
+                console.log(response);
+                setFundraisers(response.data.data)
                 setLoading(false);
             } catch (error) {
-                console.error("Failed to fetch fundraisers:", error);
+                console.log(error.response?.data?.message || "something went wrong");
                 setLoading(false);
             }
         };
@@ -90,65 +54,42 @@ function FundraiserManagement() {
         });
     };
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setFormData({
-                    ...formData,
-                    coverImageFile: file,
-                    coverImagePreview: e.target.result
-                });
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleViewDetails = (fundraiser) => {
         setSelectedFundraiser(fundraiser);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            // Here you would normally send the data to your backend API
-            const newFundraiser = {
-                id: String(fundraisers.length + 1),
-                title: formData.title,
-                description: formData.description,
-                coverImage: formData.coverImagePreview || "https://example.com/placeholder.jpg",
-                targetAmount: parseFloat(formData.targetAmount),
-                currentAmount: 0,
-                college: colleges.find(c => c._id === formData.college),
-                donors: 0,
-                endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days from now
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                category: "Other",
-                status: "active"
-            };
+            setIsSubmitting(true);
+            const formDataToSubmit = new FormData();
+            formDataToSubmit.append("title", formData.title);
+            formDataToSubmit.append("description", formData.description);
+            formDataToSubmit.append("targetAmount", formData.targetAmount);
+            formDataToSubmit.append("category", formData.category);
+            if (formData.coverImage) {
+                formDataToSubmit.append("coverImage", formData.coverImage);
+            }
+            if (formData.targetAmount <= 0) {
+                alert("Target amount must be greater than 0");
+                return;
+            }
 
-            // Add the new fundraiser to the list (in a real app, you'd wait for API confirmation)
-            setFundraisers([...fundraisers, newFundraiser]);
-
-            // Reset form
+            const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/create-fundraiser", formDataToSubmit, { withCredentials: true })
+            console.log("Fundraiser created:", response.data);
+            setFundraisers([...fundraisers, response.data]);
+            alert("Fundraiser created successfully!");
+            setIsAddingFundraiser(false);
+            setIsSubmitting(false);
             setFormData({
                 title: "",
                 description: "",
                 targetAmount: "",
-                college: "",
-                coverImageFile: null,
-                coverImagePreview: null
-            });    // Close any open dialogs
-            document.getElementById('closeAddDialog').click();
-
-            // Show success message
-            alert("Fundraiser created successfully!");
+                coverImage: null,
+            });
         } catch (error) {
-            console.error("Error creating fundraiser:", error);
-            alert("Failed to create fundraiser. Please try again.");
+            alert(error.response?.data?.message || "Failed to create fundraiser");
+            setIsSubmitting(false);
         }
     };
 
@@ -156,12 +97,17 @@ function FundraiserManagement() {
         return Math.min(100, Math.round((current / target) * 100));
     };
 
-    
+
     return (
         <div className="bg-white shadow rounded-lg">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
                 <h2 className="text-lg font-medium">Fundraiser Management</h2>
-                <Dialog>
+                <Dialog open={isAddingFundraiser} onOpenChange={(state) => {
+                    setIsAddingFundraiser(state);
+                    if (!state) {
+                        setFormData({ ...formData, coverImage: null })
+                    }
+                }}>
                     <DialogTrigger asChild>
                         <Button className="bg-indigo-600 hover:bg-indigo-700">
                             <PlusCircle className="h-4 w-4 mr-2" />
@@ -183,6 +129,7 @@ function FundraiserManagement() {
                                     placeholder="Enter fundraiser title"
                                     required
                                     className="mt-1"
+                                    disabled={isSubmitting}
                                 />
                             </div>
 
@@ -196,9 +143,10 @@ function FundraiserManagement() {
                                     placeholder="Enter fundraiser description"
                                     required
                                     className="mt-1"
+                                    disabled={isSubmitting}
                                 />
                             </div>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <Label htmlFor="targetAmount">Target Amount</Label>
@@ -211,6 +159,7 @@ function FundraiserManagement() {
                                         placeholder="Enter target amount"
                                         required
                                         className="mt-1"
+                                        disabled={isSubmitting}
                                     />
                                 </div>
                                 <div>
@@ -222,6 +171,8 @@ function FundraiserManagement() {
                                         onChange={handleInputChange}
                                         placeholder="Enter category"
                                         className="mt-1"
+                                        required
+                                        disabled={isSubmitting}
                                     />
                                 </div>
                             </div>
@@ -232,15 +183,30 @@ function FundraiserManagement() {
                                     name="coverImage"
                                     type="file"
                                     accept="image/*"
-                                    onChange={handleFileChange}
+                                    required
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            setFormData({
+                                                ...formData,
+                                                coverImage: URL.createObjectURL(file)
+                                            });
+                                        } else {
+                                            setFormData({
+                                                ...formData,
+                                                coverImage: null
+                                            });
+                                        }
+                                    }}
                                     className="mt-1"
+                                    disabled={isSubmitting}
                                 />
-                                {formData.coverImagePreview && (
+                                {formData.coverImage && (
                                     <div className="mt-2">
                                         <img
-                                            src={formData.coverImagePreview}
-                                            alt="Cover Preview"
-                                            className="w-full h-48 object-cover rounded-md"
+                                            src={formData.coverImage}
+                                            alt="Cover"
+                                            className="h-32 w-full object-cover rounded-md"
                                             onError={(e) => {
                                                 e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
                                             }}
@@ -248,6 +214,14 @@ function FundraiserManagement() {
                                     </div>
                                 )}
                             </div>
+                            <Button
+                                type="submit"
+                                className="bg-indigo-600 hover:bg-indigo-700 w-full"
+                                disabled={isSubmitting}
+                            >
+                                <DollarSign className="h-4 w-4 mr-2" />
+                                {isSubmitting ? "Creating..." : "Create Fundraiser"}
+                            </Button>
                         </form>
 
                     </DialogContent>
@@ -272,9 +246,6 @@ function FundraiserManagement() {
                                             src={fundraiser.coverImage}
                                             alt={fundraiser.title}
                                             className="h-full w-full object-cover"
-                                        // onError={(e) => {
-                                        //     e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
-                                        // }}
                                         />
                                     </div>
 
@@ -282,12 +253,6 @@ function FundraiserManagement() {
                                     <div className="p-4 md:col-span-3">
                                         <div className="flex justify-between">
                                             <h3 className="font-semibold text-lg mb-1">{fundraiser.title}</h3>
-                                            <span className={`px-2 py-1 rounded-full text-xs ${fundraiser.status === 'active'
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-blue-100 text-blue-800'
-                                                }`}>
-                                                {fundraiser.status === 'active' ? 'Active' : 'Completed'}
-                                            </span>
                                         </div>
 
                                         <div className="mt-3 mb-2">
@@ -301,9 +266,9 @@ function FundraiserManagement() {
 
                                         <div className="flex justify-between text-sm mb-3">
                                             <span>
-                                                <span className="font-semibold">${fundraiser.currentAmount.toLocaleString()}</span> raised
+                                                <span className="font-semibold">₹ {fundraiser.currentAmount.toLocaleString("en-IN")}</span> raised
                                             </span>
-                                            <span className="font-semibold">${fundraiser.targetAmount.toLocaleString()} goal</span>
+                                            <span className="font-semibold">₹ {fundraiser.targetAmount.toLocaleString("en-IN")} goal</span>
                                         </div>
 
                                         <div className="flex justify-between text-xs text-gray-500">

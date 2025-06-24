@@ -178,7 +178,6 @@ function ProfilePage() {
                       </Button>
                     ) : (
                       <Button
-                        className="bg-purple-600 hover:bg-purple-700"
                         onClick={handleSaveProfile}
                       >
                         <Save className="h-4 w-4 mr-2" /> Save Changes
