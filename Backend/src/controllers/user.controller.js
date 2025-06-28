@@ -851,14 +851,14 @@ const createPost = asyncHandler(async (req, res) => {
 const getPosts = asyncHandler(async (req, res) => {
   const college = req.user.college;
   const userId = req.user._id;
-  const { category } = req.body;
+  const { category , page = 1 , limit = 1 } = req.body;
   const matchstage = {
     college: college,
   };
   if (category) {
     matchstage.category = category;
   }
-  const aggregate = await Post.aggregate([
+  const aggregate = Post.aggregate([
     {
       $match: matchstage,
     },
@@ -913,7 +913,10 @@ const getPosts = asyncHandler(async (req, res) => {
     },
   ]);
 
-  return res.status(200).json(new ApiResponse(200, aggregate, "Posts fetched successfully"));
+  
+  const posts = await Post.aggregatePaginate(aggregate,{page,limit});
+
+  return res.status(200).json(new ApiResponse(200, posts, "Posts fetched successfully"));
 });
 
 const toggleLike = asyncHandler(async (req, res) => {
@@ -1047,4 +1050,5 @@ export {
   getPosts,
   toggleLike,
   addComment,
+  getComments
 };
