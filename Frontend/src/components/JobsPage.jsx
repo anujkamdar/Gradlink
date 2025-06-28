@@ -78,10 +78,6 @@ export default function JobsPage() {
     }
 
 
-
-
-
-
   return (
     <>
       <div className="bg-gray-50 min-h-screen">
@@ -270,11 +266,6 @@ export default function JobsPage() {
                                   <Button size="sm" className="bg-gradient-to-r from-green-500 to-green-900 text-white hover:bg-gradient-to-l">
                                     Already Applied
                                   </Button>
-
-
-
-
-
                                 )
                               }
                             </div>
