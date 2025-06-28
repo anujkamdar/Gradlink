@@ -9,6 +9,8 @@ import { Job } from "../models/Job.model.js";
 import { JobApplication } from "../models/JobApplication.model.js";
 import { College } from "../models/College.model.js";
 import { Fundraiser } from "../models/Fundraiser.model.js";
+import { Post } from "../models/Post.model.js";
+import { Comment } from "../models/Comment.model.js";
 
 const options = {
   httpOnly: true,
@@ -333,7 +335,7 @@ const getCurrentUserProfileData = asyncHandler(async (req, res) => {
 
 const getOtherUserProfileData = asyncHandler(async (req, res) => {
   const { otherUserId } = req.params;
-  
+
   if (!otherUserId) {
     throw new ApiError(400, "User ID is required");
   }
@@ -348,7 +350,7 @@ const getOtherUserProfileData = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
 
-  if(user.college.toString() != req.user.college.toString()){
+  if (user.college.toString() != req.user.college.toString()) {
     throw new ApiError(403, "You are not allowed to access this user's profile data");
   }
 
@@ -373,8 +375,6 @@ const getJobPostings = asyncHandler(async (req, res) => {
     college: req.user.college,
   };
   const skip = (parseInt(currentPage) - 1) * parseInt(limit);
-
-
 
   if (search) {
     const searchRegex = new RegExp(search, "i"); // case-insensitive search
@@ -485,9 +485,7 @@ const getJobById = asyncHandler(async (req, res) => {
 
   const job = await Job.aggregate([
     {
-      $match: { _id: new mongoose.Types.ObjectId(jobId),
-        college: req.user.college
-       },
+      $match: { _id: new mongoose.Types.ObjectId(jobId), college: req.user.college },
     },
     {
       $lookup: {
@@ -743,7 +741,7 @@ const getUserJobApplications = asyncHandler(async (req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
   const { search, graduationYear, major, company } = req.body;
   const matchstage = {
-    college: req.user.college
+    college: req.user.college,
   };
   if (graduationYear) {
     matchstage.graduationYear = graduationYear;
@@ -814,14 +812,214 @@ const createFundraiser = asyncHandler(async (req, res) => {
   return res.status(201).json(new ApiResponse(201, fundraiser, "Fundraiser created successfully"));
 });
 
-const getFundraisers = asyncHandler(async (req,res) => {
+const getFundraisers = asyncHandler(async (req, res) => {
   const college = req.user.college;
   const fundraisers = await Fundraiser.find({ college });
   if (!fundraisers || fundraisers.length === 0) {
     return res.status(404).json(new ApiResponse(404, [], "No fundraisers found for this college"));
   }
   return res.status(200).json(new ApiResponse(200, fundraisers, "Fundraisers fetched successfully"));
-})
+});
+
+const createPost = asyncHandler(async (req, res) => {
+  const college = req.user.college;
+  const { content, category } = req.body;
+  const mediaLocalPath = req.file?.path;
+  if (!content || !category) {
+    throw new ApiError(400, "Content and category are required");
+  }
+  if (!mediaLocalPath) {
+    throw new ApiError(400, "Media file is required");
+  }
+  const media = await uploadOnCloudinary(mediaLocalPath);
+  if (!media?.url) {
+    throw new ApiError(400, "Media upload failed");
+  }
+  const post = await Post.create({
+    college: college,
+    author: req.user._id,
+    content: content.trim(),
+    category: category.trim(),
+    media: media.url,
+  });
+  if (!post) {
+    throw new ApiError(500, "Post creation failed");
+  }
+  return res.status(201).json(new ApiResponse(201, post, "Post created successfully"));
+});
+
+const getPosts = asyncHandler(async (req, res) => {
+  const college = req.user.college;
+  const userId = req.user._id;
+  const { category } = req.body;
+  const matchstage = {
+    college: college,
+  };
+  if (category) {
+    matchstage.category = category;
+  }
+  const aggregate = await Post.aggregate([
+    {
+      $match: matchstage,
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "author",
+        foreignField: "_id",
+        as: "authorDetails",
+      },
+    },
+    {
+      $lookup: {
+        from: "comments",
+        localField: "_id",
+        foreignField: "post",
+        as: "comments",
+      },
+    },
+    {
+      $addFields: {
+        commentsCount: { $size: "$comments" },
+        likesCount: { $size: "$likes" },
+        isLikedByUser: {
+          $in: [userId, "$likes"],
+        },
+        authorDetails: {
+          $arrayElemAt: ["$authorDetails", 0],
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        content: 1,
+        category: 1,
+        media: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        commentsCount: 1,
+        likesCount: 1,
+        isLikedByUser: 1,
+        authorDetails: {
+          _id: "$authorDetails._id",
+          fullname: "$authorDetails.fullname",
+          avatar: "$authorDetails.avatar",
+        },
+      },
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+  ]);
+
+  return res.status(200).json(new ApiResponse(200, aggregate, "Posts fetched successfully"));
+});
+
+const toggleLike = asyncHandler(async (req, res) => {
+  const { postId } = req.body;
+  const post = await Post.findById(postId);
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+  if (post.college.toString() !== req.user.college.toString()) {
+    throw new ApiError(403, "You are not allowed to like this post");
+  }
+  const userId = req.user._id;
+  const isLiked = post.likes.includes(userId);
+  if (isLiked) {
+    post.likes = post.likes.filter((like) => like.toString() !== userId.toString());
+  } else {
+    post.likes.push(userId);
+  }
+  await post.save();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, post, isLiked ? "Post unliked successfully" : "Post liked successfully"));
+});
+
+const addComment = asyncHandler(async (req, res) => {
+  const { content, postId } = req.body;
+  if (!content || !postId) {
+    throw new ApiError(400, "Content and Post ID are required");
+  }
+  const post = await Post.findById(postId);
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+  if (post.college.toString() !== req.user.college.toString()) {
+    throw new ApiError(403, "You are not allowed to comment on this post");
+  }
+  const comment = await Comment.create({
+    content: content.trim(),
+    post: postId,
+    postedBy: req.user._id,
+  });
+  if (!comment) {
+    throw new ApiError(500, "Comment creation failed");
+  }
+  return res.status(201).json(new ApiResponse(201, comment, "Comment added successfully"));
+});
+
+const getComments = asyncHandler(async (req, res) => {
+  const { postId } = req.body;
+  if (!postId) {
+    throw new ApiError(400, "Post ID is required");
+  }
+  const post = await Post.findById(postId);
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+  if (post.college.toString() !== req.user.college.toString()) {
+    throw new ApiError(403, "You are not allowed to access comments for this post");
+  }
+
+  const aggregate = await Comment.aggregate([
+    {
+      $match: {
+        post: postId,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "postedBy",
+        foreignField: "_id",
+        as: "postedByDetails",
+      },
+    },
+    {
+      $addFields: {
+        postedByDetails: {
+          $arrayElemAt: ["$postedByDetails", 0],
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        content: 1,
+        post: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        postedByDetails: {
+          _id: "$postedByDetails._id",
+          fullname: "$postedByDetails.fullname",
+          avatar: "$postedByDetails.avatar",
+        },
+      },
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+  ]);
+
+
+  if (aggregate.length === 0) {
+    return res.status(201).json(new ApiResponse(201, [], "No comments found for this post"));
+  }
+  return res.status(200).json(new ApiResponse(200, aggregate, "Comments fetched successfully"));
+});
 
 export {
   registerUser,
@@ -844,5 +1042,9 @@ export {
   registerCollegeandAdmin,
   createFundraiser,
   getAllCollege,
-  getFundraisers
+  getFundraisers,
+  createPost,
+  getPosts,
+  toggleLike,
+  addComment,
 };
