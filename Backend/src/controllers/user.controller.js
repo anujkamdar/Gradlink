@@ -825,16 +825,21 @@ const createPost = asyncHandler(async (req, res) => {
   const college = req.user.college;
   const { content, category } = req.body;
   const mediaLocalPath = req.file?.path;
-  if (!content || !category) {
+  let media = null;
+  if (!content) {
     throw new ApiError(400, "Content and category are required");
   }
-  if (!mediaLocalPath) {
-    throw new ApiError(400, "Media file is required");
+
+  if (mediaLocalPath) {
+    media = await uploadOnCloudinary(mediaLocalPath);
+    if (!media?.url) {
+      throw new ApiError(400, "Media upload failed");
+    }
+  } else {
+    media = { url: null };
   }
-  const media = await uploadOnCloudinary(mediaLocalPath);
-  if (!media?.url) {
-    throw new ApiError(400, "Media upload failed");
-  }
+
+
   const post = await Post.create({
     college: college,
     author: req.user._id,
@@ -851,7 +856,7 @@ const createPost = asyncHandler(async (req, res) => {
 const getPosts = asyncHandler(async (req, res) => {
   const college = req.user.college;
   const userId = req.user._id;
-  const { category , page = 1 , limit = 1 } = req.body;
+  const { category, page = 1, limit = 10 } = req.body;
   const matchstage = {
     college: college,
   };
@@ -913,8 +918,7 @@ const getPosts = asyncHandler(async (req, res) => {
     },
   ]);
 
-  
-  const posts = await Post.aggregatePaginate(aggregate,{page,limit});
+  const posts = await Post.aggregatePaginate(aggregate, { page, limit });
 
   return res.status(200).json(new ApiResponse(200, posts, "Posts fetched successfully"));
 });
@@ -1017,7 +1021,6 @@ const getComments = asyncHandler(async (req, res) => {
     },
   ]);
 
-
   if (aggregate.length === 0) {
     return res.status(201).json(new ApiResponse(201, [], "No comments found for this post"));
   }
@@ -1050,5 +1053,5 @@ export {
   getPosts,
   toggleLike,
   addComment,
-  getComments
+  getComments,
 };
