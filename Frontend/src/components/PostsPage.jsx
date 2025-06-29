@@ -17,6 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "./ui/select";
+import Linkify from "linkify-react";
 
 export default function PostsPage() {
     const [category, setCategory] = useState("");
@@ -31,6 +32,14 @@ export default function PostsPage() {
         media: null // This will hold the file object for media uploads
     });
     const [submitting, setSubmitting] = useState(false);
+
+    
+    const hyperLinkOptions = {
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "text-blue-600"
+    };
+
 
     const submitNewPost = async (e) => {
         e.preventDefault()
@@ -51,7 +60,7 @@ export default function PostsPage() {
                 category: "",
                 media: null
             });
-            window.location.reload(); 
+            window.location.reload();
         } catch (error) {
             console.error("Error creating post:", error);
         }
@@ -157,7 +166,7 @@ export default function PostsPage() {
 
                                 {/* Post Content */}
                                 <div className="px-6 pb-4">
-                                    <p className="text-gray-800 text-base leading-relaxed">{post.content}</p>
+                                    <p className="text-gray-800 text-base leading-relaxed"><Linkify options={hyperLinkOptions}>{post.content}</Linkify></p>
                                 </div>
 
                                 {/* Post Media */}
