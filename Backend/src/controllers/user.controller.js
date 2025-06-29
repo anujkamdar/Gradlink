@@ -739,7 +739,7 @@ const getUserJobApplications = asyncHandler(async (req, res) => {
 });
 
 const getUsers = asyncHandler(async (req, res) => {
-  const { search, graduationYear, major, company } = req.body;
+  const { search, graduationYear, major, company, page = 1 , limit = 30 } = req.body;
   const matchstage = {
     college: req.user.college,
   };
@@ -757,7 +757,7 @@ const getUsers = asyncHandler(async (req, res) => {
     matchstage.fullname = new RegExp(search, "i");
   }
 
-  const aggregate = await User.aggregate([
+  const aggregate =  User.aggregate([
     {
       $match: matchstage,
     },
@@ -782,7 +782,12 @@ const getUsers = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(404, [], "No users found for the given criteria"));
   }
 
-  return res.status(200).json(new ApiResponse(200, aggregate, "Users fetched successfully"));
+  const users = await User.aggregatePaginate(aggregate,{
+    page: parseInt(page),
+    limit: parseInt(limit),
+  })
+
+  return res.status(200).json(new ApiResponse(200, users, "Users fetched successfully"));
 });
 
 const createFundraiser = asyncHandler(async (req, res) => {
