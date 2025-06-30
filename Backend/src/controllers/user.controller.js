@@ -1032,6 +1032,26 @@ const getComments = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, aggregate, "Comments fetched successfully"));
 });
 
+
+// TODO will later see if should separate this into different apis
+const getCollegeStats = asyncHandler(async(req,res) => {
+  const totalUsers = await User.countDocuments({ college: req.user.college }); 
+  const totalAlumni = await User.countDocuments({ college: req.user.college, role: "alumni" });
+  const totalStudents = await User.countDocuments({ college: req.user.college, role: "student" });
+  const totalJobs = await Job.countDocuments({ college: req.user.college });
+  const totalFundraisers = await Fundraiser.countDocuments({ college: req.user.college });
+  const totalPosts = await Post.countDocuments({ college: req.user.college });
+
+  return res.status(200).json(new ApiResponse(200, {
+    totalUsers,
+    totalAlumni,
+    totalStudents,
+    totalJobs,
+    totalFundraisers,
+    totalPosts
+  }, "College stats fetched successfully"));
+})
+
 export {
   registerUser,
   loginUser,
@@ -1059,4 +1079,5 @@ export {
   toggleLike,
   addComment,
   getComments,
+  getCollegeStats,
 };

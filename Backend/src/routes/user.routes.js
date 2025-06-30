@@ -24,6 +24,7 @@ import {
   getFundraisers,
   createPost,
   getPosts,
+  getCollegeStats,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 import { verifyAlum } from "../middlewares/verifyalum.middleware.js";
@@ -71,6 +72,8 @@ userRouter.route("/get-fundraisers").get(verifyJwt,getFundraisers);
 
 userRouter.route("/create-post").post(verifyJwt,upload.single("media"),createPost)
 userRouter.route("/get-posts").post(verifyJwt,getPosts)
+userRouter.route("/get-college-stats").get(verifyJwt, getCollegeStats);
+
 
 // Alum Only Routes
 
