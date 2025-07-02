@@ -26,6 +26,8 @@ import {
   getPosts,
   getCollegeStats,
   toggleLike,
+  addComment,
+  getComments,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 import { verifyAlum } from "../middlewares/verifyalum.middleware.js";
@@ -72,6 +74,8 @@ userRouter.route("/create-post").post(verifyJwt, upload.single("media"), createP
 userRouter.route("/get-posts").post(verifyJwt, getPosts);
 userRouter.route("/get-college-stats").get(verifyJwt, getCollegeStats);
 userRouter.route("/toggle-like").post(verifyJwt, toggleLike);
+userRouter.route("/add-comment").post(verifyJwt, addComment);
+userRouter.route("/get-comments").post(verifyJwt, getComments);
 
 // Alum Only Routes
 
