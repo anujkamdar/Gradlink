@@ -989,7 +989,7 @@ const getComments = asyncHandler(async (req, res) => {
   const aggregate = await Comment.aggregate([
     {
       $match: {
-        post: postId,
+        post: new mongoose.Types.ObjectId(postId),
       },
     },
     {
