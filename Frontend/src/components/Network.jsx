@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Input } from './ui/input';
@@ -13,12 +13,14 @@ import axios from 'axios';
 export default function Network() {
 
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [graduationYear, setGraduationYear] = useState("");
     const [major, setMajor] = useState("");
     const [company, setCompany] = useState("");
     const [networkMembers, setNetworkMembers] = useState([]);
+    const [networkStats, setNetworkStats] = useState({});
+    const [wait,setWait] = useState(true);
 
 
 
@@ -27,8 +29,21 @@ export default function Network() {
         try {
             console.log(search, company, major, graduationYear)
             const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-users", { search, major, company, graduationYear }, { withCredentials: true });
-            setNetworkMembers(response.data.data)
+            setNetworkMembers(response.data.data.docs)
             console.log(response.data.data);
+            setLoading(false)
+        } catch (error) {
+            console.log(error.response?.data?.message || "Something went wrong")
+            setLoading(false);
+        }
+    }
+
+    const fetchNetworkStats = async () => {
+        try {
+            const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/get-college-stats", { withCredentials: true });
+            console.log(response.data.data);
+            setNetworkStats(response.data.data)
+            setWait(false);
         } catch (error) {
             console.log(error.response?.data?.message || "Something went wrong")
         }
@@ -39,28 +54,24 @@ export default function Network() {
         fetchUsers();
     }, [search, major, company, graduationYear])
 
+    useEffect(() => {
+        fetchNetworkStats();
+    },[])
 
 
 
 
 
 
-
-    // will later work on this section
-    const networkStats = {
-        totalMembers: 9,
-        students: 2,
-        alumni: 7,
-        companies: 9
-    };
-
-    if (loading) {
+    if (loading || wait) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="loader bg-indigo-600"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-blue-500"></div>
             </div>
         );
     }
+
+
 
     return (
         <>
@@ -76,12 +87,12 @@ export default function Network() {
                         </div>
 
                         {/* Network Stats */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-4 gap-4">
                             <Card className="bg-white">
                                 <CardContent className="p-5 flex items-center justify-between">
                                     <div>
                                         <p className="text-sm text-gray-600">Total Members</p>
-                                        <p className="text-3xl font-bold">{networkStats.totalMembers}</p>
+                                        <p className="text-3xl font-bold">{networkStats.totalUsers}</p>
                                     </div>
                                     <div className="bg-blue-100 p-3 rounded-full">
                                         <Users className="h-6 w-6 text-blue-600" />
@@ -92,7 +103,7 @@ export default function Network() {
                                 <CardContent className="p-5 flex items-center justify-between">
                                     <div>
                                         <p className="text-sm text-gray-600">Students</p>
-                                        <p className="text-3xl font-bold">{networkStats.students}</p>
+                                        <p className="text-3xl font-bold">{networkStats.totalStudents}</p>
                                     </div>
                                     <div className="bg-green-100 p-3 rounded-full">
                                         <User className="h-6 w-6 text-green-600" />
@@ -103,7 +114,7 @@ export default function Network() {
                                 <CardContent className="p-5 flex items-center justify-between">
                                     <div>
                                         <p className="text-sm text-gray-600">Alumni</p>
-                                        <p className="text-3xl font-bold">{networkStats.alumni}</p>
+                                        <p className="text-3xl font-bold">{networkStats.totalAlumni}</p>
                                     </div>
                                     <div className="bg-purple-100 p-3 rounded-full">
                                         <User className="h-6 w-6 text-purple-600" />
@@ -113,8 +124,8 @@ export default function Network() {
                             <Card className="bg-white">
                                 <CardContent className="p-5 flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm text-gray-600">Companies</p>
-                                        <p className="text-3xl font-bold">{networkStats.companies}</p>
+                                        <p className="text-sm text-gray-600">Jobs Posted</p>
+                                        <p className="text-3xl font-bold">{networkStats.totalJobs}</p>
                                     </div>
                                     <div className="bg-orange-100 p-3 rounded-full">
                                         <Building className="h-6 w-6 text-orange-600" />
