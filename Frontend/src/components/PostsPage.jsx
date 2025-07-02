@@ -18,6 +18,7 @@ import {
     SelectValue,
 } from "./ui/select";
 import Linkify from "linkify-react";
+import CommentDialog from "./CommentDialog";
 
 export default function PostsPage() {
     const [category, setCategory] = useState("");
@@ -33,6 +34,8 @@ export default function PostsPage() {
     });
     const [submitting, setSubmitting] = useState(false);
     const [likeInProgress, setLikeInProgress] = useState(false);
+    const [activeCommentPostId, setActiveCommentPostId] = useState(null);
+    const [showCommentDialog, setShowCommentDialog] = useState(false);
 
     
     const hyperLinkOptions = {
@@ -111,7 +114,7 @@ export default function PostsPage() {
 
     useEffect(() => {
         getPosts();
-    }, [category])
+    }, [category, showCommentDialog]) // Re-fetch posts when closing comment dialog to update counts
 
     if (loading) {
         return (
@@ -229,6 +232,10 @@ export default function PostsPage() {
                                     </button>
                                     <div className="w-px bg-gray-100"></div>
                                     <button
+                                        onClick={() => {
+                                            setActiveCommentPostId(post._id);
+                                            setShowCommentDialog(true);
+                                        }}
                                         className="flex-1 flex justify-center items-center py-3 text-gray-500 hover:bg-gray-50 hover:text-indigo-600 transition-colors"
                                     >
                                         <MessageCircle className="h-5 w-5 mr-2" />
@@ -357,6 +364,13 @@ export default function PostsPage() {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            {/* Comment Dialog Component */}
+            <CommentDialog 
+                isOpen={showCommentDialog} 
+                onClose={() => setShowCommentDialog(false)} 
+                postId={activeCommentPostId} 
+            />
         </div>
     );
 }
