@@ -15,6 +15,7 @@ import { Comment } from "../models/Comment.model.js";
 const options = {
   httpOnly: true,
   secure: true,
+  sameSite: "None", 
 };
 
 const getAllCollege = asyncHandler(async (req, res) => {
@@ -739,7 +740,7 @@ const getUserJobApplications = asyncHandler(async (req, res) => {
 });
 
 const getUsers = asyncHandler(async (req, res) => {
-  const { search, graduationYear, major, company, page = 1 , limit = 30 } = req.body;
+  const { search, graduationYear, major, company, page = 1, limit = 30 } = req.body;
   const matchstage = {
     college: req.user.college,
   };
@@ -757,7 +758,7 @@ const getUsers = asyncHandler(async (req, res) => {
     matchstage.fullname = new RegExp(search, "i");
   }
 
-  const aggregate =  User.aggregate([
+  const aggregate = User.aggregate([
     {
       $match: matchstage,
     },
@@ -782,10 +783,10 @@ const getUsers = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(404, [], "No users found for the given criteria"));
   }
 
-  const users = await User.aggregatePaginate(aggregate,{
+  const users = await User.aggregatePaginate(aggregate, {
     page: parseInt(page),
     limit: parseInt(limit),
-  })
+  });
 
   return res.status(200).json(new ApiResponse(200, users, "Users fetched successfully"));
 });
@@ -843,7 +844,6 @@ const createPost = asyncHandler(async (req, res) => {
   } else {
     media = { url: null };
   }
-
 
   const post = await Post.create({
     college: college,
@@ -1032,25 +1032,30 @@ const getComments = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, aggregate, "Comments fetched successfully"));
 });
 
-
 // TODO will later see if should separate this into different apis
-const getCollegeStats = asyncHandler(async(req,res) => {
-  const totalUsers = await User.countDocuments({ college: req.user.college }); 
+const getCollegeStats = asyncHandler(async (req, res) => {
+  const totalUsers = await User.countDocuments({ college: req.user.college });
   const totalAlumni = await User.countDocuments({ college: req.user.college, role: "alumni" });
   const totalStudents = await User.countDocuments({ college: req.user.college, role: "student" });
   const totalJobs = await Job.countDocuments({ college: req.user.college });
   const totalFundraisers = await Fundraiser.countDocuments({ college: req.user.college });
   const totalPosts = await Post.countDocuments({ college: req.user.college });
 
-  return res.status(200).json(new ApiResponse(200, {
-    totalUsers,
-    totalAlumni,
-    totalStudents,
-    totalJobs,
-    totalFundraisers,
-    totalPosts
-  }, "College stats fetched successfully"));
-})
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        totalUsers,
+        totalAlumni,
+        totalStudents,
+        totalJobs,
+        totalFundraisers,
+        totalPosts,
+      },
+      "College stats fetched successfully"
+    )
+  );
+});
 
 export {
   registerUser,
