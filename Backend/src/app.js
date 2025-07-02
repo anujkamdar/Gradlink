@@ -9,7 +9,7 @@ const app = express();
 // Middleware to handle cookies
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173","https://gradlink-neon.vercel.app"],
     credentials: true,
   })
 );
