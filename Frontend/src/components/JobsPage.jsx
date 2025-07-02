@@ -7,6 +7,7 @@ import { Plus, Search, BookmarkIcon, Briefcase, MapPin, Clock, User, ChevronLeft
 import Header from './Header';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { Backend_url } from '@/info';
 
 
 
@@ -32,7 +33,7 @@ export default function JobsPage() {
   const getJobPostings = async () => {
     try {
       // console.log(search, location, type, currentPage);
-      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-job-postings", { search, location, type, currentPage }, { withCredentials: true })
+      const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/get-job-postings`, { search, location, type, currentPage }, { withCredentials: true })
       console.log(response.data.data);
       setTotalPages(response.data.data.pages);
       setJobs(response.data.data.jobs);
@@ -43,7 +44,7 @@ export default function JobsPage() {
 
   const getCurrentUser = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/current-user-profile", { withCredentials: true });
+      const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/current-user-profile`, { withCredentials: true });
       setUser(response.data.data);
       setLoading(false);
     } catch (error) {

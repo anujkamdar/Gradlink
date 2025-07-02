@@ -12,7 +12,6 @@ import MyJobApplicationsPage from './components/MyJobApplicationsPage'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
 import Network from './components/Network'
-import EventsTab from './components/EventsTab'
 import TabsLayout from './TabsLayout'
 import Homepage from './components/Homepage'
 import OtherUserProfilePage from './components/OtherUserProfilePage'
@@ -80,10 +79,6 @@ const router = createBrowserRouter([{
         {
           path: "network",
           element: <Network />
-        },
-        {
-          path: "events",
-          element: <EventsTab />
         },
         {
           path: "fundraisers",

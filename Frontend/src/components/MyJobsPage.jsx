@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { Backend_url } from "../info.js";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export default function MyJobsPage() {
@@ -46,7 +47,7 @@ export default function MyJobsPage() {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:8000/gradlink/api/v1/users/my-job-postings?page=${currentPage}&search=${search}`, 
+        `${Backend_url}/gradlink/api/v1/users/my-job-postings?page=${currentPage}&search=${search}`, 
         { withCredentials: true }
       );
       
@@ -73,7 +74,7 @@ export default function MyJobsPage() {
   };
   const deleteJob = async () => {
     try {
-      await axios.post(`http://localhost:8000/gradlink/api/v1/users/delete-job`,{jobId : jobToDelete},{withCredentials:true }
+      await axios.post(`${Backend_url}/gradlink/api/v1/users/delete-job`,{jobId : jobToDelete},{withCredentials:true }
       );
       
       getMyJobPostings();

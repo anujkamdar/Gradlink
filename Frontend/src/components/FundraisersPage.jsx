@@ -4,6 +4,7 @@ import axios from "axios";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { Progress } from "./ui/progress";
+import { Backend_url } from "@/info";
 
 export default function FundraisersPage() {
     const [fundraisers, setFundraisers] = useState([]);
@@ -14,7 +15,7 @@ export default function FundraisersPage() {
         const fetchFundraisers = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/get-fundraisers",
+                const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/get-fundraisers`,
                     { withCredentials: true }
                 );
                 setFundraisers(response.data.data);

@@ -9,6 +9,7 @@ import Header from './Header';
 import "../App.css";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Backend_url } from "../info.js";
 
 export default function Network() {
 
@@ -28,7 +29,7 @@ export default function Network() {
     const fetchUsers = async () => {
         try {
             console.log(search, company, major, graduationYear)
-            const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-users", { search, major, company, graduationYear }, { withCredentials: true });
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/get-users`, { search, major, company, graduationYear }, { withCredentials: true });
             setNetworkMembers(response.data.data.docs)
             console.log(response.data.data);
             setLoading(false)
@@ -40,7 +41,7 @@ export default function Network() {
 
     const fetchNetworkStats = async () => {
         try {
-            const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/get-college-stats", { withCredentials: true });
+            const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/get-college-stats`, { withCredentials: true });
             console.log(response.data.data);
             setNetworkStats(response.data.data)
             setWait(false);

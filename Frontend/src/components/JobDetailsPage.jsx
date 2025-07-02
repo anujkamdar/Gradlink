@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Briefcase, MapPin, Clock, User, ArrowLeft, CalendarIcon, Building, FileText } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios';
+import { Backend_url } from '@/info';
 
 export default function JobDetailsPage() {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function JobDetailsPage() {
         const fetchJobDetails = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`http://localhost:8000/gradlink/api/v1/users/job/${jobId}`,
+                const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/job/${jobId}`,
                     { withCredentials: true }
                 );
                 setJob(response.data.data);
@@ -56,7 +57,7 @@ export default function JobDetailsPage() {
             formData.append("resume", resumeFile);
 
             const response = await axios.post(
-                "http://localhost:8000/gradlink/api/v1/users/apply-job",
+                `${Backend_url}/gradlink/api/v1/users/apply-job`,
                 formData,
                 {
                     withCredentials: true,

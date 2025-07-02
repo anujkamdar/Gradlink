@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { Backend_url } from "../info.js";
 
 function OtherUserProfilePage() {
     const navigate = useNavigate();
@@ -26,7 +27,7 @@ function OtherUserProfilePage() {
 
     const getProfile = async () => {
         try {
-            const response = await axios.get(`http://localhost:8000/gradlink/api/v1/users/get-profile-data/${otherUserId}`, { withCredentials: true });
+            const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/get-profile-data/${otherUserId}`, { withCredentials: true });
             console.log(response.data.data);
             setUserData(response.data.data);
             setLoading(false);

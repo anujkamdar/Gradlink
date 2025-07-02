@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
+import { Backend_url } from "@/info";
 
 
 function FundraiserManagement() {
@@ -33,7 +34,7 @@ function FundraiserManagement() {
     useEffect(() => {
         const fetchFundraisers = async () => {
             try {
-                const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/get-fundraisers", { withCredentials: true })
+                const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/get-fundraisers`, { withCredentials: true })
                 console.log(response);
                 setFundraisers(response.data.data)
                 setLoading(false);
@@ -75,7 +76,7 @@ function FundraiserManagement() {
                 return;
             }
 
-            const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/create-fundraiser", formDataToSubmit, { withCredentials: true })
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/create-fundraiser`, formDataToSubmit, { withCredentials: true })
             console.log("Fundraiser created:", response.data);
             setFundraisers([...fundraisers, response.data]);
             alert("Fundraiser created successfully!");

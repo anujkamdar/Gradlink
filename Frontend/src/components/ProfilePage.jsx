@@ -22,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 import axios from "axios";
+import { Backend_url } from "../info.js";
 
 function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -32,7 +33,7 @@ function ProfilePage() {
 
   const getProfile = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/current-user-profile", { withCredentials: true });
+      const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/current-user-profile`, { withCredentials: true });
       console.log(response.data.data);
       setUserData(response.data.data);
       setLoading(false);
@@ -61,7 +62,7 @@ function ProfilePage() {
   const handleSaveProfile = async () => {
     setIsEditing(false);
     try {
-      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/update-profile", userData, { withCredentials: true });
+      const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/update-profile`, userData, { withCredentials: true });
       console.log(response.data);
     } catch (error) {
       console.log(error)

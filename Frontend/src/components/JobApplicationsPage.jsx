@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios';
+import { Backend_url } from '@/info';
 
 export default function JobApplicationsPage() {
   const navigate = useNavigate();
@@ -39,14 +40,14 @@ export default function JobApplicationsPage() {
       try {
         setLoading(true);
         const jobResponse = await axios.get(
-          `http://localhost:8000/gradlink/api/v1/users/job/${jobId}`,
+          `${Backend_url}/gradlink/api/v1/users/job/${jobId}`,
           { withCredentials: true }
         );
 
         setJob(jobResponse.data.data);
 
         const applicationsResponse = await axios.get(
-          `http://localhost:8000/gradlink/api/v1/users/get-job-applications/${jobId}`,
+          `${Backend_url}/gradlink/api/v1/users/get-job-applications/${jobId}`,
           { withCredentials: true }
         );
 
@@ -78,7 +79,7 @@ export default function JobApplicationsPage() {
   const updateApplicationStatus = async (applicationId, newStatus) => {
     try {
       console.log("hello");
-      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/update-application-status", {
+      const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/update-application-status`, {
         applicationId: applicationId,
         status: newStatus
       }, { withCredentials: true })

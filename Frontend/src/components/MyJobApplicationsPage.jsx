@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { Backend_url } from "../info.js";
 
 export default function MyJobApplicationsPage() {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ export default function MyJobApplicationsPage() {
       try {
         setLoading(true);
         const response = await axios.get(
-          "http://localhost:8000/gradlink/api/v1/users/my-applications",
+          `${Backend_url}/gradlink/api/v1/users/my-applications`,
           { withCredentials: true }
         );
 

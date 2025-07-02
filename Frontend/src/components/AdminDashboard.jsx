@@ -20,7 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Input } from "./ui/input";
 import Header from "./Header";
 import FundraiserManagement from "./FundraiserManagement";
-
+import { Backend_url } from "@/info";
 function AdminDashboard() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("fundraisers");
@@ -52,7 +52,7 @@ function AdminDashboard() {
 
     const handleLogout = async () => {
         try {
-            await axios.post("http://localhost:8000/gradlink/api/v1/users/logout");
+            await axios.post(`${Backend_url}/gradlink/api/v1/users/logout`);
             navigate("/");
         } catch (error) {
             console.error("Logout failed:", error);

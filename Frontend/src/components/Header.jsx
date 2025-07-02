@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { Bell, User, LogOut, Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Backend_url } from "@/info";
 
 
 
@@ -15,7 +16,7 @@ export default function Header() {
 
     const getUser = async () => {
         try {
-            const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/current-user-profile", { withCredentials: true });
+            const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/current-user-profile`, { withCredentials: true });
             return response.data.data;
         } catch (error) {
             console.error("Error fetching user data:", error.response?.data?.message);
@@ -44,7 +45,7 @@ export default function Header() {
 
     const handleLogout = async () => {
         try {
-            const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/logout",{ withCredentials: true })
+            const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/logout`,{ withCredentials: true })
             console.log("Logout successful:", response.data.data);
             navigate("/");
         } catch (error) {

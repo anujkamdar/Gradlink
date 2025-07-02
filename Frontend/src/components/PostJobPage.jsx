@@ -8,7 +8,8 @@ import { ArrowLeft, Plus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
+import { Backend_url } from "../info.js";
 
 export default function PostJobPage() {
     const navigate = useNavigate();
@@ -66,7 +67,7 @@ export default function PostJobPage() {
         e.preventDefault();
         console.log("Job Form Data:", jobForm);
         try {
-            const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/create-job",jobForm,{withCredentials: true});
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/create-job`,jobForm,{withCredentials: true});
             console.log("Job posted successfully:", response.data);
             navigate("/tabs/jobs")
         } catch (error) {

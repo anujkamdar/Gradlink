@@ -8,6 +8,7 @@ import { ArrowLeft, Plus, X, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { Backend_url } from '@/info';
 
 export default function CollegeRegisterPage() {
     const navigate = useNavigate();
@@ -134,7 +135,7 @@ export default function CollegeRegisterPage() {
 
         console.log(collegeFormData);
         try {
-            const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/register-college-and-admin", collegeFormData, {
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/register-college-and-admin`, collegeFormData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

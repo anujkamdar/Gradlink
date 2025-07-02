@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from './ui/button';
 import { Loader2, SendHorizontal } from 'lucide-react';
+import { Backend_url } from '@/info';
 
 export default function CommentDialog({ isOpen, onClose, postId }) {
   const [comments, setComments] = useState([]);
@@ -20,7 +21,7 @@ export default function CommentDialog({ isOpen, onClose, postId }) {
     try {
       setLoading(true);
       const response = await axios.post(
-        'http://localhost:8000/gradlink/api/v1/users/get-comments',
+        `${Backend_url}/gradlink/api/v1/users/get-comments`,
         { postId },
         { withCredentials: true }
       );
@@ -40,7 +41,7 @@ export default function CommentDialog({ isOpen, onClose, postId }) {
     try {
       setSubmitting(true);
       await axios.post(
-        'http://localhost:8000/gradlink/api/v1/users/add-comment',
+        `${Backend_url}/gradlink/api/v1/users/add-comment`,
         { 
           content: newComment,
           postId 

@@ -41,12 +41,13 @@ import {
   Award,
   Building,
 } from "lucide-react"
+import { Backend_url } from "./info.js"
 
 
 function LandingPage() {
 
   const navigate = useNavigate();
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
   const [isSignInOpen, setIsSignInOpen] = useState(false)
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState("")
@@ -76,7 +77,7 @@ function LandingPage() {
   useEffect(() => {
     const fetchColleges = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/gradlink/api/v1/users/get-all-colleges");
+        const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/get-all-colleges`);
         setCollegeList(response.data.data);
         console.log("Colleges fetched:", response.data.data);
       } catch (error) {
@@ -119,7 +120,7 @@ function LandingPage() {
     console.log(email, passwordRef.current.value);
     try {
       setLoadingAuth(true);
-      const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: passwordRef.current.value }, { withCredentials: true });
+      const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/login`, { email: email, password: passwordRef.current.value }, { withCredentials: true });
       console.log(response.data);
       setLoadingAuth(false);
       navigate("/tabs/home")
@@ -183,9 +184,9 @@ function LandingPage() {
 
     try {
       setLoadingAuth(true);
-      let response = await axios.post("http://localhost:8000/gradlink/api/v1/users/register", formData);
+      let response = await axios.post(`${Backend_url}/gradlink/api/v1/users/register`, formData);
       console.log(response.data);
-      response = await axios.post("http://localhost:8000/gradlink/api/v1/users/login", { email: email, password: registerPasswordRef.current.value }, { withCredentials: true });
+      response = await axios.post(`${Backend_url}/gradlink/api/v1/users/login`, { email: email, password: registerPasswordRef.current.value }, { withCredentials: true });
       console.log(response.data);
       setLoadingAuth(false);
       navigate("/tabs/home");

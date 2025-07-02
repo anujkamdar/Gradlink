@@ -5,6 +5,7 @@ import { MessageCircle, Heart, Image, Video, Send, ThumbsUp, X, PenSquare } from
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "./ui/dialog";
 import axios from "axios";
+import { Backend_url } from "../info.js";
 import {
     Select,
     SelectContent,
@@ -55,7 +56,7 @@ export default function PostsPage() {
             if (newPostForm.media) {
                 formData.append("media", newPostForm.media);
             }
-            const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/create-post", formData, { withCredentials: true })
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/create-post`, formData, { withCredentials: true })
             console.log(response.data);
             setSubmitting(false);
             setShowNewPostDialog(false);
@@ -76,7 +77,7 @@ export default function PostsPage() {
         try {
             setLikeInProgress(true);
             const response = await axios.post(
-                "http://localhost:8000/gradlink/api/v1/users/toggle-like",
+                `${Backend_url}/gradlink/api/v1/users/toggle-like`,
                 { postId },
                 { withCredentials: true }
             );
@@ -101,7 +102,7 @@ export default function PostsPage() {
 
     const getPosts = async () => {
         try {
-            const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-posts", { category }, { withCredentials: true });
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/get-posts`, { category }, { withCredentials: true });
             console.log(response.data.data.docs);
             setTotalPages(response.data?.data.totalPages)
             setPosts(response.data.data.docs);
