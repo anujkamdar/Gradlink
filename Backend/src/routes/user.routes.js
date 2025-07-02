@@ -25,6 +25,7 @@ import {
   createPost,
   getPosts,
   getCollegeStats,
+  toggleLike,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 import { verifyAlum } from "../middlewares/verifyalum.middleware.js";
@@ -43,7 +44,6 @@ userRouter.route("/register-college-and-admin").post(
   ]),
   registerCollegeandAdmin
 );
-
 
 userRouter.route("/get-all-colleges").get(getAllCollege);
 
@@ -65,15 +65,13 @@ userRouter.route("/job/:jobId").get(verifyJwt, getJobById);
 userRouter.route("/my-applications").get(verifyJwt, getUserJobApplications);
 userRouter.route("/get-users").post(verifyJwt, getUsers);
 
+userRouter.route("/create-fundraiser").post(verifyJwt, upload.single("coverImage"), createFundraiser);
+userRouter.route("/get-fundraisers").get(verifyJwt, getFundraisers);
 
-userRouter.route("/create-fundraiser").post(verifyJwt,upload.single("coverImage"),createFundraiser)
-userRouter.route("/get-fundraisers").get(verifyJwt,getFundraisers);
-
-
-userRouter.route("/create-post").post(verifyJwt,upload.single("media"),createPost)
-userRouter.route("/get-posts").post(verifyJwt,getPosts)
+userRouter.route("/create-post").post(verifyJwt, upload.single("media"), createPost);
+userRouter.route("/get-posts").post(verifyJwt, getPosts);
 userRouter.route("/get-college-stats").get(verifyJwt, getCollegeStats);
-
+userRouter.route("/toggle-like").post(verifyJwt, toggleLike);
 
 // Alum Only Routes
 
