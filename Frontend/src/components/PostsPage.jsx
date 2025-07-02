@@ -32,6 +32,7 @@ export default function PostsPage() {
         media: null // This will hold the file object for media uploads
     });
     const [submitting, setSubmitting] = useState(false);
+    const [likeInProgress, setLikeInProgress] = useState(false);
 
     
     const hyperLinkOptions = {
@@ -65,6 +66,36 @@ export default function PostsPage() {
             console.error("Error creating post:", error);
         }
     }
+
+    const likePost = async (postId) => {
+        if (likeInProgress) return;
+        
+        try {
+            setLikeInProgress(true);
+            const response = await axios.post(
+                "http://localhost:8000/gradlink/api/v1/users/toggle-like",
+                { postId },
+                { withCredentials: true }
+            );
+            
+            setPosts(prevPosts => 
+                prevPosts.map(post => 
+                    post._id === postId                                        ? { 
+                            ...post, 
+                            likesCount: response.data.data.likes.length,
+                            isLikedByUser: !post.isLikedByUser 
+                          } 
+                        : post
+                )
+            );
+            
+        } catch (error) {
+            console.error("Error toggling like:", error);
+        } finally {
+            setLikeInProgress(false);
+        }
+    };
+
     const getPosts = async () => {
         try {
             const response = await axios.post("http://localhost:8000/gradlink/api/v1/users/get-posts", { category }, { withCredentials: true });
@@ -77,7 +108,6 @@ export default function PostsPage() {
             setLoading(false);
         }
     }
-
 
     useEffect(() => {
         getPosts();
@@ -185,8 +215,16 @@ export default function PostsPage() {
 
                                 {/* Post Actions with Comment Button */}
                                 <div className="flex border-t border-gray-100">
-                                    <button className="flex-1 flex justify-center items-center py-3 text-gray-500 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
-                                        <Heart className="h-5 w-5 mr-2" />
+                                    <button 
+                                        onClick={() => likePost(post._id)}
+                                        className={`flex-1 flex justify-center items-center py-3 transition-colors ${
+                                            post.isLikedByUser 
+                                            ? 'text-indigo-600 bg-indigo-50' 
+                                            : 'text-gray-500 hover:bg-gray-50 hover:text-indigo-600'
+                                        }`}
+                                        disabled={likeInProgress}
+                                    >
+                                        <Heart className={`h-5 w-5 mr-2 ${post.isLikedByUser ? 'fill-indigo-600' : ''}`} />
                                         <span className="font-medium">Like ({post.likesCount})</span>
                                     </button>
                                     <div className="w-px bg-gray-100"></div>
