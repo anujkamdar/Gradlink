@@ -1052,7 +1052,7 @@ const getCollegeStats = asyncHandler(async (req, res) => {
         totalJobs,
         totalFundraisers,
         totalPosts,
-        majors,
+        majors : majors.majors || [],
       },
       "College stats fetched successfully"
     )
