@@ -352,13 +352,14 @@ function LandingPage() {
                 if (!state) {
                   setAvatar(null);
                 }
-              }}>
+              }
+              }>
               <DialogTrigger asChild>
                 <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-6 rounded-full shadow-md hover:shadow-blue-200/50 transition-all duration-300">
                   Get Started
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md rounded-xl border-blue-100 shadow-lg">
+              <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto rounded-xl border-blue-100 shadow-lg">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-bold text-gray-800">Join AlumniConnect</DialogTitle>
                   <DialogDescription className="text-gray-600">Create your account and connect with the community</DialogDescription>

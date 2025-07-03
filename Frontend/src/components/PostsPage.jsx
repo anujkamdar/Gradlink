@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { MessageCircle, Heart, Image, Video, Send, ThumbsUp, X, PenSquare } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "./ui/dialog";
 import axios from "axios";
 import { Backend_url } from "../info.js";
@@ -38,7 +37,7 @@ export default function PostsPage() {
     const [activeCommentPostId, setActiveCommentPostId] = useState(null);
     const [showCommentDialog, setShowCommentDialog] = useState(false);
 
-    
+
     const hyperLinkOptions = {
         target: "_blank",
         rel: "noopener noreferrer",
@@ -73,7 +72,7 @@ export default function PostsPage() {
 
     const likePost = async (postId) => {
         if (likeInProgress) return;
-        
+
         try {
             setLikeInProgress(true);
             const response = await axios.post(
@@ -81,18 +80,18 @@ export default function PostsPage() {
                 { postId },
                 { withCredentials: true }
             );
-            
-            setPosts(prevPosts => 
-                prevPosts.map(post => 
-                    post._id === postId                                        ? { 
-                            ...post, 
-                            likesCount: response.data.data.likes.length,
-                            isLikedByUser: !post.isLikedByUser 
-                          } 
+
+            setPosts(prevPosts =>
+                prevPosts.map(post =>
+                    post._id === postId ? {
+                        ...post,
+                        likesCount: response.data.data.likes.length,
+                        isLikedByUser: !post.isLikedByUser
+                    }
                         : post
                 )
             );
-            
+
         } catch (error) {
             console.error("Error toggling like:", error);
         } finally {
@@ -125,6 +124,19 @@ export default function PostsPage() {
         );
     }
 
+    const categories = [
+        { id: "", label: "All Posts" },
+        { id: "success", label: "Success Stories" },
+        { id: "event", label: "Events" },
+        { id: "career", label: "Career" },
+        { id: "project showcase", label: "Project Showcase" },
+        { id: "college news", label: "College News" }
+    ];
+
+    const handleCategoryChange = (categoryId) => {
+        setCategory(categoryId);
+        setCurrentPage(1); // Reset to first page when changing category
+    };
 
     return (
         <div className="bg-gray-50 min-h-screen relative">
@@ -133,47 +145,22 @@ export default function PostsPage() {
 
                 {/* Filter Tabs */}
                 <div className="mb-8">
-                    <Tabs value={category} onValueChange={setCategory} className="w-full">
-                        <TabsList className="w-full flex justify-between bg-white p-1 rounded-xl border border-gray-100 shadow-sm">
-                            <TabsTrigger
-                                value=""
-                                className="flex-1 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat.id}
+                                onClick={() => handleCategoryChange(cat.id)}
+                                className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${
+                                    category === cat.id
+                                        ? "bg-indigo-600 text-white shadow-md"
+                                        : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                                }`}
                             >
-                                All Posts
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="success"
-                                className="flex-1 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
-                            >
-                                Success Stories
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="event"
-                                className="flex-1 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
-                            >
-                                Events
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="career"
-                                className="flex-1 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
-                            >
-                                Career
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="project showcase"
-                                className="flex-1 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
-                            >
-                                Project Showcase
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="college news"
-                                className="flex-1 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
-                            >
-                                College News
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                </div>
+                                {cat.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>  
 
                 {/* Posts Feed */}
                 <div className="space-y-8">
@@ -219,13 +206,12 @@ export default function PostsPage() {
 
                                 {/* Post Actions with Comment Button */}
                                 <div className="flex border-t border-gray-100">
-                                    <button 
+                                    <button
                                         onClick={() => likePost(post._id)}
-                                        className={`flex-1 flex justify-center items-center py-3 transition-colors ${
-                                            post.isLikedByUser 
-                                            ? 'text-indigo-600 bg-indigo-50' 
-                                            : 'text-gray-500 hover:bg-gray-50 hover:text-indigo-600'
-                                        }`}
+                                        className={`flex-1 flex justify-center items-center py-3 transition-colors ${post.isLikedByUser
+                                                ? 'text-indigo-600 bg-indigo-50'
+                                                : 'text-gray-500 hover:bg-gray-50 hover:text-indigo-600'
+                                            }`}
                                         disabled={likeInProgress}
                                     >
                                         <Heart className={`h-5 w-5 mr-2 ${post.isLikedByUser ? 'fill-indigo-600' : ''}`} />
@@ -264,7 +250,7 @@ export default function PostsPage() {
 
             {/* New Post Dialog */}
             <Dialog open={showNewPostDialog} onOpenChange={(state) => { setShowNewPostDialog(state); setNewPostForm({ ...newPostForm, media: null }) }}>
-                <DialogContent className="sm:max-w-[525px]">
+                <DialogContent className="sm:max-w-[525px] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Create New Post</DialogTitle>
                     </DialogHeader>
@@ -367,11 +353,12 @@ export default function PostsPage() {
             </Dialog>
 
             {/* Comment Dialog Component */}
-            <CommentDialog 
-                isOpen={showCommentDialog} 
-                onClose={() => setShowCommentDialog(false)} 
-                postId={activeCommentPostId} 
+            <CommentDialog
+                isOpen={showCommentDialog}
+                onClose={() => setShowCommentDialog(false)}
+                postId={activeCommentPostId}
             />
         </div>
     );
 }
+
