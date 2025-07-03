@@ -15,7 +15,7 @@ import { Comment } from "../models/Comment.model.js";
 const options = {
   httpOnly: true,
   secure: true,
-  sameSite: "None", 
+  sameSite: "None",
 };
 
 const getAllCollege = asyncHandler(async (req, res) => {
@@ -1040,6 +1040,7 @@ const getCollegeStats = asyncHandler(async (req, res) => {
   const totalJobs = await Job.countDocuments({ college: req.user.college });
   const totalFundraisers = await Fundraiser.countDocuments({ college: req.user.college });
   const totalPosts = await Post.countDocuments({ college: req.user.college });
+  const majors = await College.findById(req.user.college).select("majors");
 
   return res.status(200).json(
     new ApiResponse(
@@ -1051,6 +1052,7 @@ const getCollegeStats = asyncHandler(async (req, res) => {
         totalJobs,
         totalFundraisers,
         totalPosts,
+        majors,
       },
       "College stats fetched successfully"
     )
