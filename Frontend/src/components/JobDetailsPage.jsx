@@ -203,8 +203,9 @@ export default function JobDetailsPage() {
                                             <Button
                                                 size="lg"
                                                 className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 px-6"
+                                                disabled={job.isAlreadyApplied}
                                             >
-                                                Apply Now
+                                                {job.isAlreadyApplied ? "Already Applied" : "Apply Now"}
                                             </Button>
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden rounded-2xl">
@@ -312,25 +313,6 @@ export default function JobDetailsPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column - Job Description & Skills */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* About Company */}
-                        <Card className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow duration-300 bg-white rounded-xl">
-                            <div className="h-2 bg-gradient-to-r from-purple-400 to-indigo-500"></div>
-                            <CardHeader className="pb-2 pt-6">
-                                <div className="flex items-center">
-                                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                                        <Building className="h-5 w-5 text-indigo-600" />
-                                    </div>
-                                    <CardTitle className="text-xl font-bold">About {job.company}</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-gray-600">
-                                    {job.company} is a leading organization in its field, committed to innovation and excellence.
-                                    They're looking for talented professionals to join their team.
-                                </p>
-                            </CardContent>
-                        </Card>
-
                         {/* Job Description */}
                         <Card className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow duration-300 bg-white rounded-xl">
                             <div className="h-2 bg-gradient-to-r from-indigo-400 to-purple-500"></div>
@@ -429,99 +411,16 @@ export default function JobDetailsPage() {
                                     <Button
                                         className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 font-medium shadow-md hover:shadow-lg transition-all duration-300"
                                         onClick={() => setIsApplyDialogOpen(true)}
+                                        disabled={job.isAlreadyApplied}
                                     >
                                         <FileText className="mr-2 h-4 w-4" />
-                                        Apply for this position
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Share Job Card */}
-                        <Card className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow duration-300 bg-white rounded-xl">
-                            <div className="h-2 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
-                            <CardHeader className="pb-2 pt-6">
-                                <div className="flex items-center">
-                                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                        </svg>
-                                    </div>
-                                    <CardTitle className="text-xl font-bold">Share This Job</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex justify-around">
-                                    <Button variant="ghost" className="rounded-full p-2 hover:bg-indigo-50 text-indigo-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                                    </Button>
-                                    <Button variant="ghost" className="rounded-full p-2 hover:bg-indigo-50 text-indigo-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                                    </Button>
-                                    <Button variant="ghost" className="rounded-full p-2 hover:bg-indigo-50 text-indigo-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
-                                    </Button>
-                                    <Button variant="ghost" className="rounded-full p-2 hover:bg-indigo-50 text-indigo-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                                        {job.isAlreadyApplied ? "Already Applied for this position":"Apply for this position"}
                                     </Button>
                                 </div>
                             </CardContent>
                         </Card>
                     </div>
-                </div>
-
-                {/* Similar Jobs Section */}
-
-                <div className="mt-12">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                        Similar Jobs You Might Like
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* This would ideally be populated with actual similar jobs */}
-                        <Card className="overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white rounded-xl hover:transform hover:scale-105">
-                            <div className="p-6">
-                                <h3 className="font-bold text-lg text-gray-900 mb-2">Senior Frontend Developer</h3>
-                                <div className="flex items-center text-gray-600 mb-2">
-                                    <Building className="w-4 h-4 mr-1 text-indigo-500" />
-                                    <span>TechCorp</span>
-                                    <span className="mx-2">•</span>
-                                    <MapPin className="w-4 h-4 mr-1 text-indigo-500" />
-                                    <span>Remote</span>
-                                </div>
-                                <Badge className="bg-indigo-50 text-indigo-700 mb-4">Full-time</Badge>
-                                <Button
-                                    variant="outline"
-                                    className="w-full border-indigo-300 text-indigo-600 hover:bg-indigo-50"
-                                >
-                                    View Details
-                                </Button>
-                            </div>
-                        </Card>
-
-                        <Card className="overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white rounded-xl hover:transform hover:scale-105">
-                            <div className="p-6">
-                                <h3 className="font-bold text-lg text-gray-900 mb-2">UX/UI Designer</h3>
-                                <div className="flex items-center text-gray-600 mb-2">
-                                    <Building className="w-4 h-4 mr-1 text-indigo-500" />
-                                    <span>DesignStudio</span>
-                                    <span className="mx-2">•</span>
-                                    <MapPin className="w-4 h-4 mr-1 text-indigo-500" />
-                                    <span>Bangalore</span>
-                                </div>
-                                <Badge className="bg-indigo-50 text-indigo-700 mb-4">Full-time</Badge>
-                                <Button
-                                    variant="outline"
-                                    className="w-full border-indigo-300 text-indigo-600 hover:bg-indigo-50"
-                                >
-                                    View Details
-                                </Button>
-                            </div>
-                        </Card>
-                    </div>
-                </div>
+                </div>                
             </div>
         </div>
     );

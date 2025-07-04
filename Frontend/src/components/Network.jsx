@@ -18,7 +18,6 @@ export default function Network() {
     const [search, setSearch] = useState("");
     const [graduationYear, setGraduationYear] = useState("");
     const [major, setMajor] = useState("");
-    const [company, setCompany] = useState("");
     const [networkMembers, setNetworkMembers] = useState([]);
     const [networkStats, setNetworkStats] = useState({});
     const [wait,setWait] = useState(true);
@@ -28,8 +27,8 @@ export default function Network() {
 
     const fetchUsers = async () => {
         try {
-            console.log(search, company, major, graduationYear)
-            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/get-users`, { search, major, company, graduationYear }, { withCredentials: true });
+            console.log(search, major, graduationYear)
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/get-users`, { search, major,  graduationYear }, { withCredentials: true });
             setNetworkMembers(response.data.data.docs)
             console.log(response.data.data);
             setLoading(false)
@@ -53,7 +52,7 @@ export default function Network() {
 
     useEffect(() => {
         fetchUsers();
-    }, [search, major, company, graduationYear])
+    }, [search, major,  graduationYear])
 
     useEffect(() => {
         fetchNetworkStats();
@@ -141,39 +140,26 @@ export default function Network() {
                                 <Filter className="h-5 w-5 mr-2 text-gray-700" />
                                 <h2 className="text-xl font-semibold text-gray-900">Discover Students & Alumni</h2>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="col-span-1 md:col-span-1">
-                                    <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name" className="w-full" />
+                                    <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or company" className="w-full" />
                                 </div>
                                 <div className="col-span-1 md:col-span-1">
                                     <select value={graduationYear} onChange={(e) => setGraduationYear(Number(e.target.value))} className="w-full h-10 px-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                         <option value="">All Years</option>
-                                        <option value="2024">2024</option>
-                                        <option value="2023">2023</option>
-                                        <option value="2022">2022</option>
-                                        <option value="2021">2021</option>
-                                        <option value="2020">2020</option>
+                                        {/* Generate options for the last 100 years */}
+                                        {Array.from({ length: 100 }, (_, i) => 2030 - i).map(year => (
+                                            <option key={year} value={year}>{year}</option>
+                                        ))}
+                                    
                                     </select>
                                 </div>
                                 <div className="col-span-1 md:col-span-1">
                                     <select value={major} onChange={(e) => setMajor(e.target.value)} className="w-full h-10 px-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                         <option value="">All Majors</option>
-                                        <option value="Computer Science">Computer Science</option>
-                                        <option value="Business Administration">Business Administration</option>
-                                        <option value="Design">Design</option>
-                                        <option value="Engineering">Engineering</option>
-                                        <option value="Marketing">Marketing</option>
-                                    </select>
-                                </div>
-                                <div value={company} onChange={(e) => setCompany(e.target.value)} className="col-span-1 md:col-span-1">
-                                    <select className="w-full h-10 px-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                        <option value="">All Companies</option>
-                                        <option value="Google">Google</option>
-                                        <option value="Microsoft">Microsoft</option>
-                                        <option value="Apple">Apple</option>
-                                        <option value="Amazon">Amazon</option>
-                                        <option value="Meta">Meta</option>
-                                        <option value="Tesla">Tesla</option>
+                                        {networkStats.majors.map((major, index) => (
+                                            <option key={index} value={major}>{major}</option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
