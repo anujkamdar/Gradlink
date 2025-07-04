@@ -511,6 +511,7 @@ const getJobById = asyncHandler(async (req, res) => {
         },
         createdAt: 1,
         updatedAt: 1,
+        isAlreadyApplied: { $in: [req.user._id, "$applicants"] },
       },
     },
   ]);
