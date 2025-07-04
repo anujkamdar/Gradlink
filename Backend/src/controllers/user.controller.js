@@ -740,7 +740,7 @@ const getUserJobApplications = asyncHandler(async (req, res) => {
 });
 
 const getUsers = asyncHandler(async (req, res) => {
-  const { search, graduationYear, major, company, page = 1, limit = 30 } = req.body;
+  const { search, graduationYear, major, page = 1, limit = 30 } = req.body;
   const matchstage = {
     college: req.user.college,
   };
@@ -750,12 +750,10 @@ const getUsers = asyncHandler(async (req, res) => {
   if (major) {
     matchstage.major = major;
   }
-  if (company) {
-    matchstage.company = company;
-  }
 
   if (search) {
-    matchstage.fullname = new RegExp(search, "i");
+    const searchRegex = new RegExp(search, "i");
+    matchstage.$or = [{ fullname: searchRegex }, { company: searchRegex }];
   }
 
   const aggregate = User.aggregate([
@@ -1052,7 +1050,7 @@ const getCollegeStats = asyncHandler(async (req, res) => {
         totalJobs,
         totalFundraisers,
         totalPosts,
-        majors : majors.majors || [],
+        majors: majors.majors || [],
       },
       "College stats fetched successfully"
     )
