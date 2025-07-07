@@ -22,6 +22,7 @@ export default function PostJobPage() {
         requiredSkills: []
     });
     const [currentSkill, setCurrentSkill] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -232,6 +233,7 @@ export default function PostJobPage() {
                                         type="button"
                                         variant="outline"
                                         className="mr-2"
+                                        disabled={submitting}
                                     >
                                         Cancel
                                     </Button>

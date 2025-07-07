@@ -887,13 +887,13 @@ function LandingPage() {
                 <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
                   <Mail className="h-4 w-4 text-blue-400" />
                 </div>
-                <span className="text-sm text-slate-300">contact@gradlink.edu</span>
+                <span className="text-sm text-slate-300">anujkamdar2006@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
                   <Phone className="h-4 w-4 text-blue-400" />
                 </div>
-                <span className="text-sm text-slate-300">+91 91193XXXXX</span>
+                <span className="text-sm text-slate-300">+91 9119315581</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
