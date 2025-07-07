@@ -1,21 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, BookmarkIcon, Briefcase, MapPin, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
-import Header from './Header';
+import { 
+  Search, 
+  BookmarkIcon, 
+  Briefcase, 
+  MapPin, 
+  Clock, 
+  User, 
+  ChevronLeft, 
+  ChevronRight,
+  Plus,
+  Building,
+  Calendar,
+  CheckCircle2,
+  Eye,
+  FileText,
+  Share2
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Backend_url } from '@/info';
 
-
-
-
-
 export default function JobsPage() {
   const navigate = useNavigate();
-  const [loading,setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [type, setType] = useState("");
   const [location, setLocation] = useState("");
@@ -24,7 +35,6 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState([]);
   const [user, setUser] = useState(null);
 
-
   // Handle pagination
   const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
   const goToPrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
@@ -32,9 +42,11 @@ export default function JobsPage() {
 
   const getJobPostings = async () => {
     try {
-      // console.log(search, location, type, currentPage);
-      const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/get-job-postings`, { search, location, type, currentPage }, { withCredentials: true })
-      console.log(response.data.data);
+      const response = await axios.post(
+        `${Backend_url}/gradlink/api/v1/users/get-job-postings`, 
+        { search, location, type, currentPage }, 
+        { withCredentials: true }
+      );
       setTotalPages(response.data.data.pages);
       setJobs(response.data.data.jobs);
     } catch (error) {
@@ -52,50 +64,50 @@ export default function JobsPage() {
     }
   };
 
-
   useEffect(() => {
     getCurrentUser();
-  },[])
+  }, []);
+
   useEffect(() => {
     getJobPostings();
   }, [currentPage, search, location, type]);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [search, location, type]);
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return date.toLocaleDateString(undefined, options);
+    return new Date(dateString).toLocaleDateString(undefined, options);
   }
-
   
   if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-            </div>
-        );
-    }
-
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <>
       <div className="bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-6">            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>
-            <div className="mt-4 md:mt-0 flex space-x-3">              {user?.role === 'alumni' && (
-                <Button
-                  variant="outline"
-                  className="flex items-center"
-                  onClick={() => navigate('/tabs/my-jobs')}
-                >
-                  <Briefcase className="mr-1 h-4 w-4" />
-                  My Posted Jobs
-                </Button>
-              )}
-              
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>
+              <div className="mt-4 md:mt-0 flex space-x-3">
+                {user?.role === 'alumni' && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center"
+                    onClick={() => navigate('/tabs/my-jobs')}
+                  >
+                    <Briefcase className="mr-1 h-4 w-4" />
+                    My Posted Jobs
+                  </Button>
+                )}
+                
                 <Button
                   variant="outline"
                   className="flex items-center"
@@ -104,31 +116,41 @@ export default function JobsPage() {
                   <BookmarkIcon className="mr-1 h-4 w-4" />
                   My Applications
                 </Button>
-              
-              {user.role == "alumni" &&<Button
-                variant="outline"
-                className="flex items-center"
-                onClick={() => navigate('/tabs/post-job')}
-              >
-                <Plus className="mr-1 h-4 w-4" />
-                Post a Job
-              </Button>}
-              <Button onClick={() => { getJobPostings() }} className="flex items-center">
-                <Search className="mr-1 h-4 w-4" />
-                Find Jobs
-              </Button>
+                
+                {user.role === "alumni" && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center"
+                    onClick={() => navigate('/tabs/post-job')}
+                  >
+                    <Plus className="mr-1 h-4 w-4" />
+                    Post a Job
+                  </Button>
+                )}
+                <Button onClick={() => { getJobPostings() }} className="flex items-center">
+                  <Search className="mr-1 h-4 w-4" />
+                  Find Jobs
+                </Button>
+              </div>
             </div>
-          </div>
 
             {/* Search and Filter */}
             <Card>
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="md:col-span-2">
-                    <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search jobs by title, company or keyword" />
+                    <Input 
+                      value={search} 
+                      onChange={(e) => setSearch(e.target.value)} 
+                      placeholder="Search jobs by title, company or keyword" 
+                    />
                   </div>
                   <div>
-                    <select value={location} onChange={(e) => setLocation(e.target?.value)} className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select 
+                      value={location} 
+                      onChange={(e) => setLocation(e.target?.value)} 
+                      className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
                       <option value="">All Locations</option>
                       <option value="remote">Remote</option>
                       <option value="delhi">Delhi</option>
@@ -138,7 +160,11 @@ export default function JobsPage() {
                     </select>
                   </div>
                   <div>
-                    <select value={type} onChange={(e) => setType(e.target.value)} className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select 
+                      value={type} 
+                      onChange={(e) => setType(e.target.value)} 
+                      className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
                       <option value="">All Job Types</option>
                       <option value="full-time">Full-time</option>
                       <option value="part-time">Part-time</option>
@@ -149,177 +175,224 @@ export default function JobsPage() {
               </CardContent>
             </Card>
 
-
-            {!jobs && <h1>No jobs for this criteria</h1>}
-
-
-
             {/* Job Listings */}
             <div className="space-y-4">
-              {/* Featured Jobs Section */}
-              <div className="mb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Featured Opportunities</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {jobs && jobs.slice(0, 2).map((job) => (<Card key={job._id}
-                    className="border-l-4 border-l-indigo-600 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+              {/* Section title */}
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Available Opportunities</h3>
+              
+              {/* Loading state */}
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Loading job listings...</p>
+                </div>
+              ) : jobs.length === 0 ? (
+                <Card>
+                  <CardContent className="p-10 text-center">
+                    <div className="flex flex-col items-center justify-center text-gray-500">
+                      <Briefcase className="h-12 w-12 mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Jobs Found</h3>
+                      <p className="mb-4">We couldn't find any jobs matching your criteria. Try adjusting your filters.</p>
+                      <Button onClick={() => { 
+                        setSearch(""); 
+                        setLocation(""); 
+                        setType(""); 
+                      }} className="flex items-center">
+                        <Search className="mr-1 h-4 w-4" />
+                        Clear Filters
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                jobs.map((job) => (
+                  <Card 
+                    key={job._id} 
+                    className="overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 border-l-indigo-500 cursor-pointer"
                     onClick={() => navigate(`/tabs/jobs/${job._id}`)}
                   >
-                    <CardContent className="p-5">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium text-gray-900 text-lg">{job.title}</h4>
-                          <p className="text-sm text-gray-500 mt-1 flex items-center">
-                            <Briefcase className="w-4 h-4 mr-1" />
-                            {job.company}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1 flex items-center">
-                            <MapPin className="w-4 h-4 mr-1" />
-                            {job.location}
-                          </p>
-                          <div className="mt-2 flex items-center">
-                            <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
-                              {job.type}
-                            </Badge>
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <Clock className="w-3 h-3 mr-1" />
-                              Posted {formatDate(job.createdAt)}
-                            </span>
+                    <CardContent className="p-0">
+                      <div className="p-6">
+                        {/* Header Section with Company and Actions */}
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
+                          {/* Left - Company Info */}
+                          <div className="flex items-start space-x-4">
+                            <div className="flex-shrink-0">
+                              <div className="bg-indigo-100 text-indigo-700 rounded-lg p-3 w-12 h-12 flex items-center justify-center">
+                                <Building className="h-6 w-6" />
+                              </div>
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-bold text-gray-900 hover:text-indigo-600 transition-colors">
+                                {job.title}
+                              </h3>
+                              <p className="text-gray-600 flex items-center mt-1">
+                                <Briefcase className="h-4 w-4 mr-1.5 text-indigo-500" />
+                                {job.company}
+                              </p>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-500 mt-2 flex items-center">
-                            <User className="w-3 h-3 mr-1" />
-                            Posted by: {job.postedByDetails[0].fullname}
-                          </p>
+                          
+                          {/* Right - Action Buttons */}
+                          <div className="flex space-x-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/tabs/jobs/${job._id}`);
+                              }}
+                            >
+                              <Eye className="h-4 w-4 mr-1.5" />
+                              View Details
+                            </Button>
+                            
+                            {!job.isAlreadyApplied ? (
+                              <Button 
+                                size="sm" 
+                                className="bg-indigo-600 hover:bg-indigo-700"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/tabs/jobs/${job._id}`);
+                                }}
+                              >
+                                Apply Now
+                              </Button>
+                            ) : (
+                              <Button 
+                                size="sm" 
+                                className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200"
+                                onClick={(e) => e.stopPropagation()}
+                                disabled
+                              >
+                                Already Applied
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                        <Button
-                          size="sm"
-                          className={`${job.isAlreadyApplied ? "bg-gradient-to-r from-green-500 to-green-900 text-white hover:bg-gradient-to-l" : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                            }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/tabs/jobs/${job._id}`);
-                          }}
-                        >
-                          {job.isAlreadyApplied ? "Already Applied" : "Apply Now"}
-                        </Button>
+                        
+                        {/* Status Indicators */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
+                          <div className="flex items-center">
+                            <div className="p-2 bg-blue-100 rounded-full mr-3">
+                              <User className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">Posted By</p>
+                              <p className="text-lg font-bold text-gray-900">{job.postedByDetails[0].fullname}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <div className="p-2 bg-green-100 rounded-full mr-3">
+                              <Calendar className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">Posted On</p>
+                              <p className="text-lg font-bold text-gray-900">{formatDate(job.createdAt)}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <div className="p-2 bg-purple-100 rounded-full mr-3">
+                              <MapPin className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">Location</p>
+                              <p className="text-lg font-bold text-gray-900">{job.location}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Job Description */}
+                        <div className="mb-4">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <FileText className="h-4 w-4 mr-1.5 text-gray-500" />
+                            Description
+                          </h4>
+                          <p className="text-gray-600 text-sm line-clamp-2 pl-6">{job.description}</p>
+                        </div>
+                        
+                        {/* Required Skills Section */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <CheckCircle2 className="h-4 w-4 mr-1.5 text-gray-500" />
+                            Required Skills
+                          </h4>
+                          <div className="pl-6 flex flex-wrap gap-1.5">
+                            {job.requiredSkills.map((skill, index) => (
+                              <Badge key={index} variant="secondary" className="bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
                       </div>
+                      
+                      {/* Card Footer - Job Type & Quick Actions */}
+                      <CardFooter className="bg-gray-50 border-t border-gray-100 px-6 py-3 flex justify-between items-center">
+                        <Badge className={`px-3 py-1 ${
+                          job.type === 'full-time' ? 'bg-blue-100 text-blue-800' : 
+                          job.type === 'part-time' ? 'bg-purple-100 text-purple-800' : 
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {job.type}
+                        </Badge>
+                        
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-600 hover:text-indigo-600"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardFooter>
                     </CardContent>
                   </Card>
-                  ))}
-                </div>
-              </div>
+                ))
+              )}
 
-              {/* All Jobs */}
-              <h3 className="text-lg font-medium text-gray-900 mb-4">All Opportunities</h3>
-              <div className="grid grid-cols-1 gap-4">
-                {jobs && jobs.map((job, index) => {
-                  return (
-                    <Card key={job._id}
-                      className="hover:shadow-md transition-shadow duration-300 overflow-hidden"
-                      onClick={() => { navigate(`/tabs/jobs/${job._id}`) }}
-                    >
-                      <CardContent className="p-0">
-                        <div className="p-5 border-l-4 border-l-transparent hover:border-l-indigo-600 transition-colors duration-300">
-                          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                            <div className="flex items-start space-x-4">
-                              <div className="flex-shrink-0 bg-gray-100 rounded-md p-3 hidden md:block">
-                                <Briefcase className="w-8 h-8 text-indigo-600" />
-                              </div>
-                              <div>
-                                <h4 className="font-medium text-gray-900 text-lg">{job.title}</h4>
-                                <div className="flex flex-wrap items-center gap-2 mt-1">
-                                  <span className="text-sm text-gray-600 flex items-center">
-                                    <Briefcase className="w-4 h-4 mr-1 text-gray-400" />
-                                    {job.company}
-                                  </span>
-                                  <span className="text-sm text-gray-600 flex items-center">
-                                    <MapPin className="w-4 h-4 mr-1 text-gray-400" />
-                                    {job.location}
-                                  </span>
-                                  <span className="text-sm text-gray-600 flex items-center">
-                                    <Clock className="w-4 h-4 mr-1 text-gray-400" />
-                                    {formatDate(job.createdAt)}
-                                  </span>
-                                </div>
-                                <div className="mt-2 flex items-center">
-                                  <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 border-blue-200">
-                                    {job.type}
-                                  </Badge>
-                                  <span className="text-xs text-gray-500 flex items-center">
-                                    <User className="w-3 h-3 mr-1" />
-                                    {job.postedByDetails[0].fullname}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="mt-3 md:mt-0 flex space-x-2">
-                              {/* <Button variant="outline" size="sm" className="flex items-center">
-                              <BookmarkIcon className="mr-1 h-4 w-4" />
-                              Save
-                            </Button> */}
-                              {!job.isAlreadyApplied && (
-                                <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer">Apply Now</Button>
-                              )}
-                              {
-                                job.isAlreadyApplied && (
-                                  // give a good looking button with text "Already Applied"
-                                  // use gradient background
-                                  // greenish pinkish color
-                                  <Button size="sm" className="bg-gradient-to-r from-green-500 to-green-900 text-white hover:bg-gradient-to-l">
-                                    Already Applied
-                                  </Button>
-                                )
-                              }
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
-
-              {/* Pagination */}
-              <div className="flex justify-center items-center mt-8 space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={goToPrevPage}
-                  disabled={currentPage === 1}
-                  className="flex items-center"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="ml-1">Previous</span>
-                </Button>
-
-                <div className="flex items-center space-x-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+              {/* Pagination Controls */}
+              {!loading && jobs.length > 0 && (
+                <div className="flex justify-center mt-6">
+                  <div className="flex items-center space-x-2">
                     <Button
-                      key={number}
-                      variant={currentPage === number ? "default" : "outline"}
+                      variant="outline"
                       size="sm"
-                      onClick={() => goToPage(number)}
-                      className={`w-8 h-8 p-0 ${currentPage === number ? 'bg-indigo-600' : ''}`}
+                      onClick={goToPrevPage}
+                      disabled={currentPage === 1}
                     >
-                      {number}
+                      <ChevronLeft className="h-4 w-4" />
                     </Button>
-                  ))}
+                    {[...Array(totalPages).keys()].map((page) => (
+                      <Button
+                        key={page}
+                        variant={currentPage === page + 1 ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => goToPage(page + 1)}
+                      >
+                        {page + 1}
+                      </Button>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={goToNextPage}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={goToNextPage}
-                  disabled={currentPage === totalPages}
-                  className="flex items-center"
-                >
-                  <span className="mr-1">Next</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }
