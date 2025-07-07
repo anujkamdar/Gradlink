@@ -38,6 +38,7 @@ export default function MyJobsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [jobToDelete, setJobToDelete] = useState(null);
+  const [deleting,setDeleting] = useState(false);
 
   // Handle pagination
   const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
@@ -73,6 +74,7 @@ export default function MyJobsPage() {
     setShowDeleteDialog(true);
   };
   const deleteJob = async () => {
+    setDeleting(true);
     try {
       await axios.post(`${Backend_url}/gradlink/api/v1/users/delete-job`,{jobId : jobToDelete},{withCredentials:true }
       );
@@ -339,8 +341,8 @@ export default function MyJobsPage() {
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={deleteJob}>
-              Delete
+            <Button variant="destructive" onClick={deleteJob} disabled={deleting} >
+              {deleting ? "Deleting..." : "Delete Job"}
             </Button>
           </DialogFooter>
         </DialogContent>

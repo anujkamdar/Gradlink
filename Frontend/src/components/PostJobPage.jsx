@@ -66,14 +66,17 @@ export default function PostJobPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitting(true);
         console.log("Job Form Data:", jobForm);
         try {
-            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/create-job`,jobForm,{withCredentials: true});
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/create-job`, jobForm, { withCredentials: true });
             console.log("Job posted successfully:", response.data);
+            setSubmitting(false);
             navigate("/tabs/jobs")
         } catch (error) {
             console.error("Error posting job:", error);
             alert(error.response.data.message);
+            setSubmitting(false);
         }
     };
 
@@ -114,6 +117,7 @@ export default function PostJobPage() {
                                         placeholder="e.g. Software Engineer"
                                         value={jobForm.title}
                                         onChange={handleInputChange}
+                                        disabled={submitting}
                                         required
                                     />
                                 </div>
@@ -127,6 +131,7 @@ export default function PostJobPage() {
                                         placeholder="e.g. Tech Solutions Inc."
                                         value={jobForm.company}
                                         onChange={handleInputChange}
+                                        disabled={submitting}
                                         required
                                     />
                                 </div>
@@ -136,21 +141,17 @@ export default function PostJobPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="location">Location</Label>
-                                        <select
+
+                                        <Input
                                             id="location"
                                             name="location"
-                                            className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                             value={jobForm.location}
                                             onChange={handleInputChange}
+                                            placeholder="e.g. Remote, Delhi, Mumbai"
+                                            disabled={submitting}
                                             required
-                                        >
-                                            <option value="">Select Location</option>
-                                            <option value="Remote">Remote</option>
-                                            <option value="Delhi">Delhi</option>
-                                            <option value="Mumbai">Mumbai</option>
-                                            <option value="Bangalore">Bangalore</option>
-                                            <option value="Other">Other</option>
-                                        </select>
+                                            className="w-full h-10 px-3 border border-gray-300 rounded-md"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="type">Job Type</Label>
@@ -160,6 +161,7 @@ export default function PostJobPage() {
                                             className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                             value={jobForm.type}
                                             onChange={handleInputChange}
+                                            disabled={submitting}
                                             required
                                         >
                                             <option value="">Select Job Type</option>
@@ -179,6 +181,7 @@ export default function PostJobPage() {
                                         placeholder="Describe the role, responsibilities, qualifications, etc."
                                         value={jobForm.description}
                                         onChange={handleInputChange}
+                                        disabled={submitting}
                                         rows={6}
                                         required
                                     />
@@ -196,9 +199,11 @@ export default function PostJobPage() {
                                             onChange={(e) => setCurrentSkill(e.target.value)}
                                             onKeyPress={handleSkillKeyPress}
                                             className="flex-grow"
+                                            disabled={submitting}
                                         />
                                         <Button
                                             type="button"
+                                            disabled={submitting}
                                             onClick={addSkill}
                                             className="ml-2"
                                         >
@@ -217,6 +222,7 @@ export default function PostJobPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => removeSkill(skill)}
+                                                        disabled={submitting}
                                                         className="ml-1 text-blue-700 hover:text-blue-900"
                                                     >
                                                         <X className="h-3 w-3" />
@@ -234,10 +240,11 @@ export default function PostJobPage() {
                                         variant="outline"
                                         className="mr-2"
                                         disabled={submitting}
+                                        onClick={() => navigate("/tabs/jobs")}
                                     >
                                         Cancel
                                     </Button>
-                                    <Button type="submit">Post Job</Button>
+                                    <Button type="submit" disabled={submitting}>{submitting ? "Posting Job...." : "Post Job"}</Button>
                                 </div>
                             </form>
                         </CardContent>
