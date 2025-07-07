@@ -460,9 +460,7 @@ const getJobPostings = asyncHandler(async (req, res) => {
     },
   ]);
 
-  if (aggregate.length === 0) {
-    return res.status(200).json(new ApiResponse(404, [], "No job postings found for the given criteria"));
-  }
+
   return res.status(200).json(
     new ApiResponse(
       200,
