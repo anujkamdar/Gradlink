@@ -77,6 +77,11 @@ userRouter.route("/toggle-like").post(verifyJwt, toggleLike);
 userRouter.route("/add-comment").post(verifyJwt, addComment);
 userRouter.route("/get-comments").post(verifyJwt, getComments);
 
+
+userRouter.route("/ping").get((req, res) => {
+  res.status(200).send("Pong");
+});
+
 // Alum Only Routes
 
 export default userRouter;

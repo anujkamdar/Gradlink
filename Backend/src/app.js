@@ -4,26 +4,20 @@ import cors from "cors";
 import { ApiError } from "./utils/ApiError.js";
 
 const app = express();
-
-// Middleware to parse JSON and URL-encoded data
-// Middleware to handle cookies
 app.use(
   cors({
-    origin: ["http://localhost:5173","https://gradlink-neon.vercel.app"],
+    origin: ["http://localhost:5173", "https://gradlink-neon.vercel.app"],
     credentials: true,
   })
 );
 
-
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(CookieParser());
 
 // initialize user routes
 import userRouter from "./routes/user.routes.js";
 app.use("/gradlink/api/v1/users", userRouter);
-
-export { app };
 
 app.use((err, req, res, next) => {
   let customError = err;
@@ -45,3 +39,6 @@ app.use((err, req, res, next) => {
     stack: process.env.NODE_ENV === "development" ? customError.stack : undefined,
   });
 });
+
+export { app };
+
