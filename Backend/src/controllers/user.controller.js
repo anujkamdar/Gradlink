@@ -11,9 +11,9 @@ import { College } from "../models/College.model.js";
 import { Fundraiser } from "../models/Fundraiser.model.js";
 import { Post } from "../models/Post.model.js";
 import { Comment } from "../models/Comment.model.js";
+import { Donation } from "../models/Donation.model.js";
 import Stripe from "stripe";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const options = {
   httpOnly: true,
@@ -1084,7 +1084,7 @@ const createPaymentIntent = asyncHandler(async (req, res) => {
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100, 
+      amount: amount * 100,
       currency: "inr",
       metadata: {
         fundraiserId: fundraiserId,
@@ -1098,6 +1098,48 @@ const createPaymentIntent = asyncHandler(async (req, res) => {
   } catch (error) {
     throw new ApiError(500, error.message || "Failed to create payment intent");
   }
+});
+
+const saveDonation = asyncHandler(async (req, res) => {
+  const { fundraiserId, amount, paymentIntentId } = req.body;
+  if (!fundraiserId || !amount || !paymentIntentId) {
+    throw new ApiError(400, "Fundraiser ID, amount, and payment intent ID are required");
+  }
+
+  // Verify the payment intent status with Stripe
+  try {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    
+    if (paymentIntent.status !== 'succeeded') {
+      throw new ApiError(400, "Payment has not been completed successfully");
+    }
+    
+    // Verify the amount matches
+    if (paymentIntent.amount !== amount * 100) {
+      throw new ApiError(400, "Payment amount doesn't match the donation amount");
+    }
+  } catch (error) {
+    throw new ApiError(500, `Failed to verify payment intent: ${error.message}`);
+  }
+  
+  const donation = await Donation.create({
+    fundraiser: fundraiserId,
+    donor: req.user._id,
+    amount: amount,
+    paymentIntentId: paymentIntentId,
+    college: req.user.college,
+  });
+
+  if (!donation) {
+    throw new ApiError(500, "Failed to save donation");
+  }
+
+  // Update the fundraiser's total amount raised
+  await Fundraiser.findByIdAndUpdate(fundraiserId, {
+    $inc: { currentAmount: amount },
+  });
+
+  return res.status(201).json(new ApiResponse(201, donation, "Donation saved successfully"));
 });
 
 export {
@@ -1129,4 +1171,5 @@ export {
   getComments,
   getCollegeStats,
   createPaymentIntent,
+  saveDonation,
 };

@@ -29,6 +29,7 @@ import {
   addComment,
   getComments,
   createPaymentIntent,
+  saveDonation,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 import { verifyAlum } from "../middlewares/verifyalum.middleware.js";
@@ -78,7 +79,7 @@ userRouter.route("/toggle-like").post(verifyJwt, toggleLike);
 userRouter.route("/add-comment").post(verifyJwt, addComment);
 userRouter.route("/get-comments").post(verifyJwt, getComments);
 userRouter.route("/create-payment-intent").post(verifyJwt, createPaymentIntent);
-
+userRouter.route("/save-donation").post(verifyJwt, saveDonation);
 
 userRouter.route("/ping").get((req, res) => {
   res.status(200).send("Pong");
