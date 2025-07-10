@@ -11,6 +11,9 @@ import { College } from "../models/College.model.js";
 import { Fundraiser } from "../models/Fundraiser.model.js";
 import { Post } from "../models/Post.model.js";
 import { Comment } from "../models/Comment.model.js";
+import Stripe from "stripe";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
 
 const options = {
   httpOnly: true,
@@ -459,7 +462,6 @@ const getJobPostings = asyncHandler(async (req, res) => {
       $limit: parseInt(limit), // limit the number of documents returned
     },
   ]);
-
 
   return res.status(200).json(
     new ApiResponse(
@@ -1056,6 +1058,48 @@ const getCollegeStats = asyncHandler(async (req, res) => {
   );
 });
 
+const createPaymentIntent = asyncHandler(async (req, res) => {
+  const { fundraiserId, amount } = req.body;
+
+  if (!fundraiserId || !amount) {
+    throw new ApiError(400, "Fundraiser ID and amount are required");
+  }
+
+  if (amount <= 0) {
+    throw new ApiError(400, "Amount must be greater than 0");
+  }
+
+  if (!mongoose.isValidObjectId(fundraiserId)) {
+    throw new ApiError(400, "Invalid fundraiser ID format");
+  }
+
+  const fundraiser = await Fundraiser.findById(fundraiserId);
+  if (!fundraiser) {
+    throw new ApiError(404, "Fundraiser not found");
+  }
+
+  if (fundraiser.college.toString() !== req.user.college.toString()) {
+    throw new ApiError(403, "You are not allowed to donate to this fundraiser");
+  }
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount * 100, 
+      currency: "inr",
+      metadata: {
+        fundraiserId: fundraiserId,
+        userId: req.user._id.toString(),
+      },
+    });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { clientSecret: paymentIntent.client_secret }, "Payment intent created successfully"));
+  } catch (error) {
+    throw new ApiError(500, error.message || "Failed to create payment intent");
+  }
+});
+
 export {
   registerUser,
   loginUser,
@@ -1084,4 +1128,5 @@ export {
   addComment,
   getComments,
   getCollegeStats,
+  createPaymentIntent,
 };
