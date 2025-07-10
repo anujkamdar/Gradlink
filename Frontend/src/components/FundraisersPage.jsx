@@ -5,11 +5,15 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Backend_url } from "@/info";
+import DonationModal from "./DonationModal";
+import StripeProvider from "./StripeProvider";
 
 export default function FundraisersPage() {
     const [fundraisers, setFundraisers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedFundraiser, setSelectedFundraiser] = useState(null);
+    const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchFundraisers = async () => {
@@ -40,6 +44,27 @@ export default function FundraisersPage() {
             currency: 'INR',
             maximumFractionDigits: 0
         }).format(amount);
+    };
+
+    const handleDonateClick = (fundraiser) => {
+        setSelectedFundraiser(fundraiser);
+        setIsDonationModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsDonationModalOpen(false);
+        // Refetch fundraisers to get updated amounts after donation
+        const fetchFundraisers = async () => {
+            try {
+                const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/get-fundraisers`,
+                    { withCredentials: true }
+                );
+                setFundraisers(response.data.data);
+            } catch (error) {
+                console.log("Error fetching fundraisers:", error.response?.data?.message || error.message);
+            }
+        };
+        fetchFundraisers();
     };
 
 
@@ -131,7 +156,11 @@ export default function FundraisersPage() {
                                 </div>
                             </CardContent>
                             <CardFooter className="bg-gray-50 border-t border-gray-100 p-4">
-                                <Button className="w-full" size="sm">
+                                <Button 
+                                    className="w-full" 
+                                    size="sm" 
+                                    onClick={() => handleDonateClick(fundraiser)}
+                                >
                                     <DollarSign className="h-4 w-4 mr-1" />
                                     Donate Now
                                 </Button>
@@ -140,6 +169,17 @@ export default function FundraisersPage() {
                     ))}
                 </div>
             </div>
+            
+            {/* Wrap the DonationModal with StripeProvider */}
+            {selectedFundraiser && (
+                <StripeProvider>
+                    <DonationModal 
+                        isOpen={isDonationModalOpen} 
+                        onClose={handleCloseModal} 
+                        fundraiser={selectedFundraiser} 
+                    />
+                </StripeProvider>
+            )}
         </div>
     );
 }

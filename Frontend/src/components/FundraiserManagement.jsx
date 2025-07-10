@@ -27,6 +27,7 @@ function FundraiserManagement() {
         description: "",
         targetAmount: "",
         coverImage: null,
+        category: ""
     });
     const [isAddingFundraiser, setIsAddingFundraiser] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,10 +76,15 @@ function FundraiserManagement() {
                 alert("Target amount must be greater than 0");
                 return;
             }
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/create-fundraiser`, formDataToSubmit, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                },
+                withCredentials: true
+            });
 
-            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/create-fundraiser`, formDataToSubmit, { withCredentials: true })
             console.log("Fundraiser created:", response.data);
-            setFundraisers([...fundraisers, response.data]);
+            setFundraisers([...fundraisers, response.data.data]);
             alert("Fundraiser created successfully!");
             setIsAddingFundraiser(false);
             setIsSubmitting(false);
@@ -87,6 +93,7 @@ function FundraiserManagement() {
                 description: "",
                 targetAmount: "",
                 coverImage: null,
+                category: ""
             });
         } catch (error) {
             alert(error.response?.data?.message || "Failed to create fundraiser");
@@ -106,7 +113,14 @@ function FundraiserManagement() {
                 <Dialog open={isAddingFundraiser} onOpenChange={(state) => {
                     setIsAddingFundraiser(state);
                     if (!state) {
-                        setFormData({ ...formData, coverImage: null })
+                        setFormData({
+                            title: "",
+                            description: "",
+                            targetAmount: "",
+                            coverImage: null,
+                            coverImagePreview: null,
+                            category: ""
+                        });
                     }
                 }}>
                     <DialogTrigger asChild>
@@ -190,22 +204,24 @@ function FundraiserManagement() {
                                         if (file) {
                                             setFormData({
                                                 ...formData,
-                                                coverImage: URL.createObjectURL(file)
+                                                coverImage: file,
+                                                coverImagePreview: URL.createObjectURL(file)
                                             });
                                         } else {
                                             setFormData({
                                                 ...formData,
-                                                coverImage: null
+                                                coverImage: null,
+                                                coverImagePreview: null
                                             });
                                         }
                                     }}
                                     className="mt-1"
                                     disabled={isSubmitting}
                                 />
-                                {formData.coverImage && (
+                                {formData.coverImagePreview && (
                                     <div className="mt-2">
                                         <img
-                                            src={formData.coverImage}
+                                            src={formData.coverImagePreview}
                                             alt="Cover"
                                             className="h-32 w-full object-cover rounded-md"
                                             onError={(e) => {
