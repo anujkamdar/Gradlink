@@ -1177,26 +1177,31 @@ const getMyDonations = asyncHandler(async (req, res) => {
       },
     },
     {
-      $sort: { createdAt: -1 }, 
-    }
+      $sort: { createdAt: -1 },
+    },
   ]);
 
   return res.status(200).json(new ApiResponse(200, donations, "My donations fetched successfully"));
 });
 
-const getHomePageData = asyncHandler(async (req,res) => {
+const getHomePageData = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const collegeId = req.user.college;
 
-
-  const jobsPromise = Job.find({ college: collegeId }).sort({ createdAt: -1 }).limit(4).populate("postedBy", "fullname avatar position company");
-  const postsPromise = Post.find({ college: collegeId }).sort({ createdAt: -1 }).limit(4).populate("author", "fullname avatar");
+  const jobsPromise = Job.find({ college: collegeId })
+    .sort({ createdAt: -1 })
+    .limit(4)
+    .populate("postedBy", "fullname avatar position company");
+  const postsPromise = Post.find({ college: collegeId })
+    .sort({ createdAt: -1 })
+    .limit(4)
+    .populate("author", "fullname avatar");
   const donationsPromise = Donation.find({ college: collegeId })
     .sort({ createdAt: -1 })
     .limit(4)
     .populate("fundraiser", "title coverImage")
     .populate("donor", "fullname avatar");
-  
+
   const totalUsersPromise = User.countDocuments({ college: collegeId });
   const totalAlumniPromise = User.countDocuments({ college: collegeId, role: "alumni" });
   const totalStudentsPromise = User.countDocuments({ college: collegeId, role: "student" });
@@ -1204,36 +1209,40 @@ const getHomePageData = asyncHandler(async (req,res) => {
   const totalPostsPromise = Post.countDocuments({ college: collegeId });
   const totalDonationsPromise = Donation.countDocuments({ college: collegeId });
 
+  const [jobs, posts, donations, totalUsers, totalAlumni, totalStudents, totalJobs, totalPosts, totalDonations] =
+    await Promise.all([
+      jobsPromise,
+      postsPromise,
+      donationsPromise,
+      totalUsersPromise,
+      totalAlumniPromise,
+      totalStudentsPromise,
+      totalJobsPromise,
+      totalPostsPromise,
+      totalDonationsPromise,
+    ]);
 
-  const [jobs, posts, donations, totalUsers, totalAlumni, totalStudents, totalJobs, totalPosts, totalDonations] = await Promise.all([
-    jobsPromise,
-    postsPromise,
-    donationsPromise,
-    totalUsersPromise,
-    totalAlumniPromise,
-    totalStudentsPromise,
-    totalJobsPromise,
-    totalPostsPromise,
-    totalDonationsPromise
-  ]);
-
-  return res.status(200).json(new ApiResponse(200, {
-    user:req.user,
-    jobs,
-    posts,
-    donations,
-    totalUsers,
-    totalAlumni,
-    totalStudents,
-    totalJobs,
-    totalPosts,
-    totalDonations
-  }, "Home page data fetched successfully"));
-})
-
-
-
-
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        user: req.user,
+        jobs,
+        posts,
+        donations,
+        networkStats: {
+          totalUsers,
+          totalAlumni,
+          totalStudents,
+          totalJobs,
+          totalPosts,
+          totalDonations,
+        },
+      },
+      "Home page data fetched successfully"
+    )
+  );
+});
 
 export {
   registerUser,
@@ -1266,5 +1275,5 @@ export {
   createPaymentIntent,
   saveDonation,
   getMyDonations,
-  getHomePageData
+  getHomePageData,
 };
