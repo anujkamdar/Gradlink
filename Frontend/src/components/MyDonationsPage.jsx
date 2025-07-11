@@ -222,7 +222,7 @@ export default function MyDonationsPage() {
                                             <div className="flex items-center text-gray-500 text-sm pt-2">
                                                 <div className="flex items-center">
                                                     <DollarSignIcon className="h-4 w-4 mr-1 text-emerald-500" />
-                                                    <span>Transaction ID: {donation.paymentIntentId}</span>
+                                                    <span>Transaction ID: {donation._id}</span>
                                                 </div>
                                             </div>
                                         </div>

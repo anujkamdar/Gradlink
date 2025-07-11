@@ -15,12 +15,12 @@ export default function Network() {
 
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+    const [waiting, setWaiting] = useState(true);
     const [search, setSearch] = useState("");
     const [graduationYear, setGraduationYear] = useState("");
     const [major, setMajor] = useState("");
     const [networkMembers, setNetworkMembers] = useState([]);
-    const [networkStats, setNetworkStats] = useState({});
-    const [wait,setWait] = useState(true);
+    const [majors, setMajors] = useState([]);
 
 
 
@@ -28,7 +28,7 @@ export default function Network() {
     const fetchUsers = async () => {
         try {
             console.log(search, major, graduationYear)
-            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/get-users`, { search, major,  graduationYear }, { withCredentials: true });
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/get-users`, { search, major, graduationYear }, { withCredentials: true });
             setNetworkMembers(response.data.data.docs)
             console.log(response.data.data);
             setLoading(false)
@@ -38,32 +38,36 @@ export default function Network() {
         }
     }
 
-    const fetchNetworkStats = async () => {
+    const fetchMajors = async () => {
         try {
-            const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/get-college-stats`, { withCredentials: true });
+            const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/get-majors`, { withCredentials: true });
             console.log(response.data.data);
-            setNetworkStats(response.data.data)
-            setWait(false);
+            setMajors(response.data.data);
+            setWaiting(false);
         } catch (error) {
             console.log(error.response?.data?.message || "Something went wrong")
+            setWaiting(false);
         }
     }
 
 
+
     useEffect(() => {
         fetchUsers();
-    }, [search, major,  graduationYear])
+    }, [search, major, graduationYear])
 
     useEffect(() => {
-        fetchNetworkStats();
-    },[])
+        fetchMajors();
+    }, [])
 
 
 
 
 
 
-    if (loading || wait) {
+
+
+    if (loading || waiting) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-blue-500"></div>
@@ -86,54 +90,6 @@ export default function Network() {
                             </p>
                         </div>
 
-                        {/* Network Stats */}
-                        <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-4 gap-4">
-                            <Card className="bg-white">
-                                <CardContent className="p-5 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600">Total Members</p>
-                                        <p className="text-3xl font-bold">{networkStats.totalUsers}</p>
-                                    </div>
-                                    <div className="bg-blue-100 p-3 rounded-full">
-                                        <Users className="h-6 w-6 text-blue-600" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-white">
-                                <CardContent className="p-5 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600">Students</p>
-                                        <p className="text-3xl font-bold">{networkStats.totalStudents}</p>
-                                    </div>
-                                    <div className="bg-green-100 p-3 rounded-full">
-                                        <User className="h-6 w-6 text-green-600" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-white">
-                                <CardContent className="p-5 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600">Alumni</p>
-                                        <p className="text-3xl font-bold">{networkStats.totalAlumni}</p>
-                                    </div>
-                                    <div className="bg-purple-100 p-3 rounded-full">
-                                        <User className="h-6 w-6 text-purple-600" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-white">
-                                <CardContent className="p-5 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600">Jobs Posted</p>
-                                        <p className="text-3xl font-bold">{networkStats.totalJobs}</p>
-                                    </div>
-                                    <div className="bg-orange-100 p-3 rounded-full">
-                                        <Building className="h-6 w-6 text-orange-600" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
                         {/* Filters and Search */}
                         <div>
                             <div className="flex items-center mb-4">
@@ -151,13 +107,13 @@ export default function Network() {
                                         {Array.from({ length: 100 }, (_, i) => 2030 - i).map(year => (
                                             <option key={year} value={year}>{year}</option>
                                         ))}
-                                    
+
                                     </select>
                                 </div>
                                 <div className="col-span-1 md:col-span-1">
                                     <select value={major} onChange={(e) => setMajor(e.target.value)} className="w-full h-10 px-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                         <option value="">All Majors</option>
-                                        {networkStats.majors.map((major, index) => (
+                                        {majors.map((major, index) => (
                                             <option key={index} value={major}>{major}</option>
                                         ))}
                                     </select>
