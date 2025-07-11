@@ -3,14 +3,14 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  BookmarkIcon, 
-  Briefcase, 
-  MapPin, 
-  Clock, 
-  User, 
-  ChevronLeft, 
+import {
+  Search,
+  BookmarkIcon,
+  Briefcase,
+  MapPin,
+  Clock,
+  User,
+  ChevronLeft,
   ChevronRight,
   Plus,
   Building,
@@ -43,8 +43,8 @@ export default function JobsPage() {
   const getJobPostings = async () => {
     try {
       const response = await axios.post(
-        `${Backend_url}/gradlink/api/v1/users/get-job-postings`, 
-        { search, location, type, currentPage }, 
+        `${Backend_url}/gradlink/api/v1/users/get-job-postings`,
+        { search, location, type, currentPage },
         { withCredentials: true }
       );
       setTotalPages(response.data.data.pages);
@@ -80,7 +80,7 @@ export default function JobsPage() {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   }
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -107,7 +107,7 @@ export default function JobsPage() {
                     My Posted Jobs
                   </Button>
                 )}
-                
+
                 <Button
                   variant="outline"
                   className="flex items-center"
@@ -116,7 +116,7 @@ export default function JobsPage() {
                   <BookmarkIcon className="mr-1 h-4 w-4" />
                   My Applications
                 </Button>
-                
+
                 {user.role === "alumni" && (
                   <Button
                     variant="outline"
@@ -139,16 +139,16 @@ export default function JobsPage() {
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="md:col-span-2">
-                    <Input 
-                      value={search} 
-                      onChange={(e) => setSearch(e.target.value)} 
-                      placeholder="Search jobs by title, company or keyword" 
+                    <Input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search jobs by title, company or keyword"
                     />
                   </div>
                   <div>
-                    <select 
-                      value={location} 
-                      onChange={(e) => setLocation(e.target?.value)} 
+                    <select
+                      value={location}
+                      onChange={(e) => setLocation(e.target?.value)}
                       className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="">All Locations</option>
@@ -160,9 +160,9 @@ export default function JobsPage() {
                     </select>
                   </div>
                   <div>
-                    <select 
-                      value={type} 
-                      onChange={(e) => setType(e.target.value)} 
+                    <select
+                      value={type}
+                      onChange={(e) => setType(e.target.value)}
                       className="w-full h-10 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="">All Job Types</option>
@@ -179,7 +179,7 @@ export default function JobsPage() {
             <div className="space-y-4">
               {/* Section title */}
               <h3 className="text-lg font-medium text-gray-900 mb-4">Available Opportunities</h3>
-              
+
               {/* Loading state */}
               {loading ? (
                 <div className="text-center py-8">
@@ -193,10 +193,10 @@ export default function JobsPage() {
                       <Briefcase className="h-12 w-12 mb-4" />
                       <h3 className="text-lg font-semibold mb-2">No Jobs Found</h3>
                       <p className="mb-4">We couldn't find any jobs matching your criteria. Try adjusting your filters.</p>
-                      <Button onClick={() => { 
-                        setSearch(""); 
-                        setLocation(""); 
-                        setType(""); 
+                      <Button onClick={() => {
+                        setSearch("");
+                        setLocation("");
+                        setType("");
                       }} className="flex items-center">
                         <Search className="mr-1 h-4 w-4" />
                         Clear Filters
@@ -206,10 +206,9 @@ export default function JobsPage() {
                 </Card>
               ) : (
                 jobs.map((job) => (
-                  <Card 
-                    key={job._id} 
-                    className="overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 border-l-indigo-500 cursor-pointer"
-                    onClick={() => navigate(`/tabs/jobs/${job._id}`)}
+                  <Card
+                    key={job._id}
+                    className="overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 border-l-indigo-500"
                   >
                     <CardContent className="p-0">
                       <div className="p-6">
@@ -232,12 +231,12 @@ export default function JobsPage() {
                               </p>
                             </div>
                           </div>
-                          
+
                           {/* Right - Action Buttons */}
                           <div className="flex space-x-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               className="border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -247,10 +246,10 @@ export default function JobsPage() {
                               <Eye className="h-4 w-4 mr-1.5" />
                               View Details
                             </Button>
-                            
+
                             {!job.isAlreadyApplied ? (
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 className="bg-indigo-600 hover:bg-indigo-700"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -260,8 +259,8 @@ export default function JobsPage() {
                                 Apply Now
                               </Button>
                             ) : (
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200"
                                 onClick={(e) => e.stopPropagation()}
                                 disabled
@@ -271,7 +270,7 @@ export default function JobsPage() {
                             )}
                           </div>
                         </div>
-                        
+
                         {/* Status Indicators */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
                           <div className="flex items-center">
@@ -283,7 +282,7 @@ export default function JobsPage() {
                               <p className="text-lg font-bold text-gray-900">{job.postedByDetails[0].fullname}</p>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center">
                             <div className="p-2 bg-green-100 rounded-full mr-3">
                               <Calendar className="h-5 w-5 text-green-600" />
@@ -293,7 +292,7 @@ export default function JobsPage() {
                               <p className="text-lg font-bold text-gray-900">{formatDate(job.createdAt)}</p>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center">
                             <div className="p-2 bg-purple-100 rounded-full mr-3">
                               <MapPin className="h-5 w-5 text-purple-600" />
@@ -304,7 +303,7 @@ export default function JobsPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Job Description */}
                         <div className="mb-4">
                           <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
@@ -313,7 +312,7 @@ export default function JobsPage() {
                           </h4>
                           <p className="text-gray-600 text-sm line-clamp-2 pl-6">{job.description}</p>
                         </div>
-                        
+
                         {/* Required Skills Section */}
                         <div>
                           <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
@@ -321,29 +320,36 @@ export default function JobsPage() {
                             Required Skills
                           </h4>
                           <div className="pl-6 flex flex-wrap gap-1.5">
+                            {/* Map through required skills and display badges on basis if that skill present in user or not*/}
                             {job.requiredSkills.map((skill, index) => (
-                              <Badge key={index} variant="secondary" className="bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100">
+                              <Badge
+                                key={index}
+                                className={`px-3 py-1 ${user?.skills?.includes(skill) ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100'}`}
+                              >
                                 {skill}
                               </Badge>
                             ))}
+
+
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Card Footer - Job Type & Quick Actions */}
                       <CardFooter className="bg-gray-50 border-t border-gray-100 px-6 py-3 flex justify-between items-center">
-                        <Badge className={`px-3 py-1 ${
-                          job.type === 'full-time' ? 'bg-blue-100 text-blue-800' : 
-                          job.type === 'part-time' ? 'bg-purple-100 text-purple-800' : 
-                          'bg-green-100 text-green-800'
-                        }`}>
+                        <Badge className={`px-3 py-1 text-[12px] ${job.type == 'full-time' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow-lg shadow-emerald-500/25 px-4 py-2 transition-all duration-200' :
+                          job.type === 'part-time' ? 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white border-0 shadow-lg shadow-blue-500/25 px-4 py-2 transition-all duration-200' :
+                            'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 shadow-lg shadow-purple-500/25 px-4 py-2 transition-all duration-200'
+                          }`}>
+                          <span className={`w-2 h-2 rounded-full mr-2 animate-pulse ${job.type == 'full-time' ? "bg-emerald-200" : job.type == "part-time" ? "bg-blue-200" : "bg-purple-200"}`}></span>
                           {job.type}
                         </Badge>
-                        
+
+
                         <div className="flex space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className="text-gray-600 hover:text-indigo-600"
                             onClick={(e) => e.stopPropagation()}
                           >

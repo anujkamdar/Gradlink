@@ -105,8 +105,20 @@ export default function FundraisersPage() {
         <div className="bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Fundraisers</h1>
-                    <p className="text-gray-600">Support initiatives from your alma mater and make a difference.</p>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Fundraisers</h1>
+                            <p className="text-gray-600">Support initiatives from your alma mater and make a difference.</p>
+                        </div>
+                        <Button
+                            variant="outline"
+                            onClick={() => window.location.href = '/tabs/my-donations'}
+                            className="flex items-center mt-4 md:mt-0 border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                        >
+                            <DollarSign className="h-4 w-4 mr-2" />
+                            View My Donations
+                        </Button>
+                    </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {fundraisers.map((fundraiser) => (

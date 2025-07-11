@@ -94,6 +94,12 @@ export default function Header() {
                             >
                                 Posts
                             </NavLink>
+                            <NavLink
+                                to="/tabs/my-donations"
+                                className={({ isActive }) => `${isActive ? "text-indigo-600 border-indigo-600" : "text-gray-500 border-transparent hover:text-gray-700"} border-b-2 px-1 py-2 text-sm font-medium`}
+                            >
+                                My Donations
+                            </NavLink>
                             {/* <NavLink
                                 to="/tabs/events"
                                 className={({ isActive }) => `${isActive ? "text-indigo-600 border-indigo-600" : "text-gray-500 border-transparent hover:text-gray-700"} border-b-2 px-1 py-2 text-sm font-medium`}
@@ -187,6 +193,15 @@ export default function Header() {
                             className={`text-gray-500 block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
                         >
                             Posts
+                        </button>
+                        <button
+                            onClick={() => {
+                                setIsMobileMenuOpen(false);
+                                navigate("/tabs/my-donations")
+                            }}
+                            className={`text-gray-500 block px-3 py-2 rounded-md text-base font-medium w-full text-left`}
+                        >
+                            My Donations
                         </button>
                         {/* <button
                             onClick={() => {

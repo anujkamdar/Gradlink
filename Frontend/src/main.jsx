@@ -19,6 +19,7 @@ import CollegeRegisterPage from './components/CollegeRegisterPage'
 import AdminDashboard from './components/AdminDashboard'
 import FundraisersPage from './components/FundraisersPage'
 import PostsPage from './components/PostsPage'
+import MyDonationsPage from './components/MyDonationsPage'
 
 const router = createBrowserRouter([{
   path: "/",
@@ -87,6 +88,10 @@ const router = createBrowserRouter([{
         {
           path: "posts",
           element: <PostsPage />
+        },
+        {
+          path: "my-donations",
+          element: <MyDonationsPage />
         },
       ]
     },
