@@ -1109,11 +1109,11 @@ const saveDonation = asyncHandler(async (req, res) => {
   // Verify the payment intent status with Stripe
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    
-    if (paymentIntent.status !== 'succeeded') {
+
+    if (paymentIntent.status !== "succeeded") {
       throw new ApiError(400, "Payment has not been completed successfully");
     }
-    
+
     // Verify the amount matches
     if (paymentIntent.amount !== amount * 100) {
       throw new ApiError(400, "Payment amount doesn't match the donation amount");
@@ -1121,7 +1121,7 @@ const saveDonation = asyncHandler(async (req, res) => {
   } catch (error) {
     throw new ApiError(500, `Failed to verify payment intent: ${error.message}`);
   }
-  
+
   const donation = await Donation.create({
     fundraiser: fundraiserId,
     donor: req.user._id,
@@ -1141,6 +1141,49 @@ const saveDonation = asyncHandler(async (req, res) => {
 
   return res.status(201).json(new ApiResponse(201, donation, "Donation saved successfully"));
 });
+
+const getMyDonations = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const donations = await Donation.aggregate([
+    {
+      $match: {
+        donor: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "fundraisers",
+        localField: "fundraiser",
+        foreignField: "_id",
+        as: "fundraiserDetails",
+      },
+    },
+    {
+      $addFields: {
+        fundraiserDetails: {
+          $arrayElemAt: ["$fundraiserDetails", 0],
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        amount: 1,
+        paymentIntentId: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        fundraiserDetails: 1,
+      },
+    },
+  ]);
+
+  return res.status(200).json(new ApiResponse(200, donations, "My donations fetched successfully"));
+});
+
+
+
+
 
 export {
   registerUser,
@@ -1172,4 +1215,5 @@ export {
   getCollegeStats,
   createPaymentIntent,
   saveDonation,
+  getMyDonations,
 };
