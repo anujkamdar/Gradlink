@@ -109,10 +109,10 @@ export default function Header() {
                         </nav>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <button className="relative p-1 rounded-full text-gray-400 hover:text-gray-500">
+                        {/* <button className="relative p-1 rounded-full text-gray-400 hover:text-gray-500">
                             <Bell className="h-6 w-6" />
                             <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-                        </button>
+                        </button> */}
                         <div className="hidden md:flex items-center space-x-2">
                             <div
                                 className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer"

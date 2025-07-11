@@ -71,6 +71,11 @@ function ProfilePage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    if (name === 'graduationYear' || name === 'major') {
+      return;
+    }
+    
     setUserData(prev => ({
       ...prev,
       [name]: value
@@ -306,9 +311,10 @@ function ProfilePage() {
                           name="graduationYear"
                           type="number"
                           value={userData.graduationYear || ''}
-                          onChange={handleInputChange}
                           className="border-purple-200 focus:border-purple-500"
+                          disabled
                         />
+                        <p className="text-xs text-gray-500">Graduation year cannot be changed</p>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="major">Major/Field of Study</Label>
@@ -316,10 +322,11 @@ function ProfilePage() {
                           id="major"
                           name="major"
                           value={userData.major || ''}
-                          onChange={handleInputChange}
                           className="border-purple-200 focus:border-purple-500"
                           placeholder="e.g., Computer Science"
+                          disabled
                         />
+                        <p className="text-xs text-gray-500">Major cannot be changed</p>
                       </div>
                     </>
                   ) : (
