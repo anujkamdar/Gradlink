@@ -32,6 +32,7 @@ import {
   saveDonation,
   getMyDonations,
   getHomePageData,
+  getMajors,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 import { verifyAlum } from "../middlewares/verifyalum.middleware.js";
@@ -84,6 +85,7 @@ userRouter.route("/create-payment-intent").post(verifyJwt, createPaymentIntent);
 userRouter.route("/save-donation").post(verifyJwt, saveDonation);
 userRouter.route("/get-my-donations").get(verifyJwt, getMyDonations);
 userRouter.route("/get-homepage-data").get(verifyJwt, getHomePageData);
+userRouter.route("/get-majors").get(verifyJwt, getMajors);
 
 userRouter.route("/ping").get((req, res) => {
   res.status(200).send("Pong");

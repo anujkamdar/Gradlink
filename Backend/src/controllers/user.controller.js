@@ -1244,6 +1244,14 @@ const getHomePageData = asyncHandler(async (req, res) => {
   );
 });
 
+const getMajors = asyncHandler(async (req, res) => {
+  const college = await College.findById(req.user.college).select("majors");
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+  return res.status(200).json(new ApiResponse(200, college.majors, "Majors fetched successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -1276,4 +1284,5 @@ export {
   saveDonation,
   getMyDonations,
   getHomePageData,
+  getMajors,
 };
