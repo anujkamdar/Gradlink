@@ -1184,6 +1184,22 @@ const getMyDonations = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, donations, "My donations fetched successfully"));
 });
 
+const getHomePageData = asyncHandler(async (req,res) => {
+  const userId = req.user._id;
+  const collegeId = req.user.college;
+
+  const jobsPromise = Job.find({ college: collegeId }).sort({ createdAt: -1 }).limit(4).populate("postedBy", "fullname avatar position company");
+  const postsPromise = Post.find({ college: collegeId }).sort({ createdAt: -1 }).limit(4).populate("author", "fullname avatar");
+  const donationsPromise = Donation.find({ college: collegeId }).sort({ createdAt: -1 }).limit(4).populate("fundraiser", "title coverImage");
+  const [jobs, posts, donations] = await Promise.all([jobsPromise, postsPromise, donationsPromise]);
+  return res.status(200).json(new ApiResponse(200, {
+    user:req.user,
+    jobs,
+    posts,
+    donations
+  }, "Home page data fetched successfully"));
+})
+
 
 
 
@@ -1219,4 +1235,5 @@ export {
   createPaymentIntent,
   saveDonation,
   getMyDonations,
+  getHomePageData
 };
