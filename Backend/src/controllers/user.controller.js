@@ -819,7 +819,47 @@ const createFundraiser = asyncHandler(async (req, res) => {
 
 const getFundraisers = asyncHandler(async (req, res) => {
   const college = req.user.college;
-  const fundraisers = await Fundraiser.find({ college });
+
+
+  const fundraisers = await Fundraiser.aggregate([
+    {
+      $match: {
+        college: new mongoose.Types.ObjectId(college),
+      },
+    },
+    {
+      $lookup: {
+        from: "donations",
+        localField: "_id",
+        foreignField: "fundraiser",
+        as: "donations",
+      },
+    },
+    {
+      $addFields: {
+        donationsCount: { $size: "$donations" },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        description: 1,
+        category: 1,
+        targetAmount: 1,
+        currentAmount: 1,
+        coverImage: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        donationsCount: 1,
+      },
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+  ]);
+  
+  
   if (!fundraisers || fundraisers.length === 0) {
     return res.status(404).json(new ApiResponse(404, [], "No fundraisers found for this college"));
   }
