@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DollarSign, Calendar, Users, ExternalLink } from "lucide-react";
+import { DollarSign, Calendar, Users, ExternalLink, PlusCircle } from "lucide-react";
 import axios from "axios";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "./ui/card";
@@ -7,6 +7,10 @@ import { Progress } from "./ui/progress";
 import { Backend_url } from "@/info";
 import DonationModal from "./DonationModal";
 import StripeProvider from "./StripeProvider";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { Input } from "./ui/input";
 
 export default function FundraisersPage() {
     const [fundraisers, setFundraisers] = useState([]);
@@ -14,6 +18,16 @@ export default function FundraisersPage() {
     const [error, setError] = useState(null);
     const [selectedFundraiser, setSelectedFundraiser] = useState(null);
     const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+    const [user, setUser] = useState(null);
+    const [isAddingFundraiser, setIsAddingFundraiser] = useState(false);
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+        targetAmount: "",
+        coverImage: null,
+        category: ""
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchFundraisers = async () => {
@@ -22,6 +36,7 @@ export default function FundraisersPage() {
                 const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/get-fundraisers`,
                     { withCredentials: true }
                 );
+                console.log(response.data.data);
                 setFundraisers(response.data.data);
                 setLoading(false);
             } catch (error) {
@@ -32,6 +47,19 @@ export default function FundraisersPage() {
         };
 
         fetchFundraisers();
+    }, []);
+
+    const getCurrentUser = async () => {
+        try {
+            const response = await axios.get(`${Backend_url}/gradlink/api/v1/users/current-user-profile`, { withCredentials: true });
+            setUser(response.data.data);
+        } catch (error) {
+            console.log(error.response?.data?.message || "Error fetching user data");
+        }
+    };
+
+    useEffect(() => {
+        getCurrentUser();
     }, []);
 
     const calculateProgress = (current, target) => {
@@ -65,6 +93,74 @@ export default function FundraisersPage() {
             }
         };
         fetchFundraisers();
+    };
+
+
+    const handleCloseAddFundraiser = () => {
+        setIsAddingFundraiser(false);
+        setFormData({
+            title: "",
+            description: "",
+            targetAmount: "",
+            coverImage: null,
+            category: ""
+        });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
+    const handleFileChange = (e) => {
+        setFormData({
+            ...formData,
+            coverImage: e.target.files[0]
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setIsSubmitting(true);
+            const formDataToSubmit = new FormData();
+            formDataToSubmit.append("title", formData.title);
+            formDataToSubmit.append("description", formData.description);
+            formDataToSubmit.append("targetAmount", formData.targetAmount);
+            formDataToSubmit.append("category", formData.category);
+            if (formData.coverImage) {
+                formDataToSubmit.append("coverImage", formData.coverImage);
+            }
+            if (formData.targetAmount <= 0) {
+                alert("Target amount must be greater than 0");
+                return;
+            }
+            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/create-fundraiser`, formDataToSubmit, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                },
+                withCredentials: true
+            });
+
+            console.log("Fundraiser created:", response.data);
+            setFundraisers([...fundraisers, response.data.data]);
+            alert("Fundraiser created successfully!");
+            setIsAddingFundraiser(false);
+            setIsSubmitting(false);
+            setFormData({
+                title: "",
+                description: "",
+                targetAmount: "",
+                coverImage: null,
+                category: ""
+            });
+        } catch (error) {
+            alert(error.response?.data?.message || "Failed to create fundraiser");
+            setIsSubmitting(false);
+        }
     };
 
 
@@ -110,14 +206,151 @@ export default function FundraisersPage() {
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">Fundraisers</h1>
                             <p className="text-gray-600">Support initiatives from your alma mater and make a difference.</p>
                         </div>
-                        <Button
-                            variant="outline"
-                            onClick={() => window.location.href = '/tabs/my-donations'}
-                            className="flex items-center mt-4 md:mt-0 border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
-                        >
-                            <DollarSign className="h-4 w-4 mr-2" />
-                            View My Donations
-                        </Button>
+                        <div className="flex items-center space-x-3 mt-4 md:mt-0">
+                            <Button
+                                variant="outline"
+                                onClick={() => window.location.href = '/tabs/my-donations'}
+                                className="flex items-center border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                            >
+                                <DollarSign className="h-4 w-4 mr-2" />
+                                View My Donations
+                            </Button>
+                            
+                            {user?.role === 'admin' && (
+                                <Dialog open={isAddingFundraiser} onOpenChange={(state) => {
+                                    setIsAddingFundraiser(state);
+                                    if (!state) {
+                                        setFormData({
+                                            title: "",
+                                            description: "",
+                                            targetAmount: "",
+                                            coverImage: null,
+                                            coverImagePreview: null,
+                                            category: ""
+                                        });
+                                    }
+                                }}>
+                                    <DialogTrigger asChild>
+                                        <Button className="bg-indigo-600 hover:bg-indigo-700">
+                                            <PlusCircle className="h-4 w-4 mr-2" />
+                                            Add Fundraiser
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden py-6 px-6">
+                                        <DialogHeader className="mb-4">
+                                            <DialogTitle>Create a new Fundraiser</DialogTitle>
+                                        </DialogHeader>
+                                        <form onSubmit={handleSubmit} className="space-y-6">
+                                            <div>
+                                                <Label htmlFor="title">Title</Label>
+                                                <Input
+                                                    id="title"
+                                                    name="title"
+                                                    value={formData.title}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Enter fundraiser title"
+                                                    required
+                                                    className="mt-1"
+                                                    disabled={isSubmitting}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <Label htmlFor="description">Description</Label>
+                                                <Textarea
+                                                    id="description"
+                                                    name="description"
+                                                    value={formData.description}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Enter fundraiser description"
+                                                    required
+                                                    className="mt-1"
+                                                    disabled={isSubmitting}
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <Label htmlFor="targetAmount">Target Amount</Label>
+                                                    <Input
+                                                        id="targetAmount"
+                                                        name="targetAmount"
+                                                        type="number"
+                                                        value={formData.targetAmount}
+                                                        onChange={handleInputChange}
+                                                        placeholder="Enter target amount"
+                                                        required
+                                                        className="mt-1"
+                                                        disabled={isSubmitting}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label htmlFor="category">Category</Label>
+                                                    <Input
+                                                        id="category"
+                                                        name="category"
+                                                        value={formData.category}
+                                                        onChange={handleInputChange}
+                                                        placeholder="Enter category"
+                                                        className="mt-1"
+                                                        required
+                                                        disabled={isSubmitting}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="coverImage">Cover Image</Label>
+                                                <Input
+                                                    id="coverImage"
+                                                    name="coverImage"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    required
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            setFormData({
+                                                                ...formData,
+                                                                coverImage: file,
+                                                                coverImagePreview: URL.createObjectURL(file)
+                                                            });
+                                                        } else {
+                                                            setFormData({
+                                                                ...formData,
+                                                                coverImage: null,
+                                                                coverImagePreview: null
+                                                            });
+                                                        }
+                                                    }}
+                                                    className="mt-1"
+                                                    disabled={isSubmitting}
+                                                />
+                                                {formData.coverImagePreview && (
+                                                    <div className="mt-2">
+                                                        <img
+                                                            src={formData.coverImagePreview}
+                                                            alt="Cover"
+                                                            className="h-32 w-full object-cover rounded-md"
+                                                            onError={(e) => {
+                                                                e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <Button
+                                                type="submit"
+                                                className="bg-indigo-600 hover:bg-indigo-700 w-full"
+                                                disabled={isSubmitting}
+                                            >
+                                                <DollarSign className="h-4 w-4 mr-2" />
+                                                {isSubmitting ? "Creating..." : "Create Fundraiser"}
+                                            </Button>
+                                        </form>
+                                    </DialogContent>
+                                </Dialog>
+                            )}
+                        </div>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -163,7 +396,7 @@ export default function FundraisersPage() {
                                     </span>
                                     <span className="flex items-center">
                                         <Users className="h-4 w-4 mr-1" />
-                                        {Math.floor(Math.random() * 50) + 5} donors
+                                        {fundraiser.donationsCount} Donations Made
                                     </span>
                                 </div>
                             </CardContent>
