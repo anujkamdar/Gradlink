@@ -86,7 +86,7 @@ function LandingPage() {
       }
     };
     fetchColleges();
-    
+
     const handleScroll = () => {
       if (window.scrollY > 50) {
         setIsScrolled(true);
@@ -94,9 +94,9 @@ function LandingPage() {
         setIsScrolled(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    
+
     // Clean up the event listener
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -575,11 +575,14 @@ function LandingPage() {
                         <Button onClick={(e) => { e.preventdefaut; registerUser() }} className="w-full"
                           disabled={loadingAuth}>
                           {loadingAuth ? "Registering..." : "Register"}
-                          </Button>
+                        </Button>
                       </div>
                     )}
                   </TabsContent>
                 </Tabs>
+                <p className="text-center text-sm text-gray-500 mt-2">
+                  Are you a college? <span onClick={() => {setIsRegisterOpen(false);navigate("/college-register")}} className="text-blue-600 hover:underline font-medium cursor-pointer">Register here</span>
+                </p>
               </DialogContent>
             </Dialog>
           </div>
