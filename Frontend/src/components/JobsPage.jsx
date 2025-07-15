@@ -94,13 +94,13 @@ export default function JobsPage() {
       <div className="bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
               <h2 className="text-2xl font-bold text-gray-900">Job Opportunities</h2>
-              <div className="mt-4 md:mt-0 flex space-x-3">
+              <div className="flex flex-col space-y-2 sm:flex-row sm:flex-wrap sm:gap-2 sm:space-y-0 md:space-x-3">
                 {user?.role === 'alumni' && (
                   <Button
                     variant="outline"
-                    className="flex items-center"
+                    className="flex items-center justify-center w-full sm:w-auto text-sm"
                     onClick={() => navigate('/tabs/my-jobs')}
                   >
                     <Briefcase className="mr-1 h-4 w-4" />
@@ -110,7 +110,7 @@ export default function JobsPage() {
 
                 <Button
                   variant="outline"
-                  className="flex items-center"
+                  className="flex items-center justify-center w-full sm:w-auto text-sm"
                   onClick={() => navigate('/tabs/my-applications')}
                 >
                   <BookmarkIcon className="mr-1 h-4 w-4" />
@@ -120,14 +120,17 @@ export default function JobsPage() {
                 {user.role === "alumni" && (
                   <Button
                     variant="outline"
-                    className="flex items-center"
+                    className="flex items-center justify-center w-full sm:w-auto text-sm"
                     onClick={() => navigate('/tabs/post-job')}
                   >
                     <Plus className="mr-1 h-4 w-4" />
                     Post a Job
                   </Button>
                 )}
-                <Button onClick={() => { getJobPostings() }} className="flex items-center">
+                <Button 
+                  onClick={() => { getJobPostings() }} 
+                  className="flex items-center justify-center w-full sm:w-auto text-sm"
+                >
                   <Search className="mr-1 h-4 w-4" />
                   Find Jobs
                 </Button>
