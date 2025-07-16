@@ -14,6 +14,8 @@ import { Comment } from "../models/Comment.model.js";
 import { Donation } from "../models/Donation.model.js";
 import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+import { sendMail } from "../utils/SendMailUtil.js";
+
 
 const options = {
   httpOnly: true,
@@ -319,6 +321,81 @@ const createJobApplication = asyncHandler(async (req, res) => {
   // Add user to job applicants list
   await Job.findByIdAndUpdate(jobId, {
     $addToSet: { applicants: userApplying },
+  });
+
+  setImmediate(async () => {
+    try {
+      const jobPoster = await User.findById(job.postedBy).select("email fullname");
+      const applicant = await User.findById(userApplying).select("email fullname graduationYear major");
+
+      if (jobPoster && jobPoster.email) {
+        const emailSubject = `New Job Application: ${job.title} at ${job.company}`;
+        const emailText = `
+          Dear ${jobPoster.fullname},
+
+          You have received a new job application for the position "${job.title}" at ${job.company}.
+
+          Applicant Details:
+          - Name: ${applicant.fullname}
+          - Email: ${applicant.email}
+          - Graduation Year: ${applicant.graduationYear}
+          - Major: ${applicant.major}
+
+          Cover Letter:
+          ${coverLetter || "No cover letter provided"}
+
+          Resume URL: ${resume.url}
+
+          You can review this application in your GradLink dashboard.
+
+          Best regards,
+          GradLink Team
+        `;
+
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">New Job Application Received</h2>
+            
+            <p>Dear <strong>${jobPoster.fullname}</strong>,</p>
+            
+            <p>You have received a new job application for the position "<strong>${job.title}</strong>" at <strong>${job.company}</strong>.</p>
+            
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <h3 style="color: #333; margin-top: 0;">Applicant Details:</h3>
+              <ul style="list-style: none; padding: 0;">
+                <li><strong>Name:</strong> ${applicant.fullname}</li>
+                <li><strong>Email:</strong> ${applicant.email}</li>
+                <li><strong>Graduation Year:</strong> ${applicant.graduationYear}</li>
+                <li><strong>Major:</strong> ${applicant.major}</li>
+              </ul>
+            </div>
+            
+            ${coverLetter ? `
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0;">Cover Letter:</h3>
+                <p style="white-space: pre-wrap;">${coverLetter}</p>
+              </div>
+            ` : '<p><em>No cover letter provided</em></p>'}
+            
+            <p><strong>Resume:</strong> <a href="${resume.url}" target="_blank" style="color: #007bff;">View Resume</a></p>
+            
+            <p style="margin-top: 30px;">You can review this application in your GradLink dashboard.</p>
+            
+            <p>Best regards,<br>
+            <strong>GradLink Team</strong></p>
+          </div>
+        `;
+
+        await sendMail(
+          jobPoster.email,
+          emailSubject,
+          emailText,
+          emailHtml
+        );
+      }
+    } catch (emailError) {
+      console.log("Failed to send email notification:", emailError);
+    }
   });
 
   return res.status(201).json(new ApiResponse(201, application, "Job application submitted successfully"));
@@ -820,7 +897,6 @@ const createFundraiser = asyncHandler(async (req, res) => {
 const getFundraisers = asyncHandler(async (req, res) => {
   const college = req.user.college;
 
-
   const fundraisers = await Fundraiser.aggregate([
     {
       $match: {
@@ -858,8 +934,7 @@ const getFundraisers = asyncHandler(async (req, res) => {
       $sort: { createdAt: -1 },
     },
   ]);
-  
-  
+
   if (!fundraisers || fundraisers.length === 0) {
     return res.status(404).json(new ApiResponse(404, [], "No fundraisers found for this college"));
   }
@@ -1291,6 +1366,8 @@ const getMajors = asyncHandler(async (req, res) => {
   }
   return res.status(200).json(new ApiResponse(200, college.majors, "Majors fetched successfully"));
 });
+
+
 
 export {
   registerUser,
