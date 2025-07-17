@@ -43,8 +43,7 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
         color: #4a5568;
     }
     .features {
-        display: grid;
-        gap: 20px;
+        display: block;
         margin: 30px 0;
     }
     .feature {
@@ -54,11 +53,16 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
         background-color: #f7fafc;
         border-radius: 8px;
         border-left: 4px solid #667eea;
+        margin-bottom: 20px;
     }
     .feature-icon {
         font-size: 24px;
         margin-right: 15px;
         margin-top: 2px;
+        flex-shrink: 0;
+    }
+    .feature-content {
+        flex: 1;
     }
     .feature-content h3 {
         margin: 0 0 8px 0;
@@ -83,6 +87,7 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
     .steps-list {
         list-style: none;
         padding: 0;
+        margin: 0;
     }
     .steps-list li {
         margin: 10px 0;
@@ -104,6 +109,21 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
         background-color: #f7fafc;
         border-radius: 8px;
     }
+    .support-section h3 {
+        margin-top: 0;
+        color: #2d3748;
+    }
+    .support-section p {
+        margin: 15px 0;
+        color: #4a5568;
+    }
+    .support-section a {
+        color: #667eea;
+        text-decoration: none;
+    }
+    .support-section a:hover {
+        text-decoration: underline;
+    }
     .footer {
         background-color: #2d3748;
         color: white;
@@ -114,14 +134,19 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
         margin: 5px 0;
         opacity: 0.8;
     }
-    .social-links {
-        margin: 15px 0;
+    .pro-tip {
+        text-align: center;
+        margin: 30px 0;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid;
     }
-    .social-links a {
-        color: white;
-        text-decoration: none;
-        margin: 0 10px;
-        font-size: 1.1em;
+    .pro-tip p {
+        margin: 0;
+        font-size: 0.95em;
+    }
+    .pro-tip strong {
+        font-weight: 600;
     }
     @media (max-width: 600px) {
         body {
@@ -132,6 +157,17 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
         }
         .header h1 {
             font-size: 2em;
+        }
+        .feature {
+            flex-direction: column;
+            text-align: center;
+        }
+        .feature-icon {
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+        .steps-list li {
+            padding-left: 25px;
         }
     }
   `;
@@ -209,10 +245,10 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
                     <div class="support-section">
                         <h3>Need Help Getting Started?</h3>
                         <p>Our team is here to help you make the most of your GradLink experience. Don't hesitate to reach out if you have any questions or need assistance navigating the platform.</p>
-                        <p><strong>Email:</strong> <a href="mailto:gradlink.platform@gmail.com>gradlink.platform@gmail.com</a></p>
+                        <p><strong>Email:</strong> <a href="mailto:gradlink.platform@gmail.com">gradlink.platform@gmail.com</a></p>
                     </div>
 
-                    <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #fff5f5; border-radius: 8px; border-left: 4px solid #f56565;">
+                    <div class="pro-tip" style="background-color: #fff5f5; border-left-color: #f56565;">
                         <p><strong>💡 Pro Tip:</strong> The more complete your profile, the better alumni can discover you and the more relevant job opportunities you'll receive. Aim for 100% profile completion!</p>
                     </div>
                 </div>
@@ -251,7 +287,7 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
         Need Help Getting Started?
         Our team is here to help you make the most of your GradLink experience. Don't hesitate to reach out if you have any questions or need assistance navigating the platform.
 
-        Email: support@gradlink.com
+        Email: gradlink.platform@gmail.com
 
         💡 Pro Tip: The more complete your profile, the better alumni can discover you and the more relevant job opportunities you'll receive. Aim for 100% profile completion!
 
@@ -334,10 +370,10 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
                     <div class="support-section">
                         <h3>Need Help Getting Started?</h3>
                         <p>Our team is here to help you make the most of your GradLink experience. Don't hesitate to reach out if you have any questions or need assistance navigating the platform.</p>
-                        <p><strong>Email:</strong> <a href="mailto:support@gradlink.com">support@gradlink.com</a></p>
+                        <p><strong>Email:</strong> <a href="mailto:gradlink.platform@gmail.com">gradlink.platform@gmail.com</a></p>
                     </div>
 
-                    <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f0fff4; border-radius: 8px; border-left: 4px solid #48bb78;">
+                    <div class="pro-tip" style="background-color: #f0fff4; border-left-color: #48bb78;">
                         <p><strong>💡 Pro Tip:</strong> Students are eager to connect with alumni in their field. By posting job opportunities and sharing your professional journey, you can make a real difference in their career development!</p>
                     </div>
                 </div>
@@ -376,7 +412,7 @@ const getWelcomeEmailTemplate = (userRole, userName, collegeName) => {
         Need Help Getting Started?
         Our team is here to help you make the most of your GradLink experience. Don't hesitate to reach out if you have any questions or need assistance navigating the platform.
 
-        Email: support@gradlink.com
+        Email: gradlink.platform@gmail.com
 
         💡 Pro Tip: Students are eager to connect with alumni in their field. By posting job opportunities and sharing your professional journey, you can make a real difference in their career development!
 
