@@ -16,7 +16,6 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import { sendMail } from "../utils/SendMailUtil.js";
 
-
 const options = {
   httpOnly: true,
   secure: true,
@@ -273,6 +272,112 @@ const createJobPosting = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Job posting failed");
   }
 
+  setImmediate(async () => {
+    try {
+      const jobSkills = requiredSkills.map((skill) => skill.toLowerCase().trim());
+
+      const matchingUsers = await User.find({
+        college: collegeId,
+        role: { $in: ["student", "alumni"] },
+        _id: { $ne: postedBy },
+        skills: { $in: jobSkills },
+      }).select("email fullname skills");
+
+      if (matchingUsers.length > 0) {
+        const jobPoster = await User.findById(postedBy).select("fullname");
+
+        const emailPromises = matchingUsers.map(async (user) => {
+          const userSkills = user.skills || [];
+          const matchedSkills = userSkills.filter((skill) => jobSkills.includes(skill));
+
+          const emailSubject = `New Job Opportunity: ${title} at ${company}`;
+          const emailText = `
+            Dear ${user.fullname},
+
+            A new job opportunity has been posted that matches your skills!
+
+            Job Details:
+            - Position: ${title}
+            - Company: ${company}
+            - Location: ${location}
+            - Type: ${type}
+            - Posted by: ${jobPoster?.fullname || "Unknown"}
+
+            Your Matching Skills: ${matchedSkills.join(", ")}
+            Required Skills: ${requiredSkills.join(", ")}
+
+            Job Description:
+            ${description}
+
+            Don't miss this opportunity! Log in to GradLink to view the full job details and apply.
+
+            Best regards,
+            GradLink Team
+          `;
+
+          const emailHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+                🎯 New Job Opportunity Match!
+              </h2>
+              
+              <p>Dear <strong>${user.fullname}</strong>,</p>
+              
+              <p>Great news! A new job opportunity has been posted that matches your skills.</p>
+              
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                <h3 style="color: #007bff; margin-top: 0;">Job Details</h3>
+                <ul style="list-style: none; padding: 0;">
+                  <li><strong>Position:</strong> ${title}</li>
+                  <li><strong>Company:</strong> ${company}</li>
+                  <li><strong>Location:</strong> ${location}</li>
+                  <li><strong>Type:</strong> ${type}</li>
+                  <li><strong>Posted by:</strong> ${jobPoster?.fullname || "Unknown"}</li>
+                </ul>
+              </div>
+              
+              <div style="background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <h4 style="color: #28a745; margin-top: 0;">✅ Your Matching Skills</h4>
+                <p style="font-weight: bold; color: #28a745;">${matchedSkills.join(", ")}</p>
+                
+                <h4 style="color: #6c757d; margin-bottom: 5px;">📋 All Required Skills</h4>
+                <p style="color: #6c757d;">${requiredSkills.join(", ")}</p>
+              </div>
+              
+              <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                <h4 style="color: #856404; margin-top: 0;">Job Description</h4>
+                <p style="color: #856404; white-space: pre-wrap;">${description}</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <p style="font-size: 18px; color: #007bff; font-weight: bold;">
+                  Don't miss this opportunity!
+                </p>
+                <p>Log in to GradLink to view the full job details and apply.</p>
+              </div>
+              
+              <p style="margin-top: 30px; color: #6c757d;">
+                Best regards,<br>
+                <strong>GradLink Team</strong>
+              </p>
+            </div>
+          `;
+
+          try {
+            await sendMail(user.email, emailSubject, emailText, emailHtml);
+          } catch (emailError) {
+            console.log(`Failed to send email to ${user.email}:`, emailError);
+          }
+        });
+
+        await Promise.all(emailPromises);
+        console.log(`Notified ${matchingUsers.length} users about new job posting: ${title}`);
+      }
+    } catch (error) {
+      console.log("Failed to send job notification emails:", error);
+    }
+  });
+
   return res.status(201).json(new ApiResponse(201, job, "Job posted successfully"));
 });
 
@@ -370,12 +475,16 @@ const createJobApplication = asyncHandler(async (req, res) => {
               </ul>
             </div>
             
-            ${coverLetter ? `
+            ${
+              coverLetter
+                ? `
               <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
                 <h3 style="color: #333; margin-top: 0;">Cover Letter:</h3>
                 <p style="white-space: pre-wrap;">${coverLetter}</p>
               </div>
-            ` : '<p><em>No cover letter provided</em></p>'}
+            `
+                : "<p><em>No cover letter provided</em></p>"
+            }
             
             <p><strong>Resume:</strong> <a href="${resume.url}" target="_blank" style="color: #007bff;">View Resume</a></p>
             
@@ -386,12 +495,7 @@ const createJobApplication = asyncHandler(async (req, res) => {
           </div>
         `;
 
-        await sendMail(
-          jobPoster.email,
-          emailSubject,
-          emailText,
-          emailHtml
-        );
+        await sendMail(jobPoster.email, emailSubject, emailText, emailHtml);
       }
     } catch (emailError) {
       console.log("Failed to send email notification:", emailError);
@@ -979,15 +1083,15 @@ const getPosts = asyncHandler(async (req, res) => {
   const matchstage = {
     college: college,
   };
-  
+
   if (category) {
     matchstage.category = category;
   }
-  
+
   if (myPostsOnly) {
     matchstage.author = new mongoose.Types.ObjectId(userId);
   }
-  
+
   const aggregate = Post.aggregate([
     {
       $match: matchstage,
@@ -1016,7 +1120,7 @@ const getPosts = asyncHandler(async (req, res) => {
           $in: [userId, "$likes"],
         },
         isAuthor: {
-          $eq: ["$author", new mongoose.Types.ObjectId(userId)]
+          $eq: ["$author", new mongoose.Types.ObjectId(userId)],
         },
         authorDetails: {
           $arrayElemAt: ["$authorDetails", 0],
@@ -1377,9 +1481,9 @@ const getMajors = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, college.majors, "Majors fetched successfully"));
 });
 
-const deletePost = asyncHandler(async (req,res) => {
+const deletePost = asyncHandler(async (req, res) => {
   const { postId } = req.body;
-  if( !mongoose.isValidObjectId(postId)) {
+  if (!mongoose.isValidObjectId(postId)) {
     throw new ApiError(400, "Invalid post ID format");
   }
   if (!postId) {
@@ -1389,15 +1493,13 @@ const deletePost = asyncHandler(async (req,res) => {
   if (!post) {
     throw new ApiError(404, "Post not found");
   }
-  if(post.author.toString() !== req.user._id.toString()) {
+  if (post.author.toString() !== req.user._id.toString()) {
     throw new ApiError(403, "You do not have permission to delete this post");
   }
   await Post.findByIdAndDelete(postId);
   await Comment.deleteMany({ post: postId });
   return res.status(200).json(new ApiResponse(200, null, "Post deleted successfully"));
-})
-
-
+});
 
 export {
   registerUser,
