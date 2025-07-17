@@ -975,13 +975,19 @@ const createPost = asyncHandler(async (req, res) => {
 const getPosts = asyncHandler(async (req, res) => {
   const college = req.user.college;
   const userId = req.user._id;
-  const { category, page = 1, limit = 10 } = req.body;
+  const { category, page = 1, limit = 10, myPostsOnly = false } = req.body;
   const matchstage = {
     college: college,
   };
+  
   if (category) {
     matchstage.category = category;
   }
+  
+  if (myPostsOnly) {
+    matchstage.author = new mongoose.Types.ObjectId(userId);
+  }
+  
   const aggregate = Post.aggregate([
     {
       $match: matchstage,
@@ -1009,6 +1015,9 @@ const getPosts = asyncHandler(async (req, res) => {
         isLikedByUser: {
           $in: [userId, "$likes"],
         },
+        isAuthor: {
+          $eq: ["$author", new mongoose.Types.ObjectId(userId)]
+        },
         authorDetails: {
           $arrayElemAt: ["$authorDetails", 0],
         },
@@ -1025,6 +1034,7 @@ const getPosts = asyncHandler(async (req, res) => {
         commentsCount: 1,
         likesCount: 1,
         isLikedByUser: 1,
+        isAuthor: 1,
         authorDetails: {
           _id: "$authorDetails._id",
           fullname: "$authorDetails.fullname",
@@ -1367,6 +1377,26 @@ const getMajors = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, college.majors, "Majors fetched successfully"));
 });
 
+const deletePost = asyncHandler(async (req,res) => {
+  const { postId } = req.body;
+  if( !mongoose.isValidObjectId(postId)) {
+    throw new ApiError(400, "Invalid post ID format");
+  }
+  if (!postId) {
+    throw new ApiError(400, "Post ID is required");
+  }
+  const post = await Post.findById(postId);
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+  if(post.author.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You do not have permission to delete this post");
+  }
+  await Post.findByIdAndDelete(postId);
+  await Comment.deleteMany({ post: postId });
+  return res.status(200).json(new ApiResponse(200, null, "Post deleted successfully"));
+})
+
 
 
 export {
@@ -1402,4 +1432,5 @@ export {
   getMyDonations,
   getHomePageData,
   getMajors,
+  deletePost,
 };
