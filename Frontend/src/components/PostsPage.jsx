@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { MessageCircle, Heart, Image, Video, Send, ThumbsUp, X, PenSquare } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "./ui/dialog";
+import { MessageCircle, Heart, Image, Video, Send, ThumbsUp, X, PenSquare, Trash2, UserCheck } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogFooter } from "./ui/dialog";
 import axios from "axios";
 import { Backend_url } from "../info.js";
 import {
@@ -28,6 +28,9 @@ export default function PostsPage() {
     const [loading, setLoading] = useState(true);
     const [showNewPostDialog, setShowNewPostDialog] = useState(false);
     const [posts, setPosts] = useState([]);
+    const [showOnlyMyPosts, setShowOnlyMyPosts] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [postToDelete, setPostToDelete] = useState(null);
     const [newPostForm, setNewPostForm] = useState({
         content: "",
         category: "",
@@ -102,7 +105,11 @@ export default function PostsPage() {
 
     const getPosts = async () => {
         try {
-            const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/get-posts`, { category }, { withCredentials: true });
+            const response = await axios.post(
+                `${Backend_url}/gradlink/api/v1/users/get-posts`,
+                { category, myPostsOnly: showOnlyMyPosts },
+                { withCredentials: true }
+            );
             console.log(response.data.data.docs);
             setTotalPages(response.data?.data.totalPages)
             setPosts(response.data.data.docs);
@@ -113,9 +120,30 @@ export default function PostsPage() {
         }
     }
 
+    const deletePost = async (postId) => {
+        try {
+            setSubmitting(true);
+            const response = await axios.post(
+                `${Backend_url}/gradlink/api/v1/users/delete-post`,
+                { postId },
+                { withCredentials: true }
+            );
+
+            if (response.data.success) {
+                setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
+                setShowDeleteDialog(false);
+                setPostToDelete(null);
+            }
+        } catch (error) {
+            console.error("Error deleting post:", error);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     useEffect(() => {
         getPosts();
-    }, [category, showCommentDialog]) // Re-fetch posts when closing comment dialog to update counts
+    }, [category, showCommentDialog, showOnlyMyPosts])
 
     if (loading) {
         return (
@@ -150,22 +178,37 @@ export default function PostsPage() {
 
                 {/* Filter Tabs */}
                 <div className="mb-8">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-                        {categories.map((cat) => (
+                    <div className="flex flex-col space-y-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => handleCategoryChange(cat.id)}
+                                    className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${category === cat.id
+                                            ? "bg-indigo-600 text-white shadow-md"
+                                            : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                                        }`}
+                                >
+                                    {cat.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* My Posts filter */}
+                        <div className="flex justify-end">
                             <button
-                                key={cat.id}
-                                onClick={() => handleCategoryChange(cat.id)}
-                                className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${
-                                    category === cat.id
+                                onClick={() => setShowOnlyMyPosts(!showOnlyMyPosts)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${showOnlyMyPosts
                                         ? "bg-indigo-600 text-white shadow-md"
                                         : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
-                                }`}
+                                    }`}
                             >
-                                {cat.label}
+                                <UserCheck className="h-4 w-4" />
+                                {showOnlyMyPosts ? "Showing My Posts" : "Show My Posts"}
                             </button>
-                        ))}
+                        </div>
                     </div>
-                </div>  
+                </div>
 
                 {/* Posts Feed */}
                 <div className="space-y-8">
@@ -181,13 +224,27 @@ export default function PostsPage() {
                                     />
                                     <div>
                                         <h3 className="font-semibold text-gray-900 text-lg">{post.authorDetails.fullname}</h3>
-                                        <TimeAgo className="text-gray-600 text-xs" date={post.createdAt}/>
+                                        <TimeAgo className="text-gray-600 text-xs" date={post.createdAt} />
                                     </div>
-                                    {post.category && (
-                                        <span className="ml-auto px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full">
-                                            {post.category}
-                                        </span>
-                                    )}
+                                    <div className="ml-auto flex items-center gap-2">
+                                        {post.category && (
+                                            <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full">
+                                                {post.category}
+                                            </span>
+                                        )}
+                                        {post.isAuthor && (
+                                            <button
+                                                onClick={() => {
+                                                    setPostToDelete(post._id);
+                                                    setShowDeleteDialog(true);
+                                                }}
+                                                className="p-1.5 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                                title="Delete post"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Post Content */}
@@ -214,8 +271,8 @@ export default function PostsPage() {
                                     <button
                                         onClick={() => likePost(post._id)}
                                         className={`flex-1 flex justify-center items-center py-3 transition-colors ${post.isLikedByUser
-                                                ? 'text-indigo-600 bg-indigo-50'
-                                                : 'text-gray-500 hover:bg-gray-50 hover:text-indigo-600'
+                                            ? 'text-indigo-600 bg-indigo-50'
+                                            : 'text-gray-500 hover:bg-gray-50 hover:text-indigo-600'
                                             }`}
                                         disabled={likeInProgress}
                                     >
@@ -252,6 +309,35 @@ export default function PostsPage() {
             >
                 <PenSquare className="h-6 w-6 text-white" />
             </Button>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Delete Post</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <p className="text-gray-700">Are you sure you want to delete this post? This action cannot be undone.</p>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowDeleteDialog(false)}
+                            disabled={submitting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => deletePost(postToDelete)}
+                            disabled={submitting}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            {submitting ? "Deleting..." : "Delete"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* New Post Dialog */}
             <Dialog open={showNewPostDialog} onOpenChange={(state) => { setShowNewPostDialog(state); setNewPostForm({ ...newPostForm, media: null }) }}>
