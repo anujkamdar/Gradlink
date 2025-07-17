@@ -15,6 +15,7 @@ import { Donation } from "../models/Donation.model.js";
 import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import { sendMail } from "../utils/SendMailUtil.js";
+import { sendWelcomeEmail } from "../utils/EmailService.js";
 
 const options = {
   httpOnly: true,
@@ -151,7 +152,17 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(500, "User registration failed");
   }
 
-  return res.status(200).json(new ApiResponse(200, user, "data is ok"));
+  setImmediate(async () => {
+    try {
+      const college = await College.findById(collegeId);
+      const collegeName = college ? college.collegeName : "Your College";
+      await sendWelcomeEmail(email, fullname, collegeName, role);
+    } catch (error) {
+      console.error("Failed to send welcome email:", error);
+    }
+  });
+
+  return res.status(200).json(new ApiResponse(200, user, "User registered successfully"));
 });
 
 const loginUser = asyncHandler(async (req, res) => {
