@@ -34,6 +34,7 @@ import {
   getHomePageData,
   getMajors,
   deletePost,
+  changeAvatar,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 import { verifyAlum } from "../middlewares/verifyalum.middleware.js";
@@ -88,6 +89,8 @@ userRouter.route("/get-my-donations").get(verifyJwt, getMyDonations);
 userRouter.route("/get-homepage-data").get(verifyJwt, getHomePageData);
 userRouter.route("/get-majors").get(verifyJwt, getMajors);
 userRouter.route("/delete-post").post(verifyJwt, deletePost);
+
+userRouter.route("/change-avatar").post(verifyJwt, upload.single("avatar"),changeAvatar);
 
 userRouter.route("/ping").get((req, res) => {
   res.status(200).send("Pong");

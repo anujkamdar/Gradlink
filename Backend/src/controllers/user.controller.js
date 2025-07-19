@@ -1512,6 +1512,25 @@ const deletePost = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, null, "Post deleted successfully"));
 });
 
+const changeAvatar = asyncHandler(async(req,res) => {
+  const avatarLocalPath = req.file?.path;
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar file is required");
+  }
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  if (!avatar?.url) {
+    throw new ApiError(500, "Avatar upload failed");
+  }
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user._id,
+    { avatar: avatar.url },
+  );
+  if (!updatedUser) {
+    throw new ApiError(500, "Failed to update avatar");
+  }
+  return res.status(200).json(new ApiResponse(200,avatar.url, "Avatar updated successfully"));
+})
+
 export {
   registerUser,
   loginUser,
@@ -1546,4 +1565,5 @@ export {
   getHomePageData,
   getMajors,
   deletePost,
+  changeAvatar,
 };
