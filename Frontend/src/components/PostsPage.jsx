@@ -220,7 +220,7 @@ export default function PostsPage() {
                                     <img
                                         src={post.authorDetails.avatar}
                                         alt={post.authorDetails.fullname}
-                                        className="h-12 w-12 rounded-full mr-4 border-2 border-white shadow-sm"
+                                        className="h-12 w-12 rounded-full mr-4 border-2 border-white shadow-sm object-cover"
                                     />
                                     <div>
                                         <h3 className="font-semibold text-gray-900 text-lg">{post.authorDetails.fullname}</h3>

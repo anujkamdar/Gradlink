@@ -20,6 +20,7 @@ import {
   Save,
   PlusCircle,
   X,
+  Camera,
 } from "lucide-react";
 import axios from "axios";
 import { Backend_url } from "../info.js";
@@ -30,6 +31,10 @@ function ProfilePage() {
   const [newSkill, setNewSkill] = useState("");
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState({});
+  const [isChangeAvatarDialogOpen,setIsChangeAvatarDialogOpen] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const getProfile = async () => {
     try {
@@ -111,6 +116,78 @@ function ProfilePage() {
     }));
   };
 
+  const handleAvatarFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file');
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+
+      setAvatarFile(file);
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleChangeAvatar = async () => {
+    if (!avatarFile) {
+      alert('Please select an image first');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('avatar', avatarFile);
+
+      const response = await axios.post(
+        `${Backend_url}/gradlink/api/v1/users/change-avatar`,
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setUserData(prev => ({
+          ...prev,
+          avatar: response.data.data
+        }));
+        
+        setIsChangeAvatarDialogOpen(false);
+        setAvatarFile(null);
+        setAvatarPreview(null);
+        
+        alert('Avatar updated successfully!');
+      }
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      alert(error.response?.data?.message || 'Failed to update avatar');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleCancelAvatarChange = () => {
+    setIsChangeAvatarDialogOpen(false);
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50">
@@ -119,12 +196,21 @@ function ProfilePage() {
           <div className="h-48 bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600"></div>
           <div className="container mx-auto px-4">
             <div className="relative -mt-24 mb-8 flex flex-col md:flex-row items-start md:items-end space-y-4 md:space-y-0 md:space-x-6">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                <img 
-                  src={userData.avatar} 
-                  alt={userData.fullname} 
-                  className="w-full h-full object-cover"
-                />
+              <div className="relative group">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                  <img 
+                    src={userData.avatar} 
+                    alt={userData.fullname} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <button
+                  onClick={() => setIsChangeAvatarDialogOpen(true)}
+                  className="absolute inset-0 flex items-center justify-center bg-opacity-0 group-hover:bg- -50 rounded-full transition-all duration-200 cursor-pointer"
+                  title="Change Avatar"
+                >
+                  <Camera className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                </button>
               </div>
 
               <div className="flex-1">
@@ -507,6 +593,76 @@ function ProfilePage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddingSkill(false)}>Cancel</Button>
             <Button onClick={handleAddSkill}>Add Skill</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isChangeAvatarDialogOpen} onOpenChange={(state) => {setIsChangeAvatarDialogOpen(state);if(!state) {
+        setAvatarFile(null);
+        setAvatarPreview(null);
+      }
+      }}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Change Avatar</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            {/* Current Avatar Preview */}
+            <div className="flex justify-center">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
+                <img 
+                  src={avatarPreview || userData.avatar} 
+                  alt="Avatar preview" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            
+            {/* File Input */}
+            <div className="space-y-2">
+              <Label htmlFor="avatarFile">Select New Avatar</Label>
+              <Input
+                id="avatarFile"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarFileChange}
+                className="border-purple-200 focus:border-purple-500"
+              />
+              <p className="text-xs text-gray-500">
+                Supported formats: JPG, PNG, GIF. Max size: 5MB
+              </p>
+            </div>
+            
+            {avatarFile && (
+              <div className="text-sm text-green-600">
+                ✓ Image selected: {avatarFile.name}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={handleCancelAvatarChange}
+              disabled={isUploadingAvatar}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleChangeAvatar}
+              disabled={!avatarFile || isUploadingAvatar}
+            >
+              {isUploadingAvatar ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Update Avatar
+                </>
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
