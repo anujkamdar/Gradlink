@@ -18,17 +18,15 @@
 - **Exclusive Job Portal**: Access to alumni-shared job opportunities and career openings
 - **Community Fundraising**: Support alma mater through secure donation campaigns
 - **Social Engagement**: Share achievements, updates, and professional insights
-- **Career Development**: Direct access to industry professionals and job opportunities
 
 ## 🏗️ Architecture
 
 ### Frontend (React + Vite)
 - **Framework**: React 19 with modern hooks and functional components
 - **Build Tool**: Vite for fast development and optimized production builds
-- **UI Library**: Radix UI primitives with custom components
+- **UI Components**: shadcn/ui built on top of Radix UI primitives
 - **Styling**: Tailwind CSS for responsive and modern design
 - **Routing**: React Router v7 for client-side navigation
-- **State Management**: React hooks for efficient state handling
 - **HTTP Client**: Axios with credentials for API communication
 
 ### Backend (Node.js + Express)
@@ -43,40 +41,44 @@
 
 ## 🔧 Tech Stack
 
-### Frontend Dependencies
-```json
-{
-  "core": ["React 19", "Vite 6.3", "React Router 7.6"],
-  "ui": ["Radix UI", "Tailwind CSS 4.1", "Lucide React"],
-  "utilities": ["Axios", "Clsx", "Tailwind Merge"],
-  "integrations": ["Stripe", "Socket.io Client", "React Timeago"]
-}
-```
+<div align="center">
 
-### Backend Dependencies
-```json
-{
-  "core": ["Node.js", "Express 5.1", "MongoDB", "Mongoose 8.15"],
-  "authentication": ["JWT", "bcrypt"],
-  "fileUpload": ["Multer", "Cloudinary"],
-  "email": ["Nodemailer"],
-  "payment": ["Stripe 18.3"],
-  "utilities": ["CORS", "Cookie Parser", "dotenv"]
-}
-```
+### Frontend Technologies
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-6.3-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-Latest-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![shadcn/ui](https://img.shields.io/badge/shadcn/ui-Latest-000000?style=for-the-badge&logo=shadcnui&logoColor=white)
+
+### Backend Technologies
+![Node.js](https://img.shields.io/badge/Node.js-Latest-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-5.1-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-8+-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-Authentication-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+
+### Infrastructure & Services
+![Cloudinary](https://img.shields.io/badge/Cloudinary-File_Storage-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-008CDD?style=for-the-badge&logo=stripe&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-Deployment-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Render](https://img.shields.io/badge/Render-Backend-46E3B7?style=for-the-badge&logo=render&logoColor=white)
+
+</div>
+
+
 
 ## 🚀 Features
 
 ### 👥 User Management
-- **Multi-role System**: Students, Alumni, and Admin roles
+- **Multi-role System**: Students and Alumni roles
 - **Secure Authentication**: JWT-based login with session management
 - **Profile Management**: Comprehensive user profiles with completion tracking
 - **College Integration**: Multi-college support with role-based access
+- **Welcome Emails**: Automated welcome emails sent upon successful registration
 
 ### 💼 Job Portal
 - **Job Posting**: Alumni can post job opportunities with detailed requirements
 - **Smart Applications**: Resume upload, cover letter, and application tracking
-- **Skills Matching**: Algorithm-based job recommendations
+- **Skills Matching**: Algorithm-based job recommendations with email alerts
 - **Application Management**: Status tracking and candidate management
 - **Email Notifications**: Automated updates for applications and new opportunities
 
@@ -92,129 +94,16 @@
 - **Progress Tracking**: Real-time donation tracking with visual progress indicators
 - **Donation History**: Complete transaction history and receipts
 
-### 📊 Admin Dashboard
-- **College Management**: Register and manage college information
-- **User Analytics**: Comprehensive statistics on users, jobs, and fundraisers
-- **Platform Oversight**: Administrative controls and system monitoring
-- **Data Insights**: Dashboard with key metrics and performance indicators
-
 ### 🔍 Advanced Search & Discovery
 - **Multi-criteria Search**: Search across users, jobs, and content
 - **Smart Filtering**: Filter by graduation year, major, location, and skills
 - **Skills Matching**: Algorithm-based recommendations for networking and jobs
 - **Location-based Discovery**: Geographic filtering for opportunities
 
-
-
-## 📁 Project Structure
-
-```
-Gradlink/
-├── Backend/
-│   ├── src/
-│   │   ├── controllers/           # API endpoint handlers
-│   │   │   └── user.controller.js # Main controller with all endpoints
-│   │   ├── models/               # Database schemas
-│   │   │   ├── User.model.js     # User schema with auth methods
-│   │   │   ├── Job.model.js      # Job posting schema
-│   │   │   ├── Post.model.js     # Social post schema
-│   │   │   ├── Fundraiser.model.js # Fundraising campaign schema
-│   │   │   ├── JobApplication.model.js # Job application tracking
-│   │   │   ├── Comment.model.js  # Comment system schema
-│   │   │   ├── Donation.model.js # Donation records
-│   │   │   └── College.model.js  # College information schema
-│   │   ├── middlewares/          # Custom middleware
-│   │   │   ├── auth.middleware.js # JWT authentication
-│   │   │   ├── multer.middleware.js # File upload handling
-│   │   │   └── verifyalum.middleware.js # Alumni role verification
-│   │   ├── routes/               # API routes
-│   │   │   └── user.routes.js    # All API endpoints
-│   │   ├── utils/                # Utility functions
-│   │   │   ├── cloudinary.js     # File upload utilities
-│   │   │   ├── ApiError.js       # Error handling
-│   │   │   ├── ApiResponse.js    # Response formatting
-│   │   │   ├── asynchandler.js   # Async error handling
-│   │   │   ├── EmailService.js   # Email templates
-│   │   │   └── SendMailUtil.js   # Email sending utilities
-│   │   ├── db/
-│   │   │   └── index.js          # Database connection
-│   │   ├── app.js                # Express app configuration
-│   │   └── index.js              # Server entry point
-│   ├── public/                   # Temporary file storage
-│   └── package.json              # Backend dependencies
-├── Frontend/
-│   ├── src/
-│   │   ├── components/           # React components
-│   │   │   ├── ui/               # Reusable UI components
-│   │   │   ├── Homepage.jsx      # Dashboard component
-│   │   │   ├── JobsPage.jsx      # Job listings
-│   │   │   ├── JobDetailsPage.jsx # Job detail view
-│   │   │   ├── PostJobPage.jsx   # Job creation form
-│   │   │   ├── MyJobsPage.jsx    # Personal job management
-│   │   │   ├── JobApplicationsPage.jsx # Application management
-│   │   │   ├── MyJobApplicationsPage.jsx # Personal applications
-│   │   │   ├── Network.jsx       # Alumni network
-│   │   │   ├── ProfilePage.jsx   # User profile management
-│   │   │   ├── OtherUserProfilePage.jsx # View other profiles
-│   │   │   ├── PostsPage.jsx     # Social posts feed
-│   │   │   ├── FundraisersPage.jsx # Fundraising campaigns
-│   │   │   ├── MyDonationsPage.jsx # Donation history
-│   │   │   ├── AdminDashboard.jsx # Admin panel
-│   │   │   ├── CollegeRegisterPage.jsx # College registration
-│   │   │   └── Header.jsx        # Navigation header
-│   │   ├── lib/
-│   │   │   └── utils.js          # Utility functions
-│   │   ├── App.css               # Global styles
-│   │   ├── index.css             # Tailwind imports
-│   │   ├── main.jsx              # App entry point with routing
-│   │   ├── Layout.jsx            # App layout wrapper
-│   │   ├── TabsLayout.jsx        # Tabbed navigation layout
-│   │   ├── LandingPage.jsx       # Public landing page
-│   │   └── info.js               # API configuration
-│   ├── public/                   # Static assets
-│   ├── index.html                # HTML template
-│   ├── vite.config.js            # Vite configuration
-│   ├── vercel.json               # Vercel deployment config
-│   └── package.json              # Frontend dependencies
-├── FEATURES.md                   # Detailed feature documentation
-└── README.md                     # This file
-```
-
-## 🔐 Security Features
-
-- **Password Encryption**: bcrypt hashing for secure password storage
-- **JWT Authentication**: Stateless authentication with access and refresh tokens
-- **Input Validation**: Comprehensive server-side validation and sanitization
-- **File Security**: Secure file upload with type validation
-- **CORS Configuration**: Properly configured cross-origin resource sharing
-- **Environment Variables**: Secure configuration management
-
-
-## 📱 User Roles & Permissions
-
-### 🎓 Students
-- Complete profile management with graduation tracking
-- Browse and apply to exclusive alumni-shared job opportunities
-- Network with alumni and fellow students
-- Participate in social discussions and content sharing
-- Support fundraising initiatives through secure donations
-- Access college statistics and community insights
-
-### 👔 Alumni
-- All student features plus additional privileges
-- Create and manage job postings for the community
-- Review and manage job applications with candidate insights
-- Lead fundraising campaigns for alma mater initiatives
-- Mentor students through direct networking
-- Share professional insights and career opportunities
-
-### ⚙️ Administrators
-- College registration and comprehensive management
-- User management with role assignment and oversight
-- Fundraiser administration and campaign monitoring
-- Platform analytics with detailed insights and metrics
-- System configuration and maintenance tools
-- Content moderation and community management
+### 📧 Email Notification System
+- **Welcome Emails**: Automated welcome messages sent to new users upon registration
+- **Job Application Alerts**: Instant notifications to alumni when someone applies to their posted jobs
+- **Skills-Matched Job Alerts**: Automatic emails to students when jobs matching their skills are posted
 
 
 ## 📊 Database Schema
@@ -350,211 +239,77 @@ erDiagram
     Fundraiser ||--o{ Donation : receives
 ```
 
-#### 👤 **User Model**
-```javascript
-{
-  _id: ObjectId,              // Primary Key
-  role: String,               // Required: "student" | "alumni" | "admin"
-  email: String,              // Required, Unique, Indexed
-  fullname: String,           // Required
-  password: String,           // Required, Bcrypt Hashed
-  graduationYear: Number,     // Optional
-  major: String,              // Optional
-  skills: [String],           // Array of skills for job matching
-  avatar: String,             // Profile picture URL (Cloudinary)
-  bio: String,                // Optional bio text
-  company: String,            // Current company
-  position: String,           // Current job position
-  location: String,           // Geographic location
-  college: ObjectId,          // Reference to College
-  refreshToken: String,       // JWT refresh token
-  createdAt: Date,            // Auto-generated
-  updatedAt: Date             // Auto-generated
-}
+## 📱 User Roles & Permissions
+
+### 🎓 Students
+- Complete profile management with graduation tracking
+- Browse and apply to exclusive alumni-shared job opportunities
+- Participate in social discussions and content sharing
+- Support fundraising initiatives through secure donations
+- Access college statistics and community insights
+
+### 👔 Alumni
+- All student features plus additional privileges
+- Create and manage job postings for the community
+- Review and manage job applications with candidate insights
+
+## 🔄 GradLink Platform Overview
+
+```mermaid
+flowchart TD
+    %% User Entry
+    A[👤 User] --> B[🔑 Login/Register]
+    B --> I1[📧 Welcome Email on Register]
+    B --> C[📊 Dashboard]
+    
+    %% Core Features
+    C --> D[👥 Networking]
+    C --> E[💼 Jobs]
+    C --> F[📱 Social]
+    C --> G[💰 Fundraising]
+    
+    %% Networking Features
+    D --> D1[📝 Complete Profile]
+    D --> D2[🌐 Browse Alumni Network]
+    D2 --> D2A[🔎 Search by Name]
+    D2 --> D2B[🎓 Search by Grad Year]
+    D2 --> D2C[📚 Search by Major]
+    D2 --> D2D[🏢 Search by Company]
+    
+    %% Job Features
+    E --> E1[🔍 Browse Job Listings]
+    E --> E2[📄 Apply to Jobs]
+    E --> E3{Alumni?}
+    E3 -->|Yes| E4[📝 Post Job Opportunities]
+    E3 -->|Yes| E5[📊 Manage Applications]
+    E3 -->|Yes| E6[✅ Accept/Reject Candidates]
+    
+    %% Email Notifications for Jobs
+    E2 --> I2[📧 Skills-Matched Job Alerts]
+    E4 --> I3[📧 Application Received Alert]
+    
+    %% Social Features
+    F --> F1[✍️ Create Posts]
+    F --> F2[💬 Comment on Posts]
+    F --> F3[❤️ Like Posts]
+    F --> F4[📸 Share Media]
+    
+    %% Fundraising Features
+    G --> G2[💳 Donate to Campaigns]
+    G --> G3[📊 Track Campaign Progress]
+    
+    %% Styling
+    classDef user fill:#e3f2fd,stroke:#1976d2
+    classDef feature fill:#f3e5f5,stroke:#7b1fa2
+    classDef alumni fill:#fff3e0,stroke:#f57c00
+    classDef email fill:#e8f5e8,stroke:#4caf50
+    
+    class A,B,C user
+    class D,E,F,G feature
+    class D2A,D2B,D2C,D2D feature
+    class E4,E5,E6 alumni
+    class I1,I2,I3 email
 ```
-
-#### 🏫 **College Model**
-```javascript
-{
-  _id: ObjectId,              // Primary Key
-  collegeName: String,        // Required, Unique
-  phoneNumber: String,        // Required
-  collegeEmail: String,       // Required
-  location: String,           // Optional
-  majors: [String],           // Array of available majors
-  logo: String,               // College logo URL (Cloudinary)
-  createdAt: Date,            // Auto-generated
-  updatedAt: Date             // Auto-generated
-}
-```
-
-### Collection Details
-
-#### 👥 Users Collection
-- **Purpose**: Store user profiles for students, alumni, and administrators
-- **Key Features**: 
-  - Role-based access control (student/alumni/admin)
-  - JWT authentication with bcrypt password hashing
-  - Skills tracking for job matching algorithms
-  - College affiliation for community segmentation
-- **Validation**: Required fields enforced, unique email constraint
-- **Indexes**: Email (unique), college (compound), role + college
-
-#### 🏫 Colleges Collection
-- **Purpose**: Educational institution profiles and configuration
-- **Key Features**:
-  - Multi-college platform support
-  - Major/department listings for accurate user categorization
-  - Contact information and branding (logo)
-- **Relationships**: Central hub for all platform activities
-- **Validation**: Unique college names, required contact information
-
-#### 💼 Jobs Collection
-- **Purpose**: Job postings shared by alumni for community members
-- **Key Features**:
-  - Alumni-only posting privileges
-  - Skill-based job matching algorithms
-  - Application tracking through applicants array
-  - Type categorization (full-time/part-time/internship)
-- **Access Control**: Only alumni can create, all users can view/apply
-- **Indexes**: College + type, postedBy, requiredSkills (text search)
-
-#### 📄 JobApplications Collection
-- **Purpose**: Track job application lifecycle and status
-- **Key Features**:
-  - Status management (pending/accepted/rejected)
-  - Resume and cover letter storage via Cloudinary
-  - College-wise application processing
-- **Workflow**: Application → Review → Status Update → Email Notification
-- **Relationships**: Links Job, User (applicant), and College
-
-#### 📱 Posts Collection
-- **Purpose**: Social networking and community engagement
-- **Key Features**:
-  - Media attachments via Cloudinary integration
-  - Like/unlike functionality with user tracking
-  - College-specific content feeds
-  - Category-based content organization
-- **Real-time**: Live engagement updates using aggregation pipelines
-- **Content Management**: Author-controlled editing and deletion
-
-#### 💬 Comments Collection
-- **Purpose**: Threaded discussions on posts
-- **Key Features**:
-  - Nested comment support structure
-  - Real-time comment streaming
-  - Author verification and content validation
-- **Moderation**: College-admin moderation capabilities
-- **Performance**: Paginated loading for large comment threads
-
-#### 🎯 Fundraisers Collection
-- **Purpose**: College fundraising campaigns and initiatives
-- **Key Features**:
-  - Goal tracking with real-time progress calculation
-  - Category-based campaign organization
-  - Visual campaign management with cover images
-- **Financial Tracking**: Integration with Donation collection for accuracy
-- **Transparency**: Public progress visibility and milestone tracking
-
-#### 💰 Donations Collection
-- **Purpose**: Secure donation transaction records
-- **Key Features**:
-  - Stripe payment integration with paymentIntentId tracking
-  - Complete transaction history and receipt generation
-  - Multi-college donation support
-  - Automatic fundraiser progress updates
-- **Security**: PCI-compliant payment processing, encrypted transaction data
-- **Reporting**: Comprehensive donation analytics and tax documentation
-
-### Database Design Principles
-
-#### 🔗 Relationship Patterns
-- **One-to-Many**: User → Posts, Jobs, Comments, Donations
-- **Many-to-One**: Users → College (community segmentation)
-- **Many-to-Many**: Users ↔ Jobs (via JobApplications), Users ↔ Posts (via likes)
-- **Reference Strategy**: ObjectId references for optimal query performance
-
-#### 📈 Performance Optimizations
-- **Indexes**: Strategic indexing on frequently queried fields
-- **Aggregation Pipelines**: Complex queries with data transformation
-- **Pagination**: Built-in mongoose-aggregate-paginate-v2 for large datasets
-- **Caching Strategy**: Application-level caching for static college data
-
-#### 🔒 Data Integrity
-- **Validation**: Mongoose schema validation with custom validators
-- **Constraints**: Unique constraints on critical fields (email, college names)
-- **Referential Integrity**: Proper foreign key relationships
-- **Timestamps**: Automatic createdAt/updatedAt tracking on all collections
-
-#### 🚀 Scalability Considerations
-- **Horizontal Scaling**: MongoDB sharding capability for growth
-- **Index Strategy**: Compound indexes for complex query patterns
-- **Data Archival**: Strategy for historical data management
-- **Connection Pooling**: Optimized database connection management
-
-## 🎨 UI/UX Features
-
-- **Responsive Design**: Mobile-first design that works on all devices
-- **Modern Interface**: Clean, professional design with gradient accents
-- **Interactive Components**: Smooth animations and transitions
-- **Accessibility**: ARIA labels and keyboard navigation support
-- **Dark Mode Ready**: Prepared for dark theme implementation
-- **Performance Optimized**: Lazy loading and code splitting
-
-## 🔄 Workflow Examples
-
-### Job Application Process
-1. Alumni posts job opportunity with requirements
-2. System matches job with student skills and sends email notifications
-3. Students browse jobs and apply with resume and cover letter
-4. Alumni reviews applications and updates status
-5. Email notifications sent for status updates
-
-### Fundraising Campaign
-1. User creates fundraising campaign with goal and description
-2. Campaign appears on fundraisers page with progress tracking
-3. Community members make secure donations via Stripe
-4. Real-time progress updates and milestone notifications
-5. Complete donation history and receipt management
-
-## 🚀 Deployment
-
-### Production URLs
-- **Frontend**: [https://gradlink-neon.vercel.app](https://gradlink-neon.vercel.app)
-- **Backend**: [https://gradlink-0aro.onrender.com](https://gradlink-0aro.onrender.com)
-
-### Deployment Platforms
-- **Frontend**: Vercel (with automatic deployments)
-- **Backend**: Render (with continuous deployment)
-- **Database**: MongoDB Atlas (cloud-hosted)
-- **File Storage**: Cloudinary (CDN-optimized)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Anuj Kamdar**
-- GitHub: [@anujkamdar](https://github.com/anujkamdar)
-- Email: anuj@example.com
-
-## 🙏 Acknowledgments
-
-- **Radix UI** for accessible component primitives
-- **Tailwind CSS** for utility-first styling
-- **Cloudinary** for reliable file storage
-- **Stripe** for secure payment processing
-- **MongoDB** for flexible document database
-- **Vercel** for seamless frontend deployment
 
 ---
 
