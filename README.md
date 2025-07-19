@@ -12,12 +12,23 @@
 
 **GradLink** is a comprehensive full-stack web application that bridges the gap between educational institutions' alumni and current students. It facilitates professional networking, career opportunities, fundraising initiatives, and community engagement within college ecosystems.
 
-### 🌟 Key Value Propositions
+## 🚀 Features
 
-- **Professional Networking**: Connect students with alumni for mentorship and career guidance
-- **Exclusive Job Portal**: Access to alumni-shared job opportunities and career openings
-- **Community Fundraising**: Support alma mater through secure donation campaigns
-- **Social Engagement**: Share achievements, updates, and professional insights
+### 👥 Alumni Networking
+- 🔍 **View Profiles**: Explore detailed alumni and student profiles, including education, work company and position
+
+### 📰 Social Feed
+- 📝 **Create Posts**: Share updates, success stories, and professional tips  
+- ❤️ **Like & Comment**: Engage with the community through likes and meaningful discussions  
+- 📸 **Media Support**: Share images in posts
+
+### 💼 Job Portal
+- 🧑‍💼 **Alumni-Posted Opportunities**: Jobs and internships shared by alumni for students  
+- 🔎 **Browse & Apply**: Explore listings and apply directly within the platform  
+
+### 💰 Fundraising & Donations
+- 🏫 **Event-Based Campaigns**: Support college events, infrastructure, scholarships, etc.  
+
 
 ## 🏗️ Architecture
 
