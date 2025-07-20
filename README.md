@@ -12,12 +12,28 @@
 
 **GradLink** is a comprehensive full-stack web application that bridges the gap between educational institutions' alumni and current students. It facilitates professional networking, career opportunities, fundraising initiatives, and community engagement within college ecosystems.
 
-### 🌟 Key Value Propositions
+## 🚀 Features
 
-- **Professional Networking**: Connect students with alumni for mentorship and career guidance
-- **Exclusive Job Portal**: Access to alumni-shared job opportunities and career openings
-- **Community Fundraising**: Support alma mater through secure donation campaigns
-- **Social Engagement**: Share achievements, updates, and professional insights
+### 👥 Alumni Networking
+- 🔍 **View Profiles**: Explore detailed alumni and student profiles, including education, work company and position
+
+### 📰 Social Feed
+- 📝 **Create Posts**: Share updates, success stories, and professional tips  
+- ❤️ **Like & Comment**: Engage with the community through likes and meaningful discussions  
+- 📸 **Media Support**: Share images in posts
+
+### 💼 Job Portal
+- 🧑‍💼 **Alumni-Posted Opportunities**: Jobs and internships shared by alumni for students  
+- 🔎 **Browse & Apply**: Explore listings and apply directly within the platform
+
+### 📧 Email Notification System
+- **Welcome Emails**: Automated welcome messages sent to new users upon registration
+- **Job Application Alerts**: Instant notifications to alumni when someone applies to their posted jobs
+- **Skills-Matched Job Alerts**: Automatic emails to students when jobs matching their skills are posted
+
+### 💰 Fundraising & Donations
+- 🏫 **Event-Based Campaigns**: Support college events, infrastructure, scholarships, etc.  
+
 
 ## 🏗️ Architecture
 
@@ -46,7 +62,6 @@
 ### Frontend Technologies
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-6.3-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-Latest-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![shadcn/ui](https://img.shields.io/badge/shadcn/ui-Latest-000000?style=for-the-badge&logo=shadcnui&logoColor=white)
 
@@ -62,49 +77,7 @@
 ![Vercel](https://img.shields.io/badge/Vercel-Deployment-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![Render](https://img.shields.io/badge/Render-Backend-46E3B7?style=for-the-badge&logo=render&logoColor=white)
 
-</div>
-
-
-
-## 🚀 Features
-
-### 👥 User Management
-- **Multi-role System**: Students and Alumni roles
-- **Secure Authentication**: JWT-based login with session management
-- **Profile Management**: Comprehensive user profiles with completion tracking
-- **College Integration**: Multi-college support with role-based access
-- **Welcome Emails**: Automated welcome emails sent upon successful registration
-
-### 💼 Job Portal
-- **Job Posting**: Alumni can post job opportunities with detailed requirements
-- **Smart Applications**: Resume upload, cover letter, and application tracking
-- **Skills Matching**: Algorithm-based job recommendations with email alerts
-- **Application Management**: Status tracking and candidate management
-- **Email Notifications**: Automated updates for applications and new opportunities
-
-### 🌐 Social Platform
-- **Post Creation**: Text posts with media attachments and link detection
-- **Social Interactions**: Like/unlike posts and threaded comment system
-- **Content Management**: Personal post management and categorization
-- **Real-time Updates**: Live engagement tracking and notifications
-
-### 💰 Fundraising Hub
-- **Campaign Creation**: Create fundraising initiatives with goals and descriptions
-- **Secure Payments**: Stripe integration for donation processing
-- **Progress Tracking**: Real-time donation tracking with visual progress indicators
-- **Donation History**: Complete transaction history and receipts
-
-### 🔍 Advanced Search & Discovery
-- **Multi-criteria Search**: Search across users, jobs, and content
-- **Smart Filtering**: Filter by graduation year, major, location, and skills
-- **Skills Matching**: Algorithm-based recommendations for networking and jobs
-- **Location-based Discovery**: Geographic filtering for opportunities
-
-### 📧 Email Notification System
-- **Welcome Emails**: Automated welcome messages sent to new users upon registration
-- **Job Application Alerts**: Instant notifications to alumni when someone applies to their posted jobs
-- **Skills-Matched Job Alerts**: Automatic emails to students when jobs matching their skills are posted
-
+</div> 
 
 ## 📊 Database Schema
 
