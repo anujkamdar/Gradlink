@@ -76,7 +76,20 @@ export default function PostsPage() {
 
     const likePost = async (postId) => {
         if (likeInProgress) return;
-
+        const targetPost = posts.find(post => post._id === postId);
+        const originalIsLiked = targetPost?.isLikedByUser;
+        const originalLikesCount = targetPost?.likesCount;
+        setPosts(prevPosts =>
+            prevPosts.map(post =>
+                post._id == postId
+                    ? {
+                        ...post,
+                        isLikedByUser: !originalIsLiked,
+                        likesCount: originalLikesCount + (originalIsLiked ? -1 : 1)
+                    }
+                    : post
+            )
+        );
         try {
             setLikeInProgress(true);
             const response = await axios.post(
@@ -84,20 +97,9 @@ export default function PostsPage() {
                 { postId },
                 { withCredentials: true }
             );
-
-            setPosts(prevPosts =>
-                prevPosts.map(post =>
-                    post._id === postId ? {
-                        ...post,
-                        likesCount: response.data.data.likes.length,
-                        isLikedByUser: !post.isLikedByUser
-                    }
-                        : post
-                )
-            );
-
         } catch (error) {
             console.error("Error toggling like:", error);
+            setPosts(prevPosts => prevPosts.map(post => post._id == postId ? { ...post, isLikedByUser: originalIsLiked, likesCount: originalLikesCount } : post))
         } finally {
             setLikeInProgress(false);
         }
@@ -185,8 +187,8 @@ export default function PostsPage() {
                                     key={cat.id}
                                     onClick={() => handleCategoryChange(cat.id)}
                                     className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${category === cat.id
-                                            ? "bg-indigo-600 text-white shadow-md"
-                                            : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                                        ? "bg-indigo-600 text-white shadow-md"
+                                        : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
                                         }`}
                                 >
                                     {cat.label}
@@ -199,8 +201,8 @@ export default function PostsPage() {
                             <button
                                 onClick={() => setShowOnlyMyPosts(!showOnlyMyPosts)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${showOnlyMyPosts
-                                        ? "bg-indigo-600 text-white shadow-md"
-                                        : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                                    ? "bg-indigo-600 text-white shadow-md"
+                                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
                                     }`}
                             >
                                 <UserCheck className="h-4 w-4" />
