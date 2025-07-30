@@ -203,35 +203,35 @@ function LandingPage() {
       title: "Alumni Profiles",
       description: "Create detailed profiles showcasing your education, skills, current position, company, and location. Connect with fellow graduates and build your professional network.",
       color: "bg-blue-100 text-blue-600",
-      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+      image: "/images/alumni-profiles.jpg"
     },
     {
       icon: Briefcase,
       title: "Job Portal",
       description: "Discover career opportunities shared exclusively by alumni networks and top recruiting companies.",
       color: "bg-indigo-100 text-indigo-600",
-      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+      image: "/images/job-portal.jpg"
     },
     {
       icon: Heart,
       title: "Fundraising Hub",
       description: "Support your alma mater through secure online donations for scholarships, research, and infrastructure.",
       color: "bg-blue-100 text-blue-600",
-      image: "https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1470&q=80"
+      image: "/images/fundraising-hub.jpg"
     },
     {
       icon: MessageSquare,
       title: "Social Sharing",
       description: "Share posts, updates, and achievements with fellow students and alumni through our integrated social platform.",
       color: "bg-indigo-100 text-indigo-600",
-      image: "https://images.unsplash.com/photo-1611926653458-09294b3142bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=1470&q=80"
+      image: "/images/social-sharing.jpg"
     },
     {
       icon: Building,
       title: "College News",
       description: "Stay updated with the latest news, developments, and announcements from your alma mater.",
       color: "bg-blue-100 text-blue-600",
-      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1470&q=80"
+      image: "/images/college-news.jpg"
     }
   ]
 
@@ -776,7 +776,7 @@ function LandingPage() {
             <div className="relative hidden md:block p-3 sm:p-4">
               <div className="absolute -inset-4 bg-indigo-50 rounded-xl transform rotate-3"></div>
               <img
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
+                src="/images/hero-section.jpg"
                 alt="Alumni networking"
                 className="relative rounded-xl shadow-lg object-cover h-full"
               />
