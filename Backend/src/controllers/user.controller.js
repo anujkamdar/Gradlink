@@ -574,7 +574,7 @@ const getJobPostings = asyncHandler(async (req, res) => {
 
   if (search) {
     const searchRegex = new RegExp(search, "i"); // case-insensitive search
-    matchstage.$or = [{ title: searchRegex }, { description: searchRegex }];
+    matchstage.$or = [{ title: searchRegex }, { description: searchRegex }, { company: searchRegex }];
   }
   if (type) {
     matchstage.type = type;
@@ -1512,7 +1512,7 @@ const deletePost = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, null, "Post deleted successfully"));
 });
 
-const changeAvatar = asyncHandler(async(req,res) => {
+const changeAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
@@ -1521,15 +1521,12 @@ const changeAvatar = asyncHandler(async(req,res) => {
   if (!avatar?.url) {
     throw new ApiError(500, "Avatar upload failed");
   }
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user._id,
-    { avatar: avatar.url },
-  );
+  const updatedUser = await User.findByIdAndUpdate(req.user._id, { avatar: avatar.url });
   if (!updatedUser) {
     throw new ApiError(500, "Failed to update avatar");
   }
-  return res.status(200).json(new ApiResponse(200,avatar.url, "Avatar updated successfully"));
-})
+  return res.status(200).json(new ApiResponse(200, avatar.url, "Avatar updated successfully"));
+});
 
 export {
   registerUser,
