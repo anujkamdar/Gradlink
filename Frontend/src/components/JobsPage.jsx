@@ -20,6 +20,7 @@ import {
   FileText,
   Share2
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Backend_url } from '@/info';
@@ -27,6 +28,7 @@ import { Backend_url } from '@/info';
 export default function JobsPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [loading2 , setLoading2] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [type, setType] = useState("");
   const [location, setLocation] = useState("");
@@ -42,6 +44,7 @@ export default function JobsPage() {
 
   const getJobPostings = async () => {
     try {
+      setLoading2(true);
       const response = await axios.post(
         `${Backend_url}/gradlink/api/v1/users/get-job-postings`,
         { search, location, type, currentPage },
@@ -51,6 +54,9 @@ export default function JobsPage() {
       setJobs(response.data.data.jobs);
     } catch (error) {
       console.log(error.response?.data?.message || "Network Error");
+    }
+    finally{
+      setLoading2(false);
     }
   }
 
@@ -184,10 +190,51 @@ export default function JobsPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-4">Available Opportunities</h3>
 
               {/* Loading state */}
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                  <p className="mt-2 text-gray-600">Loading job listings...</p>
+              {loading2 ? (
+                <div className="space-y-4">
+                  {[...Array(1)].map((_, i) => (
+                    <Card key={i} className="overflow-hidden">
+                      <CardContent className="p-0">
+                        <div className="p-6">
+                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
+                            <div className="flex items-start space-x-4">
+                              <div className="flex-shrink-0">
+                                <Skeleton className="w-12 h-12 rounded-lg" />
+                              </div>
+                              <div>
+                                <Skeleton className="h-6 w-40 mb-2" />
+                                <Skeleton className="h-4 w-24" />
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Skeleton className="h-8 w-24 rounded-md" />
+                              <Skeleton className="h-8 w-24 rounded-md" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
+                            <Skeleton className="h-8 w-full" />
+                            <Skeleton className="h-8 w-full" />
+                            <Skeleton className="h-8 w-full" />
+                          </div>
+                          <div className="mb-4">
+                            <Skeleton className="h-4 w-3/4 mb-2" />
+                            <Skeleton className="h-4 w-full" />
+                          </div>
+                          <div>
+                            <Skeleton className="h-4 w-32 mb-2" />
+                            <div className="flex flex-wrap gap-1.5">
+                              {[...Array(4)].map((_, j) => (
+                                <Skeleton key={j} className="h-6 w-16 rounded-full" />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <CardFooter className="bg-gray-50 border-t border-gray-100 px-6 py-3 flex justify-between items-center">
+                          <Skeleton className="h-6 w-24 rounded-md" />
+                        </CardFooter>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               ) : jobs.length === 0 ? (
                 <Card>
@@ -347,18 +394,6 @@ export default function JobsPage() {
                           <span className={`w-2 h-2 rounded-full mr-2 animate-pulse ${job.type == 'full-time' ? "bg-emerald-200" : job.type == "part-time" ? "bg-blue-200" : "bg-purple-200"}`}></span>
                           {job.type}
                         </Badge>
-
-
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-gray-600 hover:text-indigo-600"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Share2 className="h-4 w-4" />
-                          </Button>
-                        </div>
                       </CardFooter>
                     </CardContent>
                   </Card>
