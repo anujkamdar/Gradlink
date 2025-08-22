@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 export default function FundraisersPage() {
     const [fundraisers, setFundraisers] = useState([]);
@@ -135,7 +137,7 @@ export default function FundraisersPage() {
                 formDataToSubmit.append("coverImage", formData.coverImage);
             }
             if (formData.targetAmount <= 0) {
-                alert("Target amount must be greater than 0");
+                toast.error("Target amount must be greater than 0");
                 return;
             }
             const response = await axios.post(`${Backend_url}/gradlink/api/v1/users/create-fundraiser`, formDataToSubmit, {
@@ -147,7 +149,7 @@ export default function FundraisersPage() {
 
             console.log("Fundraiser created:", response.data);
             setFundraisers([...fundraisers, response.data.data]);
-            alert("Fundraiser created successfully!");
+            toast.success("Fundraiser created successfully!");
             setIsAddingFundraiser(false);
             setIsSubmitting(false);
             setFormData({
@@ -158,7 +160,7 @@ export default function FundraisersPage() {
                 category: ""
             });
         } catch (error) {
-            alert(error.response?.data?.message || "Failed to create fundraiser");
+            toast.error(error.response?.data?.message || "Failed to create fundraiser");
             setIsSubmitting(false);
         }
     };
@@ -198,6 +200,8 @@ export default function FundraisersPage() {
     }
 
     return (
+        <>
+        <Toaster position='top-right'/>
         <div className="bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
@@ -426,5 +430,6 @@ export default function FundraisersPage() {
                 </StripeProvider>
             )}
         </div>
+        </>
     );
 }

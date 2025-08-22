@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Backend_url } from '@/info';
+import toast, { Toaster } from 'react-hot-toast';
+
 
 export default function CollegeRegisterPage() {
     const navigate = useNavigate();
@@ -27,6 +29,7 @@ export default function CollegeRegisterPage() {
             avatar: null
         }
     });
+
 
 
 
@@ -142,15 +145,17 @@ export default function CollegeRegisterPage() {
             });
             console.log("College registered successfully:", response.data);
             setSubmitting(false);
-            alert("College registered successfully!");
+            toast.success("College registered successfully!");
         } catch (error) {
             console.error("Error registering college:", error);
-            alert(error.response?.data?.message || "Registration failed. Please try again.");
+            toast.error(error?.response?.data?.message || "Registration failed. Please try again.");
             setSubmitting(false);
         }
     };
 
     return (
+        <>
+        <Toaster position='top-right'/>
         <div className="bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-6">
@@ -423,5 +428,6 @@ export default function CollegeRegisterPage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

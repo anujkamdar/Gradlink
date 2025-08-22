@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { Backend_url } from "../info.js";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -91,12 +93,12 @@ function ProfilePage() {
     if (!newSkill.trim()) return;
 
     if (userData.skills && userData.skills.includes(newSkill.trim().toLowerCase())) {
-      alert("This skill already exists in your profile!");
+      toast.error("This skill already exists in your profile!");
       return;
     }
 
     if (userData.skills && userData.skills.length >= 5) {
-      alert("You can add a maximum of 5 skills. Please remove a skill before adding a new one.");
+      toast.error("You can add a maximum of 5 skills. Please remove a skill before adding a new one.");
       return;
     }
 
@@ -120,12 +122,12 @@ function ProfilePage() {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        alert('Please select a valid image file');
+        toast.error('Please select a valid image file');
         return;
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        toast.error('File size must be less than 5MB');
         return;
       }
 
@@ -141,7 +143,7 @@ function ProfilePage() {
 
   const handleChangeAvatar = async () => {
     if (!avatarFile) {
-      alert('Please select an image first');
+      toast.error('Please select an image first');
       return;
     }
 
@@ -171,12 +173,11 @@ function ProfilePage() {
         setIsChangeAvatarDialogOpen(false);
         setAvatarFile(null);
         setAvatarPreview(null);
-        
-        alert('Avatar updated successfully!');
+        toast.success('Avatar updated successfully!');
       }
     } catch (error) {
       console.error('Avatar upload error:', error);
-      alert(error.response?.data?.message || 'Failed to update avatar');
+      toast.error(error.response?.data?.message || 'Failed to update avatar');
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -190,6 +191,7 @@ function ProfilePage() {
 
   return (
     <>
+      <Toaster position='top-right'/>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50">
         {/* Header section with user banner */}
         <section className="relative">

@@ -42,6 +42,8 @@ import {
   Building,
 } from "lucide-react"
 import { Backend_url } from "./info.js"
+import toast, { Toaster } from 'react-hot-toast';
+
 
 
 function LandingPage() {
@@ -82,7 +84,7 @@ function LandingPage() {
         console.log("Colleges fetched:", response.data.data);
       } catch (error) {
         console.error("Error fetching colleges:", error);
-        alert("Failed to load colleges. Please try again later.");
+        toast.error("Failed to load colleges. Please try again later.");
       }
     };
     fetchColleges();
@@ -109,11 +111,11 @@ function LandingPage() {
   const signInUser = async () => {
     setPassword(passwordRef.current.value)
     if (!email) {
-      alert("Enter Email");
+      toast.error("Enter Email");
       return;
     }
     if (!passwordRef.current.value) {
-      alert("Enter Password");
+      toast.error("Enter Password");
       return;
     }
 
@@ -126,48 +128,48 @@ function LandingPage() {
       navigate("/tabs/home")
     } catch (error) {
       setLoadingAuth(false);
-      alert(error?.response?.data?.message || "Network error");
+      toast.error(error?.response?.data?.message || "Network error");
     }
   }
 
   const registerUser = async () => {
     if (!email) {
-      alert("Enter Email");
+      toast.error("Enter Email");
       return;
     }
     if (!registerPasswordRef.current.value) {
-      alert("Enter Password");
+      toast.error("Enter Password");
       return;
     }
     if (selectedRole === "") {
-      alert("Select a role");
+      toast.error("Select Role");
       return;
     }
     const firstName = document.getElementById("first-name").value;
     const lastName = document.getElementById("last-name").value;
 
     if (!firstName || !lastName) {
-      alert("Enter First and Last Name");
+      toast.error("Enter First and Last Name");
       return;
     }
 
     if (!graduationYear) {
-      alert("Select Graduation Year");
+      toast.error("Select Graduation Year");
       return;
     }
 
 
     if (!college) {
-      alert("Select College");
+      toast.error("Select College");
       return;
     }
 
     if (!major) {
-      alert("Select Major");
+      toast.error("Select Major");
       return;
     }
     if (!avatar) {
-      alert("Please upload a profile picture");
+      toast.error("Upload Profile Picture");
       return;
     }
 
@@ -191,7 +193,7 @@ function LandingPage() {
       setLoadingAuth(false);
       navigate("/tabs/home");
     } catch (error) {
-      alert(error.response?.data?.message || "Network Error");
+      toast.error(error?.response?.data?.message || "Network error");
       setLoadingAuth(false);
     }
   }
@@ -240,6 +242,8 @@ function LandingPage() {
 
 
   return (
+    <>
+    <Toaster/>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Header */}
       <header className={`${isScrolled ? 'bg-white/95 shadow-lg' : 'bg-white/80 shadow-md'} backdrop-blur-lg sticky top-0 z-50 border-b border-blue-50 transition-all duration-300`}>
@@ -912,6 +916,7 @@ function LandingPage() {
         </div>
       </footer>
     </div>
+    </>
   )
 }
 

@@ -34,6 +34,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Backend_url } from "../info.js";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 export default function MyJobApplicationsPage() {
   const navigate = useNavigate();
@@ -58,7 +60,7 @@ export default function MyJobApplicationsPage() {
         console.log(response.data.data)
       } catch (err) {
         console.log("Error fetching job applications:", err);
-        alert(err.response?.data?.message || "Failed to load your applications");
+        toast.error(err.response?.data?.message || "Failed to load your applications");
         setLoading(false);
       }
     };
@@ -118,6 +120,8 @@ export default function MyJobApplicationsPage() {
   }
 
   return (
+    <>
+    <Toaster position='top-right' />
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
@@ -273,5 +277,6 @@ export default function MyJobApplicationsPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }

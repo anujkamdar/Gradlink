@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Backend_url } from "../info.js";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 export default function PostJobPage() {
     const navigate = useNavigate();
@@ -36,7 +38,7 @@ export default function PostJobPage() {
     const addSkill = () => {
 
         if (jobForm.requiredSkills.includes(currentSkill.trim())) {
-            alert("Skill already added! Please add a different skill.");
+            toast.error("Skill already added! Please add a different skill.");
         }
 
         if (currentSkill.trim() && !jobForm.requiredSkills.includes(currentSkill.trim())) {
@@ -75,7 +77,7 @@ export default function PostJobPage() {
             navigate("/tabs/jobs")
         } catch (error) {
             console.error("Error posting job:", error);
-            alert(error.response.data.message);
+            toast.error(error.response.data.message || "Failed to post job");
             setSubmitting(false);
         }
     };
@@ -84,6 +86,8 @@ export default function PostJobPage() {
     // here using required keyword rather than using alert as it looks better
 
     return (
+        <>
+        <Toaster position='top-right' />
         <div className="bg-gray-50 min-h-screen">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-6">
@@ -252,5 +256,6 @@ export default function PostJobPage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }
