@@ -33,7 +33,7 @@ function ProfilePage() {
   const [newSkill, setNewSkill] = useState("");
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState({});
-  const [isChangeAvatarDialogOpen,setIsChangeAvatarDialogOpen] = useState(false);
+  const [isChangeAvatarDialogOpen, setIsChangeAvatarDialogOpen] = useState(false);
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -78,11 +78,11 @@ function ProfilePage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'graduationYear' || name === 'major') {
       return;
     }
-    
+
     setUserData(prev => ({
       ...prev,
       [name]: value
@@ -125,14 +125,14 @@ function ProfilePage() {
         toast.error('Please select a valid image file');
         return;
       }
-      
+
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB');
         return;
       }
 
       setAvatarFile(file);
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setAvatarPreview(e.target.result);
@@ -148,7 +148,7 @@ function ProfilePage() {
     }
 
     setIsUploadingAvatar(true);
-    
+
     try {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
@@ -169,7 +169,7 @@ function ProfilePage() {
           ...prev,
           avatar: response.data.data
         }));
-        
+
         setIsChangeAvatarDialogOpen(false);
         setAvatarFile(null);
         setAvatarPreview(null);
@@ -191,150 +191,207 @@ function ProfilePage() {
 
   return (
     <>
-      <Toaster position='top-right'/>
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50">
-        {/* Header section with user banner */}
-        <section className="relative">
-          <div className="h-48 bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600"></div>
-          <div className="container mx-auto px-4">
-            <div className="relative -mt-24 mb-8 flex flex-col md:flex-row items-start md:items-end space-y-4 md:space-y-0 md:space-x-6">
-              <div className="relative group">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                  <img 
-                    src={userData.avatar} 
-                    alt={userData.fullname} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <button
-                  onClick={() => setIsChangeAvatarDialogOpen(true)}
-                  className="absolute inset-0 flex items-center justify-center bg-opacity-0 group-hover:bg- -50 rounded-full transition-all duration-200 cursor-pointer"
-                  title="Change Avatar"
-                >
-                  <Camera className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                </button>
-              </div>
-
-              <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-center justify-between">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">{userData.fullname}</h1>
-                    <div className="flex flex-wrap items-center gap-2 text-gray-900 mt-2">
-                      <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200">
-                        {userData.role}
-                      </Badge>
-                      <span className="hidden md:inline">•</span>
-                      <span className="flex items-center">
-                        <GraduationCap className="h-4 w-4 mr-1" /> Class of {userData.graduationYear}
-                      </span>
-                      {userData.major && (
-                        <>
-                          <span className="hidden md:inline">•</span>
-                          <span className="flex items-center">
-                            <BookOpen className="h-4 w-4 mr-1" /> {userData.major}
-                          </span>
-                        </>
-                      )}
+      <Toaster position='top-right' />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100">
+        {/* Header Card Section */}
+        <section className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl pt-8">
+          <Card className="border border-gray-200/50 shadow-xl bg-white hover:shadow-2xl transition-all duration-300 overflow-hidden rounded-2xl">
+            <CardContent className="p-6 md:p-8">
+              {/* Profile with Avatar */}
+              <div>
+                <div className="flex flex-col items-center md:items-start">
+                  <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start w-full">
+                    {/* Avatar Section */}
+                    <div className="relative group flex-shrink-0">
+                      <div className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-4 border-gray-200 shadow-lg transition-transform group-hover:scale-105 duration-300">
+                        <img
+                          src={userData.avatar}
+                          alt={userData.fullname}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        onClick={() => setIsChangeAvatarDialogOpen(true)}
+                        className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/60 rounded-full transition-all duration-300 cursor-pointer"
+                        title="Change Avatar"
+                      >
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center">
+                          <Camera className="h-8 w-8 text-white mb-1" />
+                          <span className="text-white text-xs font-medium">Change Photo</span>
+                        </div>
+                      </button>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 text-gray-600 mt-2">
-                      {userData.position && (
-                        <span className="flex items-center">
-                          <Briefcase className="h-4 w-4 mr-1" /> {userData.position}
-                        </span>
-                      )}
-                      {userData.company && (
-                        <>
-                          {userData.position && <span className="hidden md:inline">•</span>}
-                          <span className="flex items-center">
-                            <Building className="h-4 w-4 mr-1" /> {userData.company}
-                          </span>
-                        </>
-                      )}
-                      {userData.location && (
-                        <>
-                          <span className="hidden md:inline">•</span>
-                          <span className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-1" /> {userData.location}
-                          </span>
-                        </>
-                      )}
+
+                    {/* Profile Info Section */}
+                    <div className="flex-1 text-center md:text-left">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                        <div className="space-y-3">
+                          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
+                            {userData.fullname}
+                          </h1>
+
+                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                            <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0 px-3 py-1 text-sm font-medium shadow-md rounded-full">
+                              {userData.role[0].toUpperCase() + userData.role.slice(1)}
+                            </Badge>
+                            {userData.position && (
+                              <Badge variant="outline" className="border-blue-300 text-blue-700 px-3 py-1 bg-blue-50/50 rounded-full">
+                                <Briefcase className="h-3 w-3 mr-1" />
+                                {userData.position}
+                              </Badge>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-sm text-gray-600">
+                            <span className="flex items-center gap-1.5 font-medium">
+                              <GraduationCap className="h-4 w-4 text-slate-600" />
+                              Class of {userData.graduationYear}
+                            </span>
+                            {userData.major && (
+                              <span className="flex items-center gap-1.5">
+                                <BookOpen className="h-4 w-4 text-slate-600" />
+                                {userData.major}
+                              </span>
+                            )}
+                            {userData.company && (
+                              <span className="flex items-center gap-1.5">
+                                <Building className="h-4 w-4 text-slate-600" />
+                                {userData.company}
+                              </span>
+                            )}
+                            {userData.location && (
+                              <span className="flex items-center gap-1.5">
+                                <MapPin className="h-4 w-4 text-slate-600" />
+                                {userData.location}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="flex-shrink-0">
+                          {!isEditing ? (
+                            <Button
+                              className="bg-gradient-to-r from-slate-700 to-blue-600 hover:from-slate-800 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 rounded-xl"
+                              onClick={handleEditToggle}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Profile
+                            </Button>
+                          ) : (
+                            <Button
+                              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 rounded-xl"
+                              onClick={handleSaveProfile}
+                            >
+                              <Save className="h-4 w-4 mr-2" />
+                              Save Changes
+                            </Button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="mt-4 md:mt-0">
-                    {!isEditing ? (
-                      <Button
-                        variant="outline"
-                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
-                        onClick={handleEditToggle}
-                      >
-                        <Edit className="h-4 w-4 mr-2" /> Edit Profile
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleSaveProfile}
-                      >
-                        <Save className="h-4 w-4 mr-2" /> Save Changes
-                      </Button>
-                    )}
-                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </section>
 
-        {/* Main profile content */}
-        <section className="container mx-auto px-4 pb-20">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left column - Contact info and skills */}
-            <div className="lg:col-span-1 space-y-6">
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl">Contact Information</CardTitle>
+        {/* Main Content Grid */}
+        <section className="container mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10 max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+
+            {/* Left Sidebar - Compact Info Cards */}
+            <div className="lg:col-span-4 space-y-6">
+
+              {/* About Me Card */}
+              <Card className="border border-gray-200/50 shadow-lg bg-white hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-600 to-blue-600"></div>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-slate-600 to-blue-600 flex items-center justify-center">
+                      <Users className="h-4 w-4 text-white" />
+                    </div>
+                    About Me
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        id="bio"
+                        name="bio"
+                        value={userData.bio || ''}
+                        onChange={handleInputChange}
+                        rows={5}
+                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                        placeholder="Tell your story... Share your passions, experience, and what drives you."
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-700 leading-relaxed">
+                      {userData.bio ? (
+                        <p>{userData.bio}</p>
+                      ) : (
+                        <p className="text-gray-400 italic">Share your story with the community...</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Contact Information Card */}
+              <Card className="border border-gray-200/50 shadow-lg bg-white hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+                      <Mail className="h-4 w-4 text-white" />
+                    </div>
+                    Contact
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {isEditing ? (
                     <>
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email" className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Email</Label>
                         <Input
                           id="email"
                           name="email"
                           value={userData.email || ''}
-                          onChange={handleInputChange}
-                          className="border-purple-200 focus:border-purple-500"
+                          className="border-2 border-gray-200 bg-gray-50 cursor-not-allowed"
                           disabled
                         />
-                        <p className="text-xs text-gray-500">Email cannot be changed</p>
+                        <p className="text-xs text-gray-400">Email cannot be changed</p>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
+                        <Label htmlFor="location" className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Location</Label>
                         <Input
                           id="location"
                           name="location"
                           value={userData.location || ''}
                           onChange={handleInputChange}
-                          className="border-purple-200 focus:border-purple-500"
-                          placeholder="e.g., New York, NY"
+                          className="border-2 border-gray-200 rounded-xl focus:border-blue-500"
+                          placeholder="City, State or Country"
                         />
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="flex items-start space-x-3">
-                        <Mail className="h-5 w-5 text-purple-600 mt-0.5" />
-                        <div>
-                          <div className="font-medium">Email</div>
-                          <div className="text-gray-600">{userData.email}</div>
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-br from-gray-50 to-blue-50/50 border border-gray-200">
+                        <Mail className="h-5 w-5 text-slate-600 mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Email</div>
+                          <div className="text-sm text-gray-900 break-all">{userData.email}</div>
                         </div>
                       </div>
                       {userData.location && (
-                        <div className="flex items-start space-x-3">
-                          <MapPin className="h-5 w-5 text-purple-600 mt-0.5" />
-                          <div>
-                            <div className="font-medium">Location</div>
-                            <div className="text-gray-600">{userData.location}</div>
+                        <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-br from-gray-50 to-blue-50/50 border border-gray-200">
+                          <MapPin className="h-5 w-5 text-slate-600 mt-0.5 flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Location</div>
+                            <div className="text-sm text-gray-900">{userData.location}</div>
                           </div>
                         </div>
                       )}
@@ -343,223 +400,255 @@ function ProfilePage() {
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-xl">Skills</CardTitle>
+              {/* Skills Card */}
+              <Card className="border border-gray-200/50 shadow-lg bg-white hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-blue-600"></div>
+                <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center">
+                      <Award className="h-4 w-4 text-white" />
+                    </div>
+                    Skills
+                  </CardTitle>
                   {isEditing && (!userData.skills || userData.skills.length < 5) && (
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      className="h-8 border-dashed border-purple-300 text-purple-600"
+                      className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg"
                       onClick={() => setIsAddingSkill(true)}
                     >
-                      <PlusCircle className="h-3 w-3 mr-1" /> Add Skill
+                      <PlusCircle className="h-4 w-4 mr-1" />
+                      Add
                     </Button>
                   )}
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {userData.skills && userData.skills.map((skill, index) => (
-                      <Badge key={index} variant={`secondary`} className="bg-purple-100 text-purple-700 border-purple-200 py-1 px-3">
+                      <Badge
+                        key={index}
+                        className="bg-gradient-to-r from-blue-100/70 to-indigo-100/70 text-slate-700 border border-blue-200/50 py-1.5 px-3 text-sm font-medium hover:from-blue-200/70 hover:to-indigo-200/70 transition-all rounded-full"
+                      >
                         {skill}
                         {isEditing && (
                           <button
                             onClick={() => handleRemoveSkill(skill)}
-                            className="ml-2 text-purple-700 hover:text-red-500 transition-colors"
-                            aria-label={`Remove ${skill} skill`}
+                            className="ml-2 text-slate-500 hover:text-red-600 transition-colors"
+                            aria-label={`Remove ${skill}`}
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-3.5 w-3.5" />
                           </button>
                         )}
                       </Badge>
                     ))}
                     {(!userData.skills || userData.skills.length === 0) && (
-                      <p className="text-sm text-gray-500">No skills added yet.</p>
+                      <p className="text-sm text-gray-400 italic">Add your skills to showcase your expertise</p>
                     )}
                   </div>
                   {isEditing && userData.skills && userData.skills.length >= 5 && (
-                    <p className="text-sm text-gray-500 mt-2">
-                      Maximum of 5 skills reached. Remove a skill to add a new one.
+                    <p className="text-xs text-amber-600 mt-3 flex items-center gap-1">
+                      <span className="font-semibold">⚠️</span> Maximum 5 skills. Remove one to add another.
                     </p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl">Education</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {isEditing ? (
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="graduationYear">Graduation Year</Label>
-                        <Input
-                          id="graduationYear"
-                          name="graduationYear"
-                          type="number"
-                          value={userData.graduationYear || ''}
-                          className="border-purple-200 focus:border-purple-500"
-                          disabled
-                        />
-                        <p className="text-xs text-gray-500">Graduation year cannot be changed</p>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="major">Major/Field of Study</Label>
-                        <Input
-                          id="major"
-                          name="major"
-                          value={userData.major || ''}
-                          className="border-purple-200 focus:border-purple-500"
-                          placeholder="e.g., Computer Science"
-                          disabled
-                        />
-                        <p className="text-xs text-gray-500">Major cannot be changed</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-start space-x-3">
-                        <Calendar className="h-5 w-5 text-purple-600 mt-0.5" />
-                        <div>
-                          <div className="font-medium">Graduation Year</div>
-                          <div className="text-gray-600">{userData.graduationYear}</div>
-                        </div>
-                      </div>
-                      {userData.major && (
-                        <div className="flex items-start space-x-3">
-                          <Award className="h-5 w-5 text-purple-600 mt-0.5" />
-                          <div>
-                            <div className="font-medium">Major</div>
-                            <div className="text-gray-600">{userData.major}</div>
-                          </div>
-                        </div>
-                      )}
-                    </>
                   )}
                 </CardContent>
               </Card>
             </div>
 
-            {/* Right column - Bio and Work Experience */}
-            <div className="lg:col-span-2 space-y-6">
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl">About Me</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isEditing ? (
-                    <div className="space-y-2">
-                      <Label htmlFor="bio">Bio</Label>
-                      <Textarea
-                        id="bio"
-                        name="bio"
-                        value={userData.bio || ''}
-                        onChange={handleInputChange}
-                        rows={4}
-                        className="w-full p-2 border border-purple-200 rounded-md focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                        placeholder="Tell others about yourself, your interests, and your experience..."
-                      />
-                    </div>
-                  ) : (
-                    <div>
-                      {userData.bio ? (
-                        <p className="text-gray-700 leading-relaxed">{userData.bio}</p>
-                      ) : (
-                        <p className="text-gray-500 italic">No bio provided</p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            {/* Right Main Content Area */}
+            <div className="lg:col-span-8 space-y-6">
 
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl">Professional Information</CardTitle>
+              {/* Professional Information Card */}
+              <Card className="border border-gray-200/50 shadow-lg bg-white hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-600 to-blue-600"></div>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-600 to-blue-600 flex items-center justify-center">
+                      <Briefcase className="h-5 w-5 text-white" />
+                    </div>
+                    Professional Information
+                  </CardTitle>
+                  <CardDescription>Your career and work experience</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {isEditing ? (
-                    <div className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label htmlFor="position">Current Position</Label>
+                        <Label htmlFor="position" className="text-sm font-semibold text-gray-700">Current Position</Label>
                         <Input
                           id="position"
                           name="position"
                           value={userData.position || ''}
                           onChange={handleInputChange}
-                          className="border-purple-200 focus:border-purple-500"
-                          placeholder="e.g., Software Engineer"
+                          className="border-2 border-gray-200 rounded-xl focus:border-blue-500 h-11"
+                          placeholder="e.g., Senior Software Engineer"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="company">Company</Label>
+                        <Label htmlFor="company" className="text-sm font-semibold text-gray-700">Company</Label>
                         <Input
                           id="company"
                           name="company"
                           value={userData.company || ''}
                           onChange={handleInputChange}
-                          className="border-purple-200 focus:border-purple-500"
+                          className="border-2 border-gray-200 rounded-xl focus:border-blue-500 h-11"
                           placeholder="e.g., Google"
                         />
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-6">
                       {userData.position || userData.company ? (
                         <>
                           {userData.position && (
-                            <div className="flex items-start space-x-3">
-                              <Briefcase className="h-5 w-5 text-purple-600 mt-0.5" />
-                              <div>
-                                <div className="font-medium">Current Position</div>
-                                <div className="text-gray-700">{userData.position}</div>
+                            <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-blue-50/50 border border-gray-200">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                                  <Briefcase className="h-5 w-5 text-slate-600" />
+                                </div>
+                                <div>
+                                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Position</div>
+                                  <div className="text-base font-semibold text-gray-900">{userData.position}</div>
+                                </div>
                               </div>
                             </div>
                           )}
                           {userData.company && (
-                            <div className="flex items-start space-x-3">
-                              <Building className="h-5 w-5 text-purple-600 mt-0.5" />
-                              <div>
-                                <div className="font-medium">Company</div>
-                                <div className="text-gray-700">{userData.company}</div>
+                            <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-blue-50/50 border border-gray-200">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                                  <Building className="h-5 w-5 text-slate-600" />
+                                </div>
+                                <div>
+                                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Company</div>
+                                  <div className="text-base font-semibold text-gray-900">{userData.company}</div>
+                                </div>
                               </div>
                             </div>
                           )}
                         </>
                       ) : (
-                        <p className="text-gray-500 italic">No professional information provided</p>
+                        <div className="col-span-2 text-center py-8">
+                          <Briefcase className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                          <p className="text-gray-400 italic">Add your professional information to help others connect with you</p>
+                        </div>
                       )}
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl">Account Information</CardTitle>
+              {/* Education Card */}
+              <Card className="border border-gray-200/50 shadow-lg bg-white hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-blue-600"></div>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center">
+                      <GraduationCap className="h-5 w-5 text-white" />
+                    </div>
+                    Education
+                  </CardTitle>
+                  <CardDescription>Your academic background and achievements</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <Users className="h-5 w-5 text-purple-600 mt-0.5" />
-                    <div>
-                      <div className="font-medium">Account Type</div>
-                      <div className="text-gray-700">
-                        <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200">
-                          {userData.role === 'employer' ? 'Employer' : 'Alumni'}
-                        </Badge>
+                <CardContent>
+                  {isEditing ? (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="graduationYear" className="text-sm font-semibold text-gray-700">Graduation Year</Label>
+                        <Input
+                          id="graduationYear"
+                          name="graduationYear"
+                          type="number"
+                          value={userData.graduationYear || ''}
+                          className="border-2 border-gray-200 bg-gray-50 cursor-not-allowed h-11"
+                          disabled
+                        />
+                        <p className="text-xs text-gray-400">Cannot be changed</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="major" className="text-sm font-semibold text-gray-700">Major / Field of Study</Label>
+                        <Input
+                          id="major"
+                          name="major"
+                          value={userData.major || ''}
+                          className="border-2 border-gray-200 bg-gray-50 cursor-not-allowed h-11"
+                          disabled
+                        />
+                        <p className="text-xs text-gray-400">Cannot be changed</p>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <Calendar className="h-5 w-5 text-purple-600 mt-0.5" />
-                    <div>
-                      <div className="font-medium">Member Since</div>
-                      <div className="text-gray-700">
-                        {userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        }) : 'N/A'}
+                  ) : (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-indigo-50/50 border border-gray-200">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                            <Calendar className="h-5 w-5 text-slate-600" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Graduation Year</div>
+                            <div className="text-base font-semibold text-gray-900">{userData.graduationYear}</div>
+                          </div>
+                        </div>
+                      </div>
+                      {userData.major && (
+                        <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-indigo-50/50 border border-gray-200">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                              <BookOpen className="h-5 w-5 text-slate-600" />
+                            </div>
+                            <div>
+                              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Major</div>
+                              <div className="text-base font-semibold text-gray-900">{userData.major}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Account Information Card */}
+              <Card className="border border-gray-200/50 shadow-lg bg-white hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-slate-600"></div>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-slate-600 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-white" />
+                    </div>
+                    Account Information
+                  </CardTitle>
+                  <CardDescription>Your membership details</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-indigo-50/50 border border-gray-200">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                          <Users className="h-5 w-5 text-slate-600" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Account Type</div>
+                          <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0 text-sm px-3 py-1 rounded-full">
+                            {userData.role[0].toUpperCase() + userData.role.slice(1)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-indigo-50/50 border border-gray-200">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                          <Calendar className="h-5 w-5 text-slate-600" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Member Since</div>
+                          <div className="text-base font-semibold text-gray-900">
+                            {userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            }) : 'N/A'}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -584,10 +673,10 @@ function ProfilePage() {
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
                 placeholder="Enter a skill (e.g. JavaScript, React, UI Design)"
-                className="border-purple-200 focus:border-purple-500"
+                className="border-2 border-gray-200 rounded-xl focus:border-blue-500"
               />
               <p className="text-xs text-gray-500">
-                {userData.skills ? userData.skills.length : 0}/5 skills added. 
+                {userData.skills ? userData.skills.length : 0}/5 skills added.
                 You can add {5 - (userData.skills ? userData.skills.length : 0)} more.
               </p>
             </div>
@@ -599,10 +688,11 @@ function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isChangeAvatarDialogOpen} onOpenChange={(state) => {setIsChangeAvatarDialogOpen(state);if(!state) {
-        setAvatarFile(null);
-        setAvatarPreview(null);
-      }
+      <Dialog open={isChangeAvatarDialogOpen} onOpenChange={(state) => {
+        setIsChangeAvatarDialogOpen(state); if (!state) {
+          setAvatarFile(null);
+          setAvatarPreview(null);
+        }
       }}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -612,14 +702,14 @@ function ProfilePage() {
             {/* Current Avatar Preview */}
             <div className="flex justify-center">
               <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
-                <img 
-                  src={avatarPreview || userData.avatar} 
-                  alt="Avatar preview" 
+                <img
+                  src={avatarPreview || userData.avatar}
+                  alt="Avatar preview"
                   className="w-full h-full object-cover"
                 />
               </div>
             </div>
-            
+
             {/* File Input */}
             <div className="space-y-2">
               <Label htmlFor="avatarFile">Select New Avatar</Label>
@@ -628,13 +718,13 @@ function ProfilePage() {
                 type="file"
                 accept="image/*"
                 onChange={handleAvatarFileChange}
-                className="border-purple-200 focus:border-purple-500"
+                className="border-2 border-gray-200 rounded-xl focus:border-blue-500"
               />
               <p className="text-xs text-gray-500">
                 Supported formats: JPG, PNG, GIF. Max size: 5MB
               </p>
             </div>
-            
+
             {avatarFile && (
               <div className="text-sm text-green-600">
                 ✓ Image selected: {avatarFile.name}
@@ -642,14 +732,14 @@ function ProfilePage() {
             )}
           </div>
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleCancelAvatarChange}
               disabled={isUploadingAvatar}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleChangeAvatar}
               disabled={!avatarFile || isUploadingAvatar}
             >
