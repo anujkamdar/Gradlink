@@ -968,13 +968,15 @@ const getUserJobApplications = asyncHandler(async (req, res) => {
 });
 
 const getUsers = asyncHandler(async (req, res) => {
-  const { search, graduationYear, major, page = 1, limit = 30 } = req.body;
+  const { search, graduationYear, major, page = 1, limit = 9 } = req.body;
   const matchstage = {
     college: req.user.college,
   };
+  
   if (graduationYear) {
     matchstage.graduationYear = graduationYear;
   }
+  
   if (major) {
     matchstage.major = major;
   }
@@ -1003,16 +1005,45 @@ const getUsers = asyncHandler(async (req, res) => {
         position: 1,
       },
     },
+    {
+      $sort: {
+        fullname: 1, // Sort alphabetically by name
+      },
+    },
   ]);
 
-  if (aggregate.length === 0) {
-    return res.status(200).json(new ApiResponse(404, [], "No users found for the given criteria"));
-  }
-
-  const users = await User.aggregatePaginate(aggregate, {
+  const options = {
     page: parseInt(page),
     limit: parseInt(limit),
-  });
+    customLabels: {
+      totalDocs: 'totalDocs',
+      docs: 'docs',
+      limit: 'limit',
+      page: 'page',
+      nextPage: 'nextPage',
+      prevPage: 'prevPage',
+      totalPages: 'totalPages',
+      pagingCounter: 'pagingCounter',
+      hasPrevPage: 'hasPrevPage',
+      hasNextPage: 'hasNextPage',
+    },
+  };
+
+  const users = await User.aggregatePaginate(aggregate, options);
+
+  if (!users.docs || users.docs.length === 0) {
+    return res.status(200).json(new ApiResponse(200, {
+      docs: [],
+      totalDocs: 0,
+      totalPages: 0,
+      page: 1,
+      limit: parseInt(limit),
+      hasNextPage: false,
+      hasPrevPage: false,
+      nextPage: null,
+      prevPage: null,
+    }, "No users found for the given criteria"));
+  }
 
   return res.status(200).json(new ApiResponse(200, users, "Users fetched successfully"));
 });
