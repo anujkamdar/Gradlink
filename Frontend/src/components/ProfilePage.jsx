@@ -21,6 +21,9 @@ import {
   PlusCircle,
   X,
   Camera,
+  Heart,
+  Trophy,
+  Star,
 } from "lucide-react";
 import axios from "axios";
 import { Backend_url } from "../info.js";
@@ -37,6 +40,65 @@ function ProfilePage() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const getAchievementBadges = (badges) => [
+    {
+      id: 1,
+      title: "First Donation",
+      description: "Made your first contribution",
+      icon: Heart,
+      color: "from-pink-500 to-rose-500",
+      earned: badges?.firstDonation || false,
+      category: "donation"
+    },
+    {
+      id: 2,
+      title: "Generous Donor",
+      description: "Donated to 5+ fundraisers",
+      icon: Heart,
+      color: "from-rose-500 to-red-500",
+      earned: badges?.generousDonor || false,
+      category: "donation"
+    },
+    {
+      id: 3,
+      title: "Top Supporter",
+      description: "Donated ₹10000+ total",
+      icon: Trophy,
+      color: "from-amber-500 to-yellow-500",
+      earned: badges?.topSupporter || false,
+      category: "donation"
+    },
+    {
+      id: 4,
+      title: "Job Pioneer",
+      description: "Posted your first job",
+      icon: Briefcase,
+      color: "from-blue-500 to-indigo-500",
+      earned: badges?.jobPioneer || false,
+      category: "job"
+    },
+    {
+      id: 5,
+      title: "Active Recruiter",
+      description: "Posted 10+ job opportunities",
+      icon: Star,
+      color: "from-indigo-500 to-purple-500",
+      earned: badges?.activeRecruiter || false,
+      category: "job"
+    },
+    {
+      id: 6,
+      title: "Hiring Champion",
+      description: "Posted 50+ jobs",
+      icon: Trophy,
+      color: "from-purple-500 to-pink-500",
+      earned: badges?.hiringChampion || false,
+      category: "job"
+    },
+  ];
+
+  const achievementBadges = getAchievementBadges(userData.badges);
 
   const getProfile = async () => {
     try {
@@ -265,6 +327,64 @@ function ProfilePage() {
                                 {userData.location}
                               </span>
                             )}
+                          </div>
+
+                          {/* Achievement Badges in Header */}
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Trophy className="h-4 w-4 text-amber-500" />
+                              <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                                Achievements ({achievementBadges.filter(b => b.earned).length}/{achievementBadges.length})
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {achievementBadges.filter(badge => badge.earned).map((badge) => {
+                                const IconComponent = badge.icon;
+                                return (
+                                  <div
+                                    key={badge.id}
+                                    className="group relative"
+                                    title={`${badge.title}: ${badge.description}`}
+                                  >
+                                    <div
+                                      className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${badge.color} shadow-md hover:shadow-lg transform hover:scale-110 transition-all duration-300 cursor-pointer`}
+                                    >
+                                      <IconComponent className="h-5 w-5 text-white" />
+                                    </div>
+                                    {/* Tooltip */}
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-xl">
+                                      <div className="font-semibold">{badge.title}</div>
+                                      <div className="text-gray-300 mt-0.5">{badge.description}</div>
+                                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              {achievementBadges.filter(badge => !badge.earned).map((badge) => {
+                                const IconComponent = badge.icon;
+                                return (
+                                  <div
+                                    key={badge.id}
+                                    className="group relative"
+                                    title={`${badge.title}: ${badge.description} (Not earned yet)`}
+                                  >
+                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-200 opacity-40 cursor-help">
+                                      <IconComponent className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    {/* Tooltip for locked badges */}
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-xl">
+                                      <div className="font-semibold text-gray-300">🔒 {badge.title}</div>
+                                      <div className="text-gray-400 mt-0.5">{badge.description}</div>
+                                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
 
@@ -654,6 +774,7 @@ function ProfilePage() {
                   </div>
                 </CardContent>
               </Card>
+
             </div>
           </div>
         </section>

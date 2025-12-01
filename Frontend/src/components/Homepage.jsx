@@ -496,7 +496,7 @@ export default function Homepage() {
 
                                                 <div className="flex items-center gap-1 my-1">
                                                     <Badge className="bg-green-100 text-green-800 border-green-200">
-                                                        <DollarSign size={12} className="mr-1" /> ₹{donation.amount.toLocaleString()}
+                                                        ₹{donation.amount.toLocaleString()}
                                                     </Badge>
                                                     <span className="text-xs text-gray-500">donated to</span>
                                                 </div>
