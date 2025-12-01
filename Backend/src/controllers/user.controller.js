@@ -522,11 +522,46 @@ const getCurrentUserProfileData = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid user ID");
   } // this error wont happen as already checked in verifyJwt
 
-  const user = await User.findById(userId).select("-password -refreshToken");
+  let user = await User.findById(userId).select("-password -refreshToken");
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  return res.status(200).json(new ApiResponse(200, user, "User profile data retrieved successfully"));
+  const donations = await Donation.aggregate([
+    { $match: { donor: new mongoose.Types.ObjectId(userId) } },
+    {
+      $group: {
+        _id: "null",
+        totalDonations: { $sum: 1 },
+        totalAmount: { $sum: "$amount" },
+      },
+    },
+  ]);
+
+  const jobPostings = await Job.countDocuments({ postedBy: userId });
+
+  const donationCount = donations[0]?.totalDonations || 0;
+  const totalDonatedAmount = donations[0]?.totalAmount || 0;
+
+  const badges = {
+    firstDonation: donationCount > 0,
+    generousDonor: donationCount >= 5,
+    topSupporter: totalDonatedAmount >= 10000,
+    jobPioneer: jobPostings > 0,
+    activeRecruiter: jobPostings >= 10,
+    hiringChampion: jobPostings >= 50,
+  };
+
+  const userWithBadges = {
+    ...user.toObject(),
+    badges,
+    stats: {
+      donationCount,
+      totalDonatedAmount,
+      jobPostings,
+    },
+  };
+
+  return res.status(200).json(new ApiResponse(200, userWithBadges, "User profile data retrieved successfully"));
 });
 
 const getOtherUserProfileData = asyncHandler(async (req, res) => {
