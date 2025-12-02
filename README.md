@@ -2,15 +2,17 @@
 
 <div align="center">
 
-  [![Node.js](https://img.shields.io/badge/Node.js-v18+-green.svg)](https://nodejs.org/)
-  [![React](https://img.shields.io/badge/React-v19-blue.svg)](https://reactjs.org/)
-  [![MongoDB](https://img.shields.io/badge/MongoDB-v8+-green.svg)](https://www.mongodb.com/)
-  [![Deployed on Vercel](https://img.shields.io/badge/Deployed-Vercel-black.svg)](https://vercel.com/)
+  [![Node.js](https://img.shields.io/badge/Node.js-v20+-green.svg)](https://nodejs.org/)
+  [![React](https://img.shields.io/badge/React-v19.1-blue.svg)](https://reactjs.org/)
+  [![MongoDB](https://img.shields.io/badge/MongoDB-v8.15+-green.svg)](https://www.mongodb.com/)
+  [![Frontend on Vercel](https://img.shields.io/badge/Frontend-Vercel-black.svg)](https://vercel.com/)
+  [![Backend on Render](https://img.shields.io/badge/Backend-Render-46E3B7.svg)](https://render.com/)
+  [![License](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 </div>
 
 ## 🎯 Overview
 
-**GradLink** is a comprehensive full-stack web application that bridges the gap between educational institutions' alumni and current students. It facilitates professional networking, career opportunities, fundraising initiatives, and community engagement within college ecosystems.
+**GradLink** is a comprehensive full-stack web application designed to bridge the gap between educational institutions' alumni and current students. Our platform facilitates meaningful professional networking, exclusive career opportunities, community-driven fundraising initiatives, and enhanced engagement within college ecosystems. With features like achievement badges, real-time notifications, and secure payment processing, GradLink creates a thriving digital community for educational institutions.
 
 ## 🚀 Features
 
@@ -21,6 +23,12 @@
 - 📝 **Create Posts**: Share updates, success stories, and professional tips  
 - ❤️ **Like & Comment**: Engage with the community through likes and meaningful discussions  
 - 📸 **Media Support**: Share images in posts
+
+### 🏆 Achievement System
+- 🎖️ **Donation Badges**: Earn badges for first donations, generous giving, and top supporter status
+- 💼 **Career Badges**: Recognition for job posting milestones and recruitment activities
+- 📈 **Progress Tracking**: Visual achievement progress across different categories
+- 🌟 **Profile Showcase**: Display earned badges prominently on user profiles
 
 ### 💼 Job Portal
 - 🧑‍💼 **Alumni-Posted Opportunities**: Jobs and internships shared by alumni for students  
@@ -60,22 +68,28 @@
 <div align="center">
 
 ### Frontend Technologies
-![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![React](https://img.shields.io/badge/React-19.1-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-6.3-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![shadcn/ui](https://img.shields.io/badge/shadcn/ui-Latest-000000?style=for-the-badge&logo=shadcnui&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router-7.6-CA4245?style=for-the-badge&logo=react-router&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-1.9-671DDF?style=for-the-badge&logo=axios&logoColor=white)
 
 ### Backend Technologies
-![Node.js](https://img.shields.io/badge/Node.js-Latest-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-5.1-000000?style=for-the-badge&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-8+-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-Authentication-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-8.15+-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Mongoose](https://img.shields.io/badge/Mongoose-8.15-880000?style=for-the-badge&logo=mongoose&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-9.0-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+![Socket.io](https://img.shields.io/badge/Socket.io-4.8-010101?style=for-the-badge&logo=socket.io&logoColor=white)
 
 ### Infrastructure & Services
 ![Cloudinary](https://img.shields.io/badge/Cloudinary-File_Storage-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
 ![Stripe](https://img.shields.io/badge/Stripe-Payments-008CDD?style=for-the-badge&logo=stripe&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-Deployment-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-Frontend-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![Render](https://img.shields.io/badge/Render-Backend-46E3B7?style=for-the-badge&logo=render&logoColor=white)
+![Nodemailer](https://img.shields.io/badge/Nodemailer-Email_Service-339933?style=for-the-badge&logo=nodemailer&logoColor=white)
+![Multer](https://img.shields.io/badge/Multer-File_Upload-FF6600?style=for-the-badge&logo=multer&logoColor=white)
 
 </div> 
 
@@ -225,6 +239,7 @@ erDiagram
 - All student features plus additional privileges
 - Create and manage job postings for the community
 - Review and manage job applications with candidate insights
+- Build professional reputation through platform contributions
 
 ## 🔄 GradLink Platform Overview
 
