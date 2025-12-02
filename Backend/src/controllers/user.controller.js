@@ -584,8 +584,43 @@ const getOtherUserProfileData = asyncHandler(async (req, res) => {
   if (user.college.toString() != req.user.college.toString()) {
     throw new ApiError(403, "You are not allowed to access this user's profile data");
   }
+  
+  const donations = await Donation.aggregate([
+    { $match: { donor: new mongoose.Types.ObjectId(otherUserId) } },
+    {
+      $group: {
+        _id: "null",
+        totalDonations: { $sum: 1 },
+        totalAmount: { $sum: "$amount" },
+      },
+    },
+  ]);
 
-  return res.status(200).json(new ApiResponse(200, user, "User profile data retrieved successfully"));
+  const jobPostings = await Job.countDocuments({ postedBy: otherUserId });
+
+  const donationCount = donations[0]?.totalDonations || 0;
+  const totalDonatedAmount = donations[0]?.totalAmount || 0;
+
+  const badges = {
+    firstDonation: donationCount > 0,
+    generousDonor: donationCount >= 5,
+    topSupporter: totalDonatedAmount >= 10000,
+    jobPioneer: jobPostings > 0,
+    activeRecruiter: jobPostings >= 10,
+    hiringChampion: jobPostings >= 50,
+  };
+
+    const userWithBadges = {
+    ...user.toObject(),
+    badges,
+    stats: {
+      donationCount,
+      totalDonatedAmount,
+      jobPostings,
+    },
+  };
+
+  return res.status(200).json(new ApiResponse(200, userWithBadges, "User profile data retrieved successfully"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -972,11 +1007,11 @@ const getUsers = asyncHandler(async (req, res) => {
   const matchstage = {
     college: req.user.college,
   };
-  
+
   if (graduationYear) {
     matchstage.graduationYear = graduationYear;
   }
-  
+
   if (major) {
     matchstage.major = major;
   }
@@ -1005,44 +1040,45 @@ const getUsers = asyncHandler(async (req, res) => {
         position: 1,
       },
     },
-    {
-      $sort: {
-        fullname: 1, // Sort alphabetically by name
-      },
-    },
   ]);
 
   const options = {
     page: parseInt(page),
     limit: parseInt(limit),
     customLabels: {
-      totalDocs: 'totalDocs',
-      docs: 'docs',
-      limit: 'limit',
-      page: 'page',
-      nextPage: 'nextPage',
-      prevPage: 'prevPage',
-      totalPages: 'totalPages',
-      pagingCounter: 'pagingCounter',
-      hasPrevPage: 'hasPrevPage',
-      hasNextPage: 'hasNextPage',
+      totalDocs: "totalDocs",
+      docs: "docs",
+      limit: "limit",
+      page: "page",
+      nextPage: "nextPage",
+      prevPage: "prevPage",
+      totalPages: "totalPages",
+      pagingCounter: "pagingCounter",
+      hasPrevPage: "hasPrevPage",
+      hasNextPage: "hasNextPage",
     },
   };
 
   const users = await User.aggregatePaginate(aggregate, options);
 
   if (!users.docs || users.docs.length === 0) {
-    return res.status(200).json(new ApiResponse(200, {
-      docs: [],
-      totalDocs: 0,
-      totalPages: 0,
-      page: 1,
-      limit: parseInt(limit),
-      hasNextPage: false,
-      hasPrevPage: false,
-      nextPage: null,
-      prevPage: null,
-    }, "No users found for the given criteria"));
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          docs: [],
+          totalDocs: 0,
+          totalPages: 0,
+          page: 1,
+          limit: parseInt(limit),
+          hasNextPage: false,
+          hasPrevPage: false,
+          nextPage: null,
+          prevPage: null,
+        },
+        "No users found for the given criteria"
+      )
+    );
   }
 
   return res.status(200).json(new ApiResponse(200, users, "Users fetched successfully"));
