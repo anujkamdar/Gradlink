@@ -7,7 +7,6 @@
   [![MongoDB](https://img.shields.io/badge/MongoDB-v8.15+-green.svg)](https://www.mongodb.com/)
   [![Frontend on Vercel](https://img.shields.io/badge/Frontend-Vercel-black.svg)](https://vercel.com/)
   [![Backend on Render](https://img.shields.io/badge/Backend-Render-46E3B7.svg)](https://render.com/)
-  [![License](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 </div>
 
 ## 🎯 Overview
