@@ -29,7 +29,6 @@ import {
   addComment,
   getComments,
   createPaymentIntent,
-  saveDonation,
   getMyDonations,
   getHomePageData,
   getMajors,
@@ -84,7 +83,6 @@ userRouter.route("/toggle-like").post(verifyJwt, toggleLike);
 userRouter.route("/add-comment").post(verifyJwt, addComment);
 userRouter.route("/get-comments").post(verifyJwt, getComments);
 userRouter.route("/create-payment-intent").post(verifyJwt, createPaymentIntent);
-userRouter.route("/save-donation").post(verifyJwt, saveDonation);
 userRouter.route("/get-my-donations").get(verifyJwt, getMyDonations);
 userRouter.route("/get-homepage-data").get(verifyJwt, getHomePageData);
 userRouter.route("/get-majors").get(verifyJwt, getMajors);

@@ -1819,7 +1819,6 @@ export {
   getComments,
   getCollegeStats,
   createPaymentIntent,
-  saveDonation,
   getMyDonations,
   getHomePageData,
   getMajors,
