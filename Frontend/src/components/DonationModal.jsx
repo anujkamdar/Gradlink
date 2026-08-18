@@ -54,25 +54,7 @@ export default function DonationModal({ isOpen, onClose, fundraiser }) {
       }
 
       if (result.paymentIntent.status === 'succeeded') {
-        try {
-          const saveResponse = await axios.post(
-            `${Backend_url}/gradlink/api/v1/users/save-donation`,
-            {
-              amount: Number(amount),
-              fundraiserId: fundraiser._id,
-              paymentIntentId: result.paymentIntent.id,
-            },
-            { withCredentials: true }
-          );
-          
-          if (saveResponse.status === 201) {
-            setSuccess(true);
-          } else {
-            setError("Error saving donation. Please contact support.");
-          }
-        } catch (err) {
-          setError(err.response?.data?.message || "Failed to save your donation.");
-        }
+        setSuccess(true);
       }
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while processing your donation");

@@ -2,6 +2,7 @@ import express from "express";
 import CookieParser from "cookie-parser";
 import cors from "cors";
 import { ApiError } from "./utils/ApiError.js";
+import { stripeWebhook } from "./controllers/user.controller.js";
 
 const app = express();
 app.use(
@@ -9,6 +10,12 @@ app.use(
     origin: ["http://localhost:5173", "https://gradlink-neon.vercel.app"],
     credentials: true,
   })
+);
+
+app.post(
+  "/gradlink/api/v1/users/stripe-webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
 );
 
 app.use(express.json());

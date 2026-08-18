@@ -486,16 +486,15 @@ const createJobApplication = asyncHandler(async (req, res) => {
               </ul>
             </div>
             
-            ${
-              coverLetter
-                ? `
+            ${coverLetter
+            ? `
               <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
                 <h3 style="color: #333; margin-top: 0;">Cover Letter:</h3>
                 <p style="white-space: pre-wrap;">${coverLetter}</p>
               </div>
             `
-                : "<p><em>No cover letter provided</em></p>"
-            }
+            : "<p><em>No cover letter provided</em></p>"
+          }
             
             <p><strong>Resume:</strong> <a href="${resume.url}" target="_blank" style="color: #007bff;">View Resume</a></p>
             
@@ -584,7 +583,7 @@ const getOtherUserProfileData = asyncHandler(async (req, res) => {
   if (user.college.toString() != req.user.college.toString()) {
     throw new ApiError(403, "You are not allowed to access this user's profile data");
   }
-  
+
   const donations = await Donation.aggregate([
     { $match: { donor: new mongoose.Types.ObjectId(otherUserId) } },
     {
@@ -610,7 +609,7 @@ const getOtherUserProfileData = asyncHandler(async (req, res) => {
     hiringChampion: jobPostings >= 50,
   };
 
-    const userWithBadges = {
+  const userWithBadges = {
     ...user.toObject(),
     badges,
     stats: {
@@ -1442,46 +1441,207 @@ const createPaymentIntent = asyncHandler(async (req, res) => {
   }
 });
 
-const saveDonation = asyncHandler(async (req, res) => {
-  const { fundraiserId, amount, paymentIntentId } = req.body;
-  if (!fundraiserId || !amount || !paymentIntentId) {
-    throw new ApiError(400, "Fundraiser ID, amount, and payment intent ID are required");
-  }
 
-  // Verify the payment intent status with Stripe
+// const saveDonation = asyncHandler(async (req, res) => {
+//   const { fundraiserId, amount, paymentIntentId } = req.body;
+//   if (!fundraiserId || !amount || !paymentIntentId) {
+//     throw new ApiError(400, "Fundraiser ID, amount, and payment intent ID are required");
+//   }
+
+//   // Verify the payment intent status with Stripe
+//   try {
+//     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+//     if (paymentIntent.status !== "succeeded") {
+//       throw new ApiError(400, "Payment has not been completed successfully");
+//     }
+
+//     // Verify the amount matches
+//     if (paymentIntent.amount !== amount * 100) {
+//       throw new ApiError(400, "Payment amount doesn't match the donation amount");
+//     }
+//   } catch (error) {
+//     throw new ApiError(500, `Failed to verify payment intent: ${error.message}`);
+//   }
+
+//   const donation = await Donation.create({
+//     fundraiser: fundraiserId,
+//     donor: req.user._id,
+//     amount: amount,
+//     paymentIntentId: paymentIntentId,
+//     college: req.user.college,
+//   });
+
+//   if (!donation) {
+//     throw new ApiError(500, "Failed to save donation");
+//   }
+
+//   // Update the fundraiser's total amount raised
+//   await Fundraiser.findByIdAndUpdate(fundraiserId, {
+//     $inc: { currentAmount: amount },
+//   });
+
+//   return res.status(201).json(new ApiResponse(201, donation, "Donation saved successfully"));
+// });
+
+const stripeWebhook = asyncHandler(async (req, res) => {
+  const signature = req.headers["stripe-signature"];
+
+  let event;
+
+  //verify the webhook signature to ensure the request is from Stripe
   try {
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-    if (paymentIntent.status !== "succeeded") {
-      throw new ApiError(400, "Payment has not been completed successfully");
-    }
-
-    // Verify the amount matches
-    if (paymentIntent.amount !== amount * 100) {
-      throw new ApiError(400, "Payment amount doesn't match the donation amount");
-    }
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
   } catch (error) {
-    throw new ApiError(500, `Failed to verify payment intent: ${error.message}`);
+    console.error(
+      "Stripe webhook signature verification failed:",
+      error.message
+    );
+
+    return res.status(400).send(
+      `Webhook Error: ${error.message}`
+    );
   }
 
-  const donation = await Donation.create({
-    fundraiser: fundraiserId,
-    donor: req.user._id,
-    amount: amount,
-    paymentIntentId: paymentIntentId,
-    college: req.user.college,
-  });
 
-  if (!donation) {
-    throw new ApiError(500, "Failed to save donation");
+  // We only process successful payment intents.
+  // Other Stripe events don't require processing,
+  // so acknowledge them with 200.
+  if (event.type !== "payment_intent.succeeded") {
+    return res.status(200).json({
+      success: true,
+      received: true,
+    });
   }
 
-  // Update the fundraiser's total amount raised
-  await Fundraiser.findByIdAndUpdate(fundraiserId, {
-    $inc: { currentAmount: amount },
-  });
+  const paymentIntent = event.data.object;
 
-  return res.status(201).json(new ApiResponse(201, donation, "Donation saved successfully"));
+  try {
+    const fundraiserId = paymentIntent.metadata?.fundraiserId;
+    const userId = paymentIntent.metadata?.userId;
+
+    if (!fundraiserId || !userId) {
+      console.error(
+        "Missing fundraiserId or userId in PaymentIntent metadata"
+      );
+
+      // This is a permanent data problem.
+      // Returning 200 prevents pointless retries.
+      return res.status(200).json({
+        success: false,
+        received: true,
+        message: "Missing payment metadata",
+      });
+    }
+
+
+
+    if (!mongoose.isValidObjectId(fundraiserId) || !mongoose.isValidObjectId(userId)) {
+      console.error(
+        "Invalid fundraiserId or userId"
+      );
+
+      return res.status(200).json({
+        success: false,
+        received: true,
+        message: "Invalid payment metadata",
+      });
+    }
+
+
+
+    const amount = paymentIntent.amount / 100;
+    const session = await mongoose.startSession();
+
+    try {
+      await session.withTransaction(async () => {
+
+        //checking if donation already exists for this payment intent to avoid duplicates
+        const existingDonation =
+          await Donation.findOne({
+            paymentIntentId: paymentIntent.id,
+          }).session(session);
+
+        if (existingDonation) {
+          console.log(
+            "Donation already processed:",
+            paymentIntent.id
+          );
+
+          return;
+        }
+
+
+        const fundraiser =
+          await Fundraiser.findById(
+            fundraiserId
+          ).session(session);
+
+        if (!fundraiser) {
+          throw new Error(
+            `Fundraiser not found: ${fundraiserId}`
+          );
+        }
+
+
+        await Donation.create(
+          [
+            {
+              fundraiser: fundraiserId,
+              donor: userId,
+              amount: amount,
+              paymentIntentId: paymentIntent.id,
+              college: fundraiser.college,
+            },
+          ],
+          { session }
+        );
+
+
+
+        await Fundraiser.findByIdAndUpdate(
+          fundraiserId,
+          {
+            $inc: {
+              currentAmount: amount,
+            },
+          },
+          {
+            session,
+          }
+        );
+
+        console.log(
+          `Donation ₹${amount} saved successfully`
+        );
+      });
+    } finally {
+      await session.endSession();
+    }
+
+
+    //tell Stripe that the webhook was received and processed successfully
+    return res.status(200).json({
+      success: true,
+      received: true,
+    });
+
+  } catch (error) {
+    console.error(
+      "Stripe webhook processing failed:",
+      error
+    );
+
+    //retuen 500 to indicate a temporary failure, so Stripe will retry the webhook
+    return res.status(500).json({
+      success: false,
+      message: "Webhook processing failed",
+    });
+  }
 });
 
 const getMyDonations = asyncHandler(async (req, res) => {
@@ -1665,4 +1825,5 @@ export {
   getMajors,
   deletePost,
   changeAvatar,
+  stripeWebhook
 };
